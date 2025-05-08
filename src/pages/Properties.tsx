@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 const propertySchema = z.object({
   name: z.string().min(1, "Le nom est obligatoire"),
   address: z.string().optional(),
-  beds24_property_id: z.string().optional().transform(val => val ? parseInt(val) : null),
+  beds24_property_id: z.string().optional().transform(val => val ? Number(val) : null),
   is_active: z.boolean().default(true),
 });
 
@@ -78,7 +77,7 @@ const Properties = () => {
       await propertyService.createProperty({
         name: values.name,
         address: values.address || null,
-        beds24_property_id: values.beds24_property_id || null,
+        beds24_property_id: values.beds24_property_id,
         is_active: values.is_active
       });
       
