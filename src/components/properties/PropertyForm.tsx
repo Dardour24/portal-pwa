@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -33,7 +32,7 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel }: PropertyFormP
     defaultValues: {
       name: "",
       address: "",
-      beds24_property_id: "",
+      beds24_property_id: null,
       is_active: true
     }
   });
@@ -81,10 +80,11 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel }: PropertyFormP
               <FormLabel>ID de propriété Beds24 (optionnel)</FormLabel>
               <FormControl>
                 <Input 
-                  type="text"
+                  type="number"
                   placeholder="12345" 
                   {...field} 
-                  value={field.value || ''}
+                  value={field.value ?? ''} 
+                  onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
                 />
               </FormControl>
               <FormMessage />
