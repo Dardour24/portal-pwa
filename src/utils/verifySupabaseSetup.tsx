@@ -1,5 +1,5 @@
 
-import { supabase } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 
 export const verifySupabaseSetup = async () => {
   console.log("Vérification de la configuration Supabase...");
