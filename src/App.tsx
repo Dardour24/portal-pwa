@@ -7,6 +7,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { useEffect } from "react";
+import { verifySupabaseSetup } from "./utils/verifySupabaseSetup";
 
 // Pages
 import Home from "./pages/Home";
@@ -22,49 +24,62 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/auth" element={<AuthPage />} />
-            
-            <Route path="/" element={<Layout />}>
-              <Route index element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              } />
-              <Route path="profile" element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } />
-              <Route path="properties" element={
-                <ProtectedRoute>
-                  <Properties />
-                </ProtectedRoute>
-              } />
-              <Route path="beds24" element={
-                <ProtectedRoute>
-                  <Beds24 />
-                </ProtectedRoute>
-              } />
-              <Route path="faq" element={<Faq />} />
-              <Route path="contact" element={<Contact />} />
-            </Route>
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  useEffect(() => {
+    // Vérifier la configuration Supabase au chargement initial de l'application
+    verifySupabaseSetup()
+      .then(isConfigured => {
+        console.log("Configuration Supabase vérifiée:", isConfigured ? "OK" : "NON configurée");
+        if (!isConfigured) {
+          console.warn("IMPORTANT: La configuration Supabase n'est pas complète. Veuillez exécuter le script SQL nécessaire dans l'éditeur SQL de Supabase.");
+        }
+      });
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/auth" element={<AuthPage />} />
+              
+              <Route path="/" element={<Layout />}>
+                <Route index element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                } />
+                <Route path="profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="properties" element={
+                  <ProtectedRoute>
+                    <Properties />
+                  </ProtectedRoute>
+                } />
+                <Route path="beds24" element={
+                  <ProtectedRoute>
+                    <Beds24 />
+                  </ProtectedRoute>
+                } />
+                <Route path="faq" element={<Faq />} />
+                <Route path="contact" element={<Contact />} />
+              </Route>
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

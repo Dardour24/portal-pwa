@@ -45,8 +45,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user) {
+        // Corrected syntax: using .schema('botnb') and .from('clients')
         const { data: clientData, error: clientError } = await supabase
-          .from('botnb.clients')
+          .from('clients')
+          .schema('botnb')
           .select('first_name, last_name, phone')
           .eq('id', session.user.id)
           .single();
@@ -69,8 +71,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (session?.user) {
+          // Corrected syntax: using .schema('botnb') and .from('clients')
           const { data: clientData, error: clientError } = await supabase
-            .from('botnb.clients')
+            .from('clients')
+            .schema('botnb')
             .select('first_name, last_name, phone')
             .eq('id', session.user.id)
             .single();
@@ -107,8 +111,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       if (data.user) {
+        // Corrected syntax: using .schema('botnb') and .from('clients')
         const { data: clientData, error: clientError } = await supabase
-          .from('botnb.clients')
+          .from('clients')
+          .schema('botnb')
           .select('first_name, last_name, phone')
           .eq('id', data.user.id)
           .single();
