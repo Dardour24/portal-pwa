@@ -2,8 +2,14 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Utiliser directement les valeurs au lieu des variables d'environnement
+const supabaseUrl = "https://qsbfhiujjlhipmdylqva.supabase.co";
+const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzYmZoaXVqamxoaXBtZHlscXZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY2ODM1NjUsImV4cCI6MjA2MjI1OTU2NX0.SAXchw3KuIA16ZKWOIsynUu-JuHSwMzY6OoWu_enwhw";
+
+// Vérifier que les valeurs ne sont pas vides
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Les URL et clé Supabase doivent être définies');
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
