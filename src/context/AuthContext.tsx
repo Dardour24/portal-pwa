@@ -1,8 +1,15 @@
 
 import React, { createContext, useState, useContext, useEffect } from "react";
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface User {
   email: string;
+  id: string;
 }
 
 interface AuthContextType {
@@ -10,8 +17,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  signup: (email: string, password: string, firstName: string, lastName: string, phoneNumber: string) => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -22,33 +29,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Check if user is already logged in on initial load
   useEffect(() => {
-    const checkUserSession = () => {
-      const savedUser = localStorage.getItem("user");
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
+    const checkUserSession = async () => {
+      setIsLoading(true);
+      
+      // Get session from Supabase
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email || '',
+        });
       }
+      
       setIsLoading(false);
     };
 
     checkUserSession();
+    
+    // Set up auth state change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email || '',
+          });
+        } else {
+          setUser(null);
+        }
+        setIsLoading(false);
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
-    // Mock authentication logic - replace with real auth later
-    // In a real app you would verify credentials with a backend
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       
-      // For now, just set the user if the email includes @ (simple validation)
-      if (!email || !email.includes('@') || !password) {
-        throw new Error('Identifiants invalides');
+      if (error) {
+        throw error;
       }
       
-      const userData = { email };
-      setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData));
+      if (data.user) {
+        setUser({
+          id: data.user.id,
+          email: data.user.email || '',
+        });
+      }
     } catch (error) {
       console.error("Error during login:", error);
       throw error;
@@ -57,21 +93,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signup = async (email: string, password: string) => {
-    // Mock signup logic - replace with real auth later
+  const signup = async (email: string, password: string, firstName: string, lastName: string, phoneNumber: string) => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Register the user with Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            phone: phoneNumber,
+          }
+        }
+      });
       
-      // For now, just validate that the email includes @ and password is not empty
-      if (!email || !email.includes('@') || !password) {
-        throw new Error('Email ou mot de passe invalide');
+      if (error) {
+        throw error;
       }
       
-      const userData = { email };
-      setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData));
+      if (data.user) {
+        setUser({
+          id: data.user.id,
+          email: data.user.email || '',
+        });
+      }
     } catch (error) {
       console.error("Error during signup:", error);
       throw error;
@@ -80,9 +127,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
   };
 
   return (

@@ -34,16 +34,16 @@ const SignUp = () => {
     setIsLoading(true);
 
     try {
-      await signup(email, password);
+      await signup(email, password, firstName, lastName, phoneNumber);
       toast({
         title: "Compte créé avec succès",
         description: "Bienvenue sur votre portail client Botnb.",
       });
       navigate("/");
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Erreur d'inscription",
-        description: "Échec de la création du compte. Veuillez réessayer.",
+        description: error.message || "Échec de la création du compte. Veuillez réessayer.",
         variant: "destructive",
       });
     } finally {

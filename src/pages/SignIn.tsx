@@ -26,10 +26,10 @@ const SignIn = () => {
         description: "Bienvenue sur votre portail client Botnb.",
       });
       navigate("/");
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Erreur de connexion",
-        description: "Email ou mot de passe invalide.",
+        description: error.message || "Email ou mot de passe invalide.",
         variant: "destructive",
       });
     } finally {
