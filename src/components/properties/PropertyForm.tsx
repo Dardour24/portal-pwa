@@ -35,7 +35,6 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel, initialValues }
     defaultValues: {
       name: initialValues?.name || "",
       address: initialValues?.address || "",
-      // Nous utilisons une chaîne vide ou convertissons en chaîne pour correspondre au type attendu par le schéma
       beds24_property_id: initialValues?.beds24_property_id !== undefined && initialValues.beds24_property_id !== null
         ? String(initialValues.beds24_property_id)
         : "",
