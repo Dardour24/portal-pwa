@@ -35,8 +35,9 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel, initialValues }
     defaultValues: {
       name: initialValues?.name || "",
       address: initialValues?.address || "",
-      beds24_property_id: initialValues?.beds24_property_id !== undefined 
-        ? String(initialValues.beds24_property_id) 
+      // Nous utilisons une chaîne vide ou convertissons en chaîne pour correspondre au type attendu par le schéma
+      beds24_property_id: initialValues?.beds24_property_id !== undefined && initialValues.beds24_property_id !== null
+        ? String(initialValues.beds24_property_id)
         : "",
       is_active: initialValues?.is_active !== undefined ? initialValues.is_active : true
     }
@@ -88,7 +89,7 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel, initialValues }
                   type="text"
                   placeholder="12345" 
                   {...field} 
-                  value={field.value ?? ''}
+                  value={field.value || ''}
                 />
               </FormControl>
               <FormMessage />
