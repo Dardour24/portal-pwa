@@ -1,0 +1,21 @@
+
+{
+  "name": "Portail Client Botnb",
+  "short_name": "Botnb",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "/lovable-uploads/b97f6b22-40f5-4de9-9245-072e4eeb6895.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/lovable-uploads/b97f6b22-40f5-4de9-9245-072e4eeb6895.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

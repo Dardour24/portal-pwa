@@ -1,20 +1,27 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>botnb-client-portal-pwa</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
+    <title>Portail Client Botnb</title>
+    <meta name="description" content="Portail Client Botnb pour la gestion de logements" />
+    <meta name="author" content="Botnb" />
 
-    <meta property="og:title" content="botnb-client-portal-pwa" />
-    <meta property="og:description" content="Lovable Generated Project" />
+    <meta property="og:title" content="Portail Client Botnb" />
+    <meta property="og:description" content="Portail Client Botnb pour la gestion de logements" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta property="og:image" content="/lovable-uploads/b97f6b22-40f5-4de9-9245-072e4eeb6895.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@lovable_dev" />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+    <meta name="twitter:site" content="@botnb" />
+    <meta name="twitter:image" content="/lovable-uploads/b97f6b22-40f5-4de9-9245-072e4eeb6895.png" />
+    
+    <!-- PWA Support -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0ea5e9">
+    <link rel="icon" href="/lovable-uploads/b97f6b22-40f5-4de9-9245-072e4eeb6895.png" type="image/png">
+    <link rel="apple-touch-icon" href="/lovable-uploads/b97f6b22-40f5-4de9-9245-072e4eeb6895.png">
   </head>
 
   <body>
@@ -22,5 +29,14 @@
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service worker registered:', reg))
+            .catch(err => console.log('Service worker registration failed:', err));
+        });
+      }
+    </script>
   </body>
 </html>
