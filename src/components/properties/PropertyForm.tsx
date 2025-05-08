@@ -24,17 +24,20 @@ interface PropertyFormProps {
   onSubmit: (values: PropertyFormValues) => Promise<void>;
   isSubmitting: boolean;
   onCancel: () => void;
+  initialValues?: Partial<PropertyFormValues>;
 }
 
-export const PropertyForm = ({ onSubmit, isSubmitting, onCancel }: PropertyFormProps) => {
+export const PropertyForm = ({ onSubmit, isSubmitting, onCancel, initialValues }: PropertyFormProps) => {
   // Configuration du formulaire avec React Hook Form
   const form = useForm<PropertyFormValues>({
     resolver: zodResolver(propertySchema),
     defaultValues: {
-      name: "",
-      address: "",
-      beds24_property_id: null,
-      is_active: true
+      name: initialValues?.name || "",
+      address: initialValues?.address || "",
+      beds24_property_id: initialValues?.beds24_property_id !== undefined 
+        ? String(initialValues.beds24_property_id) 
+        : "",
+      is_active: initialValues?.is_active !== undefined ? initialValues.is_active : true
     }
   });
 
@@ -118,10 +121,10 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel }: PropertyFormP
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Ajout en cours...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {initialValues ? 'Modification en cours...' : 'Ajout en cours...'}
               </>
             ) : (
-              'Ajouter'
+              initialValues ? 'Modifier' : 'Ajouter'
             )}
           </Button>
         </div>

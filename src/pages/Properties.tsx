@@ -17,7 +17,10 @@ const Properties = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isAddingProperty, setIsAddingProperty] = useState(false);
+  const [isEditingProperty, setIsEditingProperty] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   
   // Charger les propriétés au chargement du composant
   useEffect(() => {
@@ -44,8 +47,8 @@ const Properties = () => {
     }
   };
   
-  // Gérer la soumission du formulaire
-  const onSubmit = async (values: PropertyFormValues) => {
+  // Gérer la soumission du formulaire d'ajout
+  const onSubmitAdd = async (values: PropertyFormValues) => {
     try {
       setIsAddingProperty(true);
       
@@ -78,6 +81,43 @@ const Properties = () => {
     }
   };
 
+  // Gérer la soumission du formulaire d'édition
+  const onSubmitEdit = async (values: PropertyFormValues) => {
+    if (!selectedProperty?.id) return;
+    
+    try {
+      setIsEditingProperty(true);
+      
+      await propertyService.updateProperty(selectedProperty.id, {
+        name: values.name,
+        address: values.address || null,
+        beds24_property_id: values.beds24_property_id,
+        is_active: values.is_active
+      });
+      
+      // Recharger les propriétés après mise à jour
+      await loadProperties();
+      
+      // Fermer la boîte de dialogue
+      setIsEditDialogOpen(false);
+      setSelectedProperty(null);
+      
+      toast({
+        title: "Succès",
+        description: "Propriété modifiée avec succès",
+      });
+    } catch (error) {
+      console.error("Erreur lors de la modification de la propriété:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de modifier la propriété",
+        variant: "destructive",
+      });
+    } finally {
+      setIsEditingProperty(false);
+    }
+  };
+
   // Gérer la visualisation des détails d'une propriété
   const handleViewDetails = (propertyId: string) => {
     // Pour l'instant, juste afficher un message
@@ -89,11 +129,11 @@ const Properties = () => {
 
   // Gérer l'édition d'une propriété
   const handleEdit = (propertyId: string) => {
-    // Pour l'instant, juste afficher un message
-    toast({
-      title: "Information",
-      description: `Édition de la propriété ${propertyId} à implémenter`,
-    });
+    const property = properties.find(p => p.id === propertyId);
+    if (property) {
+      setSelectedProperty(property);
+      setIsEditDialogOpen(true);
+    }
   };
   
   return (
@@ -115,13 +155,42 @@ const Properties = () => {
             </DialogHeader>
             
             <PropertyForm 
-              onSubmit={onSubmit} 
+              onSubmit={onSubmitAdd} 
               isSubmitting={isAddingProperty}
               onCancel={() => setIsAddDialogOpen(false)}
             />
           </DialogContent>
         </Dialog>
       </div>
+      
+      {/* Dialog pour l'édition d'une propriété */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Modifier un logement</DialogTitle>
+            <DialogDescription>
+              Modifiez les informations de votre logement.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedProperty && (
+            <PropertyForm 
+              onSubmit={onSubmitEdit} 
+              isSubmitting={isEditingProperty}
+              onCancel={() => {
+                setIsEditDialogOpen(false);
+                setSelectedProperty(null);
+              }}
+              initialValues={{
+                name: selectedProperty.name,
+                address: selectedProperty.address || '',
+                beds24_property_id: selectedProperty.beds24_property_id || null,
+                is_active: selectedProperty.is_active || true
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
       
       {isLoading ? (
         <div className="flex justify-center items-center h-60">

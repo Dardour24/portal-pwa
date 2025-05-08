@@ -4,56 +4,74 @@ import { supabase } from '../lib/supabase';
 export const verifySupabaseSetup = async () => {
   console.log("Vérification de la configuration Supabase...");
   
-  // 1. Vérifier si le schema botnb existe
   try {
-    const { data: schemas, error: schemasError } = await supabase.rpc('get_schemas');
-    if (schemasError) {
-      console.error("Erreur lors de la vérification des schémas:", schemasError);
-      return false;
-    }
+    // Vérifier la connexion de base à Supabase
+    const { data, error } = await supabase
+      .from('properties')
+      .select('count()')
+      .limit(1)
+      .single();
     
-    console.log("Schémas disponibles:", schemas);
-    const botnbSchemaExists = schemas?.some((schema: string) => schema === 'botnb');
-    console.log("Schéma botnb existe:", botnbSchemaExists);
-    
-    // 2. Vérifier si la table clients existe dans le schéma botnb
-    if (botnbSchemaExists) {
-      const { data: tables, error: tablesError } = await supabase.rpc('get_tables', { schema_name: 'botnb' });
-      if (tablesError) {
-        console.error("Erreur lors de la vérification des tables:", tablesError);
+    if (error) {
+      if (error.code === 'PGRST109') {
+        console.warn("La table 'properties' n'existe pas encore. Veuillez la créer dans votre projet Supabase.");
         return false;
       }
       
-      console.log("Tables dans le schéma botnb:", tables);
-      const clientsTableExists = tables?.some((table: string) => table === 'clients');
-      console.log("Table clients existe:", clientsTableExists);
-      
-      return clientsTableExists;
+      console.error("Erreur lors de la vérification de la connexion Supabase:", error);
+      return false;
     }
     
-    return false;
+    console.log("Connexion Supabase vérifiée avec succès.");
+    return true;
   } catch (error) {
     console.error("Erreur lors de la vérification de la configuration Supabase:", error);
-    console.log("Si les fonctions RPC ne sont pas disponibles, exécutez le script SQL complet dans l'éditeur SQL de Supabase.");
     return false;
   }
 };
 
-// Fonctions RPC nécessaires à créer dans Supabase:
+// Script SQL à exécuter dans l'éditeur SQL de Supabase pour configurer la base de données:
 /*
-CREATE OR REPLACE FUNCTION public.get_schemas()
-RETURNS TABLE(schema_name text) LANGUAGE plpgsql SECURITY DEFINER AS $$
-BEGIN
-  RETURN QUERY SELECT nspname::text FROM pg_catalog.pg_namespace 
-  WHERE nspname != 'pg_toast' AND nspname != 'pg_temp_1' AND nspname != 'pg_toast_temp_1' 
-  AND nspname != 'pg_catalog' AND nspname != 'information_schema';
-END;
-$$;
+-- Création de la table properties si elle n'existe pas
+CREATE TABLE IF NOT EXISTS public.properties (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  client_id UUID NOT NULL REFERENCES auth.users(id),
+  name TEXT NOT NULL,
+  beds24_property_id INTEGER,
+  address TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
 
-CREATE OR REPLACE FUNCTION public.get_tables(schema_name text)
-RETURNS TABLE(table_name text) LANGUAGE plpgsql SECURITY DEFINER AS $$
+-- Politique RLS pour la table properties
+CREATE POLICY "Users can only view their own properties" ON public.properties
+  FOR SELECT USING (auth.uid() = client_id);
+
+CREATE POLICY "Users can insert their own properties" ON public.properties
+  FOR INSERT WITH CHECK (auth.uid() = client_id);
+
+CREATE POLICY "Users can update their own properties" ON public.properties
+  FOR UPDATE USING (auth.uid() = client_id);
+
+CREATE POLICY "Users can delete their own properties" ON public.properties
+  FOR DELETE USING (auth.uid() = client_id);
+
+-- Activer RLS sur la table properties
+ALTER TABLE public.properties ENABLE ROW LEVEL SECURITY;
+
+-- Fonction pour mettre à jour la date de modification
+CREATE OR REPLACE FUNCTION public.update_updated_at()
+RETURNS TRIGGER AS $$
 BEGIN
-  RETURN QUERY SELECT tablename::text FROM pg_catalog.pg_tables WHERE schemaname = schema_name;
+  NEW.updated_at = TIMEZONE('utc', NOW());
+  RETURN NEW;
 END;
-$$;
+$$ LANGUAGE plpgsql;
+
+-- Trigger pour mettre à jour la date de modification
+CREATE TRIGGER update_properties_updated_at
+BEFORE UPDATE ON public.properties
+FOR EACH ROW
+EXECUTE PROCEDURE public.update_updated_at();
 */
