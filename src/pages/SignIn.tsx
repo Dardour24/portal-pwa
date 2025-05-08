@@ -27,11 +27,22 @@ const SignIn = () => {
       });
       navigate("/");
     } catch (error: any) {
-      toast({
-        title: "Erreur de connexion",
-        description: error.message || "Email ou mot de passe invalide.",
-        variant: "destructive",
-      });
+      console.error("Error during login:", error);
+      
+      // Gestion spécifique de l'erreur "Email not confirmed"
+      if (error.code === "email_not_confirmed") {
+        toast({
+          title: "Email non confirmé",
+          description: "Veuillez vérifier votre boîte mail et confirmer votre adresse email avant de vous connecter.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erreur de connexion",
+          description: error.message || "Email ou mot de passe invalide.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
