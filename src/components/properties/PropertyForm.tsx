@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -80,11 +81,11 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel }: PropertyFormP
               <FormLabel>ID de propriété Beds24 (optionnel)</FormLabel>
               <FormControl>
                 <Input 
-                  type="number"
+                  type="text"
                   placeholder="12345" 
                   {...field} 
                   value={field.value ?? ''} 
-                  onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
+                  onChange={(e) => field.onChange(e.target.value)}
                 />
               </FormControl>
               <FormMessage />
