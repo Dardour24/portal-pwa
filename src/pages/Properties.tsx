@@ -1,49 +1,24 @@
+
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import { House, Plus, Loader2 } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Plus, Loader2 } from "lucide-react";
 import { Property } from "@/types/property";
 import { propertyService } from "@/services/propertyService";
 import { useAuth } from "@/context/AuthContext";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-
-// Schema de validation pour le formulaire de propriété
-const propertySchema = z.object({
-  name: z.string().min(1, "Le nom est obligatoire"),
-  address: z.string().optional(),
-  beds24_property_id: z.string().optional().transform(val => val ? Number(val) : null),
-  is_active: z.boolean().default(true),
-});
-
-type PropertyFormValues = z.infer<typeof propertySchema>;
+import { PropertyCard } from "@/components/properties/PropertyCard";
+import { PropertyForm, PropertyFormValues } from "@/components/properties/PropertyForm";
 
 const Properties = () => {
   const { toast } = useToast();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [properties, setProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isAddingProperty, setIsAddingProperty] = useState(false);
   
-  // Configuration du formulaire avec React Hook Form
-  const form = useForm<PropertyFormValues>({
-    resolver: zodResolver(propertySchema),
-    defaultValues: {
-      name: "",
-      address: "",
-      beds24_property_id: "",
-      is_active: true
-    }
-  });
-
   // Charger les propriétés au chargement du composant
   useEffect(() => {
     if (isAuthenticated) {
@@ -84,9 +59,8 @@ const Properties = () => {
       // Recharger les propriétés après création
       await loadProperties();
       
-      // Fermer la boîte de dialogue et réinitialiser le formulaire
+      // Fermer la boîte de dialogue
       setIsAddDialogOpen(false);
-      form.reset();
       
       toast({
         title: "Succès",
@@ -102,6 +76,24 @@ const Properties = () => {
     } finally {
       setIsAddingProperty(false);
     }
+  };
+
+  // Gérer la visualisation des détails d'une propriété
+  const handleViewDetails = (propertyId: string) => {
+    // Pour l'instant, juste afficher un message
+    toast({
+      title: "Information",
+      description: `Détails de la propriété ${propertyId} à implémenter`,
+    });
+  };
+
+  // Gérer l'édition d'une propriété
+  const handleEdit = (propertyId: string) => {
+    // Pour l'instant, juste afficher un message
+    toast({
+      title: "Information",
+      description: `Édition de la propriété ${propertyId} à implémenter`,
+    });
   };
   
   return (
@@ -122,93 +114,11 @@ const Properties = () => {
               </DialogDescription>
             </DialogHeader>
             
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nom du logement</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Appartement Paris" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="address"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Adresse</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="123 Rue de Paris, 75001 Paris" 
-                          {...field} 
-                          value={field.value || ''}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="beds24_property_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>ID de propriété Beds24 (optionnel)</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="number" 
-                          placeholder="12345" 
-                          {...field} 
-                          value={field.value || ''}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="is_active"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <div className="space-y-1 leading-none">
-                        <FormLabel>Actif</FormLabel>
-                      </div>
-                    </FormItem>
-                  )}
-                />
-                
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                    Annuler
-                  </Button>
-                  <Button type="submit" disabled={isAddingProperty}>
-                    {isAddingProperty ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Ajout en cours...
-                      </>
-                    ) : (
-                      'Ajouter'
-                    )}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </Form>
+            <PropertyForm 
+              onSubmit={onSubmit} 
+              isSubmitting={isAddingProperty}
+              onCancel={() => setIsAddDialogOpen(false)}
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -220,26 +130,12 @@ const Properties = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {properties.map((property) => (
-            <Card key={property.id} className="overflow-hidden">
-              <div className="bg-gray-100 h-40 flex items-center justify-center">
-                <House className="h-16 w-16 text-gray-400" />
-              </div>
-              <CardHeader>
-                <CardTitle>{property.name}</CardTitle>
-                <CardDescription>{property.is_active ? "Actif" : "Inactif"}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-gray-500 mb-4">{property.address || "Aucune adresse"}</p>
-                <div className="flex justify-between">
-                  <Button variant="outline" size="sm">
-                    Voir détails
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Modifier
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <PropertyCard 
+              key={property.id} 
+              property={property}
+              onViewDetails={handleViewDetails}
+              onEdit={handleEdit}
+            />
           ))}
           
           {/* Add Property Card */}
