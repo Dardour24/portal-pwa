@@ -16,6 +16,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 interface User {
   email: string;
   id: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
 }
 
 interface AuthContextType {
@@ -42,9 +45,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user) {
+        const { data: clientData, error: clientError } = await supabase
+          .from('botnb.clients')
+          .select('first_name, last_name, phone')
+          .eq('id', session.user.id)
+          .single();
+
         setUser({
           id: session.user.id,
           email: session.user.email || '',
+          first_name: clientData?.first_name,
+          last_name: clientData?.last_name,
+          phone: clientData?.phone,
         });
       }
       
@@ -57,9 +69,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (session?.user) {
+          const { data: clientData, error: clientError } = await supabase
+            .from('botnb.clients')
+            .select('first_name, last_name, phone')
+            .eq('id', session.user.id)
+            .single();
+
           setUser({
             id: session.user.id,
             email: session.user.email || '',
+            first_name: clientData?.first_name,
+            last_name: clientData?.last_name,
+            phone: clientData?.phone,
           });
         } else {
           setUser(null);
@@ -86,9 +107,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       if (data.user) {
+        const { data: clientData, error: clientError } = await supabase
+          .from('botnb.clients')
+          .select('first_name, last_name, phone')
+          .eq('id', data.user.id)
+          .single();
+
         setUser({
           id: data.user.id,
           email: data.user.email || '',
+          first_name: clientData?.first_name,
+          last_name: clientData?.last_name,
+          phone: clientData?.phone,
         });
       }
     } catch (error) {
@@ -123,6 +153,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser({
           id: data.user.id,
           email: data.user.email || '',
+          first_name: firstName,
+          last_name: lastName,
+          phone: phoneNumber,
         });
       }
     } catch (error) {
