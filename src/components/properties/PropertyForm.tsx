@@ -14,7 +14,7 @@ import { Property } from "@/types/property";
 export const propertySchema = z.object({
   name: z.string().min(1, "Le nom est obligatoire"),
   address: z.string().optional(),
-  beds24_property_id: z.string().optional().transform(val => val ? Number(val) : null),
+  beds24_property_id: z.string().optional().transform(val => val && val.trim() !== '' ? Number(val) : null),
   is_active: z.boolean().default(true),
 });
 
@@ -81,7 +81,7 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel }: PropertyFormP
               <FormLabel>ID de propriété Beds24 (optionnel)</FormLabel>
               <FormControl>
                 <Input 
-                  type="number" 
+                  type="text"
                   placeholder="12345" 
                   {...field} 
                   value={field.value || ''}
