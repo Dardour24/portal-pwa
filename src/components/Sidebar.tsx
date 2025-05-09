@@ -2,7 +2,7 @@
 import { Sidebar as SidebarComponent, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarFooter } from "@/components/ui/sidebar";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Home, User, House, Bed, HelpCircle, Mail, LogOut } from "lucide-react";
+import { Home, House, Bed, HelpCircle, Mail, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Sidebar = () => {
@@ -12,7 +12,7 @@ const Sidebar = () => {
 
   const menuItems = [
     { title: "Accueil", path: "/", icon: Home },
-    { title: "Mon Compte / Profil", path: "/profile", icon: User },
+    // Removed "Mon Compte / Profil" entry
     { title: "Mes Logements", path: "/properties", icon: House },
     { title: "Mon Beds24", path: "/beds24", icon: Bed },
     { title: "FAQ", path: "/faq", icon: HelpCircle },
