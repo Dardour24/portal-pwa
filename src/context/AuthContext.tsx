@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext } from "react";
-import useAuthProvider from "../hooks/useAuthProvider";
+import useAuthProvider from "../hooks/auth/useAuthProvider";
 import { AuthContextType } from "../types/auth";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
