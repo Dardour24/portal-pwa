@@ -1,12 +1,13 @@
 
 import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/components/ui/use-toast";
 import { FormQuestion, FormAnswer } from "@/types/formQA";
 import { formQAService } from "@/services/formQAService";
 
 export const useFormQA = (isAuthenticated: boolean) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isLoadingQA, setIsLoadingQA] = useState(false);
   const [customQuestions, setCustomQuestions] = useState<FormQuestion[]>([]);
   
@@ -66,6 +67,7 @@ export const useFormQA = (isAuthenticated: boolean) => {
     },
     onSuccess: (newQuestion) => {
       setCustomQuestions(prev => [...prev, newQuestion]);
+      queryClient.invalidateQueries({ queryKey: ['requiredQuestions'] });
       toast({
         title: "Succès",
         description: "Question personnalisée ajoutée"
@@ -87,6 +89,7 @@ export const useFormQA = (isAuthenticated: boolean) => {
     },
     onSuccess: (_, questionId) => {
       setCustomQuestions(prev => prev.filter(q => q.id !== questionId));
+      queryClient.invalidateQueries({ queryKey: ['requiredQuestions'] });
       toast({
         title: "Succès",
         description: "Question personnalisée supprimée"
