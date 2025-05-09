@@ -18,6 +18,8 @@ const Layout = () => {
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
+  console.log("Layout rendering", { isMobile, path: location.pathname });
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col w-full">

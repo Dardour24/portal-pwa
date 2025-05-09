@@ -7,6 +7,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const auth = useAuthProvider();
+  console.log("AuthProvider rendering with auth state:", { 
+    isAuthenticated: auth.isAuthenticated,
+    isLoading: auth.isLoading 
+  });
 
   return (
     <AuthContext.Provider value={auth}>

@@ -7,6 +7,8 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
+  console.log("ProtectedRoute - isAuthenticated:", isAuthenticated, "isLoading:", isLoading);
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] p-6">
@@ -19,9 +21,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
 
   if (!isAuthenticated) {
+    console.log("Not authenticated, redirecting to signin");
     return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 
+  console.log("Authenticated, rendering children");
   return <>{children}</>;
 };
 

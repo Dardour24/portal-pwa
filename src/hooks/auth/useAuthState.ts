@@ -47,6 +47,7 @@ export const useAuthState = (): AuthState => {
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log("Auth state changed:", event, session?.user?.id);
         try {
           if (session?.user) {
             const clientData = await fetchClientData(session.user.id);

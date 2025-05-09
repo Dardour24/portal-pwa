@@ -21,9 +21,12 @@ const SignIn = () => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    
+    console.log("Login attempt with:", email);
 
     try {
       const result = await login(email, password);
+      console.log("Login result:", result);
       
       if (result.user) {
         toast({

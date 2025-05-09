@@ -8,6 +8,7 @@ import { LoginResult, User, Session } from '../../types/auth';
  */
 export const fetchClientData = async (userId: string): Promise<UserData | null> => {
   try {
+    console.log("Fetching client data for user:", userId);
     const { data, error } = await supabase
       .from('clients')
       .select('first_name, last_name, phone')
@@ -19,6 +20,7 @@ export const fetchClientData = async (userId: string): Promise<UserData | null> 
       return null;
     }
 
+    console.log("Client data fetched:", data);
     return data;
   } catch (error) {
     console.error("Error in fetchClientData:", error);
@@ -31,6 +33,7 @@ export const fetchClientData = async (userId: string): Promise<UserData | null> 
  */
 export const signInWithEmail = async (email: string, password: string): Promise<LoginResult> => {
   try {
+    console.log("Attempting login with email:", email);
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -42,6 +45,7 @@ export const signInWithEmail = async (email: string, password: string): Promise<
     }
     
     if (data.user) {
+      console.log("Login successful for user:", data.user.id);
       const clientData = await fetchClientData(data.user.id);
       
       const user: User = {
