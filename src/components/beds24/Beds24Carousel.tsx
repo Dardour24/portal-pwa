@@ -156,6 +156,21 @@ interface Beds24CarouselProps {
 const Beds24Carousel: React.FC<Beds24CarouselProps> = ({ className }) => {
   const carouselRef = useRef(null);
 
+  // Navigation helpers
+  const goToNextSlide = () => {
+    const swiper = carouselRef.current?.swiper;
+    if (swiper) {
+      swiper.slideNext();
+    }
+  };
+
+  const goToPrevSlide = () => {
+    const swiper = carouselRef.current?.swiper;
+    if (swiper) {
+      swiper.slidePrev();
+    }
+  };
+
   return (
     <section id="carousel-section" className={`py-12 ${className}`}>
       <div className="container mx-auto">
@@ -195,18 +210,26 @@ const Beds24Carousel: React.FC<Beds24CarouselProps> = ({ className }) => {
                       <InviteCodeForm />
                     </div>
                   ) : (
-                    <Button 
-                      variant="outline" 
-                      className="custom-next-button"
-                      onClick={() => {
-                        const swiper = carouselRef.current?.swiper;
-                        if (swiper) {
-                          swiper.slideNext();
-                        }
-                      }}
-                    >
-                      Étape suivante
-                    </Button>
+                    <div className="flex space-x-4 w-full justify-center">
+                      {slide.id > 1 && (
+                        <Button 
+                          variant="outline" 
+                          onClick={goToPrevSlide}
+                          className="flex items-center"
+                        >
+                          <ChevronLeft className="h-5 w-5 mr-1" />
+                          Précédent
+                        </Button>
+                      )}
+                      <Button 
+                        variant="outline" 
+                        onClick={goToNextSlide}
+                        className="flex items-center"
+                      >
+                        Étape suivante
+                        <ChevronRight className="h-5 w-5 ml-1" />
+                      </Button>
+                    </div>
                   )}
                 </div>
               </SwiperSlide>

@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowDown } from "lucide-react";
@@ -40,28 +39,6 @@ const Beds24 = () => {
       
       {/* Section Carousel */}
       <Beds24Carousel />
-
-      {/* Section supplémentaire d'informations */}
-      <Card className="mt-12">
-        <CardHeader>
-          <CardTitle>À propos de l'intégration Beds24</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-md">
-            <h3 className="text-lg font-medium mb-2">Avantages de l'intégration Beds24</h3>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Synchronisation automatique des calendriers</li>
-              <li>Gestion centralisée des réservations</li>
-              <li>Mise à jour des tarifs en temps réel</li>
-              <li>Suivi des disponibilités</li>
-            </ul>
-          </div>
-          <p>
-            L'intégration avec Beds24 vous permet de gérer efficacement vos propriétés
-            à partir d'une seule plateforme. Pour plus d'informations, consultez notre documentation.
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 };
