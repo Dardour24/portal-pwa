@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Import Swiper styles
 import 'swiper/css';
@@ -201,28 +202,32 @@ const Beds24Carousel = () => {
           
           {/* Navigation personnalisée */}
           <div className="flex justify-between mt-4">
-            <div className="swiper-button-prev text-primary hover:text-primary-dark"></div>
-            <div className="swiper-button-next text-primary hover:text-primary-dark"></div>
+            <div className="swiper-button-prev text-primary hover:text-primary-dark cursor-pointer">
+              <ChevronLeft className="w-6 h-6" />
+            </div>
+            <div className="swiper-button-next text-primary hover:text-primary-dark cursor-pointer">
+              <ChevronRight className="w-6 h-6" />
+            </div>
           </div>
         </div>
       </div>
       
-      {/* Styles personnalisés pour la pagination et la navigation */}
-      <style jsx>{`
-        :global(.swiper-pagination-bullet-active) {
+      {/* CSS personnalisé pour la pagination */}
+      <style dangerouslySetInnerHTML={{__html: `
+        .swiper-pagination-bullet-active {
           background-color: hsl(var(--primary));
         }
         
-        :global(.swiper-button-next),
-        :global(.swiper-button-prev) {
+        .swiper-button-next,
+        .swiper-button-prev {
           color: hsl(var(--primary));
         }
         
-        :global(.swiper-button-disabled) {
+        .swiper-button-disabled {
           opacity: 0.5;
           pointer-events: none;
         }
-      `}</style>
+      `}} />
     </section>
   );
 };
