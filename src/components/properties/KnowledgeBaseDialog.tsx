@@ -22,12 +22,21 @@ export const KnowledgeBaseDialog = ({
   const { isAuthenticated } = useAuth();
   const { resetPropertyData } = useFormQA(isAuthenticated);
   
-  // Reset property data when dialog closes
+  // Reset property data when dialog closes or property changes
   useEffect(() => {
     if (!isOpen) {
+      console.log("Dialog closed, resetting property data");
       resetPropertyData();
     }
   }, [isOpen, resetPropertyData]);
+  
+  // Also reset when component unmounts
+  useEffect(() => {
+    return () => {
+      console.log("Dialog unmounting, resetting property data");
+      resetPropertyData();
+    };
+  }, [resetPropertyData]);
   
   const handleSave = () => {
     onSave();
@@ -45,7 +54,7 @@ export const KnowledgeBaseDialog = ({
           <DialogTitle>Base de Connaissances</DialogTitle>
         </DialogHeader>
         
-        {property && (
+        {property && isOpen && (
           <KnowledgeBaseForm
             propertyId={property.id || ""}
             propertyName={property.name}

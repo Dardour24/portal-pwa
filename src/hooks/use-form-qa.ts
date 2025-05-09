@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/components/ui/use-toast";
@@ -12,48 +11,54 @@ export const useFormQA = (isAuthenticated: boolean) => {
   const [customQuestions, setCustomQuestions] = useState<FormQuestion[]>([]);
   const isInitialLoaded = useRef(false);
   const dataLoadedForPropertyId = useRef<string | null>(null);
+  const isCurrentlyFetching = useRef(false);
   
-  // Fetch required questions only once
+  // Fetch required questions only once with improved caching
   const {
     data: requiredQuestions = [],
     isLoading: isLoadingRequiredQuestions,
     isError: isErrorRequiredQuestions,
   } = useQuery({
     queryKey: ['requiredQuestions'],
-    queryFn: () => formQAService.getRequiredQuestions(),
+    queryFn: () => {
+      console.log("Fetching required questions");
+      return formQAService.getRequiredQuestions();
+    },
     enabled: isAuthenticated,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: Infinity, // Never consider this data stale
+    cacheTime: 1000 * 60 * 60, // Cache for 1 hour
     refetchOnWindowFocus: false,
-    retry: 1, // Limiter les retentatives en cas d'échec
+    retry: 2, // Augmenté à 2 pour plus de fiabilité
+    onSuccess: (data) => {
+      console.log("Successfully loaded required questions:", data.length);
+      isInitialLoaded.current = true;
+    },
+    onError: (error) => {
+      console.error("Error loading required questions:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les questions requises",
+        variant: "destructive"
+      });
+    }
   });
   
-  // Mettre à jour le flag isInitialLoaded quand les questions sont chargées
-  useEffect(() => {
-    if (requiredQuestions.length > 0 && !isInitialLoaded.current) {
-      isInitialLoaded.current = true;
-    }
-  }, [requiredQuestions]);
-  
-  // Fetch custom questions for a property
+  // Fetch custom questions for a property with better error handling
   const fetchCustomQuestions = async (propertyId: string) => {
-    // Éviter de charger pour le même property ID plusieurs fois
-    if (dataLoadedForPropertyId.current === propertyId) {
-      console.log("Data already loaded for property:", propertyId);
+    // Éviter les appels multiples ou si les données sont déjà chargées
+    if (isCurrentlyFetching.current || dataLoadedForPropertyId.current === propertyId) {
+      console.log("Skipping fetchCustomQuestions - already loaded or in progress");
       return customQuestions;
     }
     
-    // Éviter les chargements multiples
-    if (isLoadingQA) {
-      console.log("Already loading data, skipping fetch");
-      return customQuestions;
-    }
-    
+    isCurrentlyFetching.current = true;
     setIsLoadingQA(true);
+    
     try {
       console.log("Fetching custom questions for property:", propertyId);
       const questions = await formQAService.getCustomQuestionsForProperty(propertyId);
+      console.log("Custom questions loaded:", questions.length);
       setCustomQuestions(questions);
-      // Marquer ce propertyId comme déjà chargé
       dataLoadedForPropertyId.current = propertyId;
       return questions;
     } catch (error) {
@@ -66,28 +71,32 @@ export const useFormQA = (isAuthenticated: boolean) => {
       return [];
     } finally {
       setIsLoadingQA(false);
+      isCurrentlyFetching.current = false;
     }
   };
   
-  // Reset loading state and cached data when changing property
-  const resetPropertyData = (propertyId?: string) => {
-    if (!propertyId || dataLoadedForPropertyId.current !== propertyId) {
-      dataLoadedForPropertyId.current = null;
-      setCustomQuestions([]);
-    }
+  // Reset loading state and cached data
+  const resetPropertyData = () => {
+    console.log("Resetting property data");
+    dataLoadedForPropertyId.current = null;
+    setCustomQuestions([]);
+    isCurrentlyFetching.current = false;
   };
   
-  // Fetch answers for a property
+  // Fetch answers for a property with better error handling
   const fetchAnswers = async (propertyId: string) => {
-    if (isLoadingQA) {
-      console.log("Already loading data, skipping fetch answers");
+    if (isCurrentlyFetching.current) {
+      console.log("Skipping fetchAnswers - fetch already in progress");
       return [];
     }
     
+    isCurrentlyFetching.current = true;
     setIsLoadingQA(true);
+    
     try {
       console.log("Fetching answers for property:", propertyId);
       const answers = await formQAService.getAnswersForProperty(propertyId);
+      console.log("Answers loaded:", answers.length);
       return answers;
     } catch (error) {
       console.error("Erreur lors du chargement des réponses:", error);
@@ -99,6 +108,7 @@ export const useFormQA = (isAuthenticated: boolean) => {
       return [];
     } finally {
       setIsLoadingQA(false);
+      isCurrentlyFetching.current = false;
     }
   };
   

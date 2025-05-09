@@ -10,19 +10,41 @@ export const requiredQuestionsService = {
    * Récupère toutes les questions imposées (non personnalisées)
    */
   async getRequiredQuestions(): Promise<FormQuestion[]> {
-    // D'abord, supprimons TOUTES les questions existantes non personnalisées
-    // pour s'assurer de nettoyer complètement la table avant d'insérer les questions par défaut
-    const { error: deleteError } = await supabase
+    // D'abord, vérifions si des questions imposées existent déjà
+    const { data: existingQuestions, error: fetchError } = await supabase
       .from('form_questions')
-      .delete()
+      .select('*')
       .eq('is_custom', false);
-      
-    if (deleteError) {
-      console.error('Erreur lors de la suppression des questions existantes:', deleteError);
-      throw deleteError;
+    
+    if (fetchError) {
+      console.error('Erreur lors de la vérification des questions existantes:', fetchError);
+      throw fetchError;
     }
     
-    // Insérer les 21 questions par défaut (liste exacte et vérifiée)
+    // Si nous avons déjà 21 questions imposées, retournons-les directement
+    if (existingQuestions && existingQuestions.length === 21) {
+      console.log('Les 21 questions imposées existent déjà, pas besoin de les recréer');
+      return existingQuestions;
+    }
+    
+    console.log('Recréation des questions imposées nécessaire. Nombre actuel:', existingQuestions?.length || 0);
+    
+    // Sinon, supprimons les questions existantes non personnalisées
+    if (existingQuestions && existingQuestions.length > 0) {
+      const { error: deleteError } = await supabase
+        .from('form_questions')
+        .delete()
+        .eq('is_custom', false);
+        
+      if (deleteError) {
+        console.error('Erreur lors de la suppression des questions existantes:', deleteError);
+        throw deleteError;
+      }
+      
+      console.log('Questions imposées existantes supprimées avec succès');
+    }
+    
+    // Liste exacte des 21 questions par défaut
     const defaultQuestions = [
       { question_text: 'Quel est le nom du logement ?', is_required: true, is_custom: false },
       { question_text: 'Si le voyageur veut connaître l\'ADRESSE ?', is_required: true, is_custom: false },
@@ -47,18 +69,31 @@ export const requiredQuestionsService = {
       { question_text: 'Si le voyageur pose une question sur la plaque de cuisson : ex : « La plaque de cuisson ne marche pas » ou « Comment on allume la plaque de cuisson » ?', is_required: true, is_custom: false }
     ];
     
-    // Insérer les questions par défaut
-    const { data, error } = await supabase
-      .from('form_questions')
-      .insert(defaultQuestions)
-      .select();
+    try {
+      // Insérer les questions par défaut
+      const { data, error } = await supabase
+        .from('form_questions')
+        .insert(defaultQuestions)
+        .select();
+        
+      if (error) {
+        console.error('Erreur lors de l\'insertion des questions par défaut:', error);
+        throw error;
+      }
       
-    if (error) {
-      console.error('Erreur lors de l\'insertion des questions par défaut:', error);
-      throw error;
+      console.log('21 questions par défaut insérées avec succès:', data?.length || 0);
+      return data || [];
+    } catch (error) {
+      console.error('Exception lors de l\'insertion des questions:', error);
+      
+      // En cas d'échec de l'insertion, essayons de récupérer les questions existantes
+      const { data: fallbackData } = await supabase
+        .from('form_questions')
+        .select('*')
+        .eq('is_custom', false);
+      
+      console.log('Récupération de secours des questions imposées:', fallbackData?.length || 0);
+      return fallbackData || [];
     }
-    
-    console.log('21 questions par défaut insérées avec succès');
-    return data || [];
   }
 };
