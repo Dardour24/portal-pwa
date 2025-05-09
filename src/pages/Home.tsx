@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -18,33 +17,35 @@ const HomeCarouselSlides = [
     id: 1,
     title: "Botnb : Votre assistant intelligent pour les réponses aux voyageurs !",
     text: "Gagnez du temps grâce à des réponses rapides et personnalisées pour tous vos voyageurs.",
-    image: "/placeholder.svg",
+    image: "/lovable-uploads/4009bbc6-3025-427c-981d-6a1b26ff1f6f.png",
   },
   {
     id: 2,
     title: "Le Flux Simplifié",
     text: "Voyageur → Beds24 → Botnb → Suggestion WhatsApp → Validation → Réponse via Beds24",
-    image: "/placeholder.svg",
+    image: "/lovable-uploads/b67e5565-a691-467e-83bd-a9d234eabd9a.png",
   },
   {
     id: 3,
     title: "Donnez vie à votre assistant !",
     text: "Rendez-vous dans 'Mes Logements' pour remplir le questionnaire unique de chaque propriété. C'est la clé pour des réponses pertinentes !",
     buttonText: "Aller à Mes Logements",
-    buttonLink: "/properties"
+    buttonLink: "/properties",
+    image: "/lovable-uploads/3e1867af-676e-488a-8837-6347fbaab95a.png",
   },
   {
     id: 4,
     title: "Liez Botnb à vos réservations",
     text: "Connectez votre compte Beds24 pour que Botnb reçoive les messages des voyageurs et puisse y répondre.",
     buttonText: "Aller à Mon Beds24",
-    buttonLink: "/beds24"
+    buttonLink: "/beds24",
+    image: "/lovable-uploads/c270e7a3-00ea-4752-bac0-647f39a8ef81.png",
   },
   {
     id: 5,
     title: "Vous avez toujours le dernier mot !",
     text: "Botnb suggère, vous validez ou modifiez via WhatsApp avant tout envoi.",
-    image: "/placeholder.svg",
+    image: "/lovable-uploads/4009bbc6-3025-427c-981d-6a1b26ff1f6f.png",
   }
 ];
 
