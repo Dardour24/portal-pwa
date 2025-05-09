@@ -1,53 +1,10 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
-} from "@/components/ui/carousel";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../context/AuthContext";
-import { ArrowRight, HousePlus, Settings } from "lucide-react";
-
-const HomeCarouselSlides = [
-  {
-    id: 1,
-    title: "Botnb : Votre assistant intelligent pour les réponses aux voyageurs !",
-    text: "Gagnez du temps grâce à des réponses rapides et personnalisées pour tous vos voyageurs.",
-    image: "/lovable-uploads/4009bbc6-3025-427c-981d-6a1b26ff1f6f.png",
-  },
-  {
-    id: 2,
-    title: "Le Flux Simplifié",
-    text: "Voyageur → Beds24 → Botnb → Suggestion WhatsApp → Validation → Réponse via Beds24",
-    image: "/lovable-uploads/b67e5565-a691-467e-83bd-a9d234eabd9a.png",
-  },
-  {
-    id: 3,
-    title: "Donnez vie à votre assistant !",
-    text: "Rendez-vous dans 'Mes Logements' pour remplir le questionnaire unique de chaque propriété. C'est la clé pour des réponses pertinentes !",
-    buttonText: "Aller à Mes Logements",
-    buttonLink: "/properties",
-    image: "/lovable-uploads/3e1867af-676e-488a-8837-6347fbaab95a.png",
-  },
-  {
-    id: 4,
-    title: "Liez Botnb à vos réservations",
-    text: "Connectez votre compte Beds24 pour que Botnb reçoive les messages des voyageurs et puisse y répondre.",
-    buttonText: "Aller à Mon Beds24",
-    buttonLink: "/beds24",
-    image: "/lovable-uploads/c270e7a3-00ea-4752-bac0-647f39a8ef81.png",
-  },
-  {
-    id: 5,
-    title: "Vous avez toujours le dernier mot !",
-    text: "Botnb suggère, vous validez ou modifiez via WhatsApp avant tout envoi.",
-    image: "/lovable-uploads/4009bbc6-3025-427c-981d-6a1b26ff1f6f.png",
-  }
-];
+import { ArrowRight, Home as HomeIcon, Mail, MessageSquare, Phone } from "lucide-react";
 
 const Home = () => {
   const { user } = useAuth();
@@ -66,85 +23,88 @@ const Home = () => {
   }, [user]);
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-2">
-        Bienvenue
-        {firstName && <span className="text-primary ml-1">{firstName} !</span>}
-      </h1>
-      <p className="text-muted-foreground mb-8">Découvrez comment Botnb peut vous aider à gérer vos communications avec vos voyageurs</p>
-      
-      {/* Carousel Tutorial */}
-      <div className="relative mb-12">
-        <Carousel className="w-full">
-          <CarouselContent>
-            {HomeCarouselSlides.map((slide) => (
-              <CarouselItem key={slide.id}>
-                <div className="p-1">
-                  <Card className="border-none shadow-lg">
-                    <CardContent className="p-6">
-                      <div className="flex flex-col items-center text-center">
-                        <div className="w-full h-48 bg-muted rounded-lg mb-6 flex items-center justify-center">
-                          {slide.image ? (
-                            <img 
-                              src={slide.image} 
-                              alt={slide.title} 
-                              className="max-h-full object-contain"
-                            />
-                          ) : (
-                            <div className="text-3xl font-bold text-primary">Slide {slide.id}</div>
-                          )}
-                        </div>
-                        <h2 className="text-2xl font-semibold mb-3">{slide.title}</h2>
-                        <p className="text-muted-foreground mb-6">{slide.text}</p>
-                        {slide.buttonText && slide.buttonLink && (
-                          <Button 
-                            onClick={() => navigate(slide.buttonLink)}
-                            className="mt-4"
-                          >
-                            {slide.buttonText} <ArrowRight className="ml-2 h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious className="absolute left-0 top-1/2" />
-          <CarouselNext className="absolute right-0 top-1/2" />
-        </Carousel>
+    <div className="container mx-auto px-4 py-6 max-w-5xl">
+      {/* Header Section */}
+      <div className="text-center mb-10">
+        <h1 className="text-4xl font-bold mb-4">
+          Bienvenue sur votre Espace Botnb
+        </h1>
+        <p className="text-lg text-muted-foreground mb-2">
+          Botnb ne demande qu'à vous connaître et vous aider !
+        </p>
+        <p className="text-lg text-muted-foreground mb-2">
+          Rendez-vous sur votre "Zone d'Apprentissage"
+        </p>
+        <p className="text-lg text-muted-foreground">
+          pour transmettre à votre Botnb toutes les informations de votre Logement !
+        </p>
       </div>
-
-      {/* Raccourcis */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-        <Card className="hover:shadow-md transition-all duration-200">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <HousePlus className="mr-2 h-5 w-5" /> Ajouter un Logement
-            </CardTitle>
-            <CardDescription>Créez et configurez un nouveau logement</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => navigate('/properties')} variant="default">
-              Ajouter maintenant
-            </Button>
+      
+      {/* Cards Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        <Card className="bg-white hover:shadow-md transition-all duration-200 text-center">
+          <CardContent className="p-6 flex flex-col items-center justify-center h-full">
+            <HomeIcon className="h-8 w-8 mb-4 text-primary" />
+            <h3 className="font-medium mb-1">Transmettez les</h3>
+            <h3 className="font-medium mb-1">Informations</h3>
+            <h3 className="font-medium mb-1">de votre</h3>
+            <h3 className="font-medium">Logement</h3>
+            <div className="border-b w-full mt-4"></div>
           </CardContent>
         </Card>
         
-        <Card className="hover:shadow-md transition-all duration-200">
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Settings className="mr-2 h-5 w-5" /> Configurer Beds24
-            </CardTitle>
-            <CardDescription>Liez votre compte Beds24 pour synchroniser vos réservations</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => navigate('/beds24')} variant="default">
-              Configurer
-            </Button>
+        <Card className="bg-white hover:shadow-md transition-all duration-200 text-center">
+          <CardContent className="p-6 flex flex-col items-center justify-center h-full">
+            <MessageSquare className="h-8 w-8 mb-4 text-primary" />
+            <h3 className="font-medium mb-1">Configurer vos</h3>
+            <h3 className="font-medium mb-1">accès à Beds24</h3>
           </CardContent>
         </Card>
+        
+        <Card className="bg-white hover:shadow-md transition-all duration-200 text-center">
+          <CardContent className="p-6 flex flex-col items-center justify-center h-full">
+            <Mail className="h-8 w-8 mb-4 text-primary" />
+            <h3 className="font-medium mb-1">Recevez les</h3>
+            <h3 className="font-medium mb-1">réponses de</h3>
+            <h3 className="font-medium mb-1">Botnb par</h3>
+            <h3 className="font-medium">Email</h3>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-white hover:shadow-md transition-all duration-200 text-center">
+          <CardContent className="p-6 flex flex-col items-center justify-center h-full">
+            <Phone className="h-8 w-8 mb-4 text-primary" />
+            <h3 className="font-medium mb-1">Contactez</h3>
+            <h3 className="font-medium">Nous</h3>
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* Reminder Text */}
+      <div className="text-center mb-10">
+        <p className="text-lg text-muted-foreground">
+          Rendez-vous sur votre "Zone d'Apprentissage" pour transmettre à votre Botnb toutes les informations sur votre Logement !
+        </p>
+      </div>
+      
+      {/* Image Section */}
+      <div className="flex justify-center mb-6">
+        <img 
+          src="/lovable-uploads/e0275547-126a-4f3d-87cd-e9496acd16c0.png"
+          alt="Utilisateurs de Botnb" 
+          className="rounded-lg max-w-full h-auto"
+          style={{ maxHeight: '400px' }}
+        />
+      </div>
+      
+      {/* Quick Links for Mobile */}
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 md:hidden">
+        <Button onClick={() => navigate('/properties')} className="w-full">
+          Mes Logements <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+        <Button onClick={() => navigate('/beds24')} className="w-full">
+          Mon Beds24 <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
