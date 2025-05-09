@@ -1,12 +1,12 @@
 
 import { useState, useEffect } from "react";
 import { FormQuestion, FormAnswer } from "@/types/formQA";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Plus, Trash2 } from "lucide-react";
 import { useFormQA } from "@/hooks/use-form-qa";
 import { useAuth } from "@/context/AuthContext";
+import { RequiredQuestions } from "./form-qa/RequiredQuestions";
+import { CustomQuestions } from "./form-qa/CustomQuestions";
+import { ValidationErrors } from "./form-qa/ValidationErrors";
+import { FormActions } from "./form-qa/FormActions";
 
 interface KnowledgeBaseFormProps {
   propertyId: string;
@@ -37,7 +37,6 @@ export const KnowledgeBaseForm = ({
   } = useFormQA(isAuthenticated);
   
   const [answers, setAnswers] = useState<Map<string, string>>(new Map());
-  const [newCustomQuestion, setNewCustomQuestion] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   
@@ -65,20 +64,18 @@ export const KnowledgeBaseForm = ({
     setAnswers(newAnswers);
   };
   
-  const handleAddCustomQuestion = async () => {
-    if (!newCustomQuestion.trim()) return;
+  const handleAddCustomQuestion = async (questionText: string) => {
+    if (!questionText.trim()) return;
     
     if (customQuestions.length >= 10) {
       return setValidationErrors(["Vous avez atteint la limite de 10 questions personnalisées."]);
     }
     
     await addCustomQuestion({
-      question_text: newCustomQuestion,
+      question_text: questionText,
       is_required: false,
       property_id: propertyId
     });
-    
-    setNewCustomQuestion("");
   };
   
   const handleDeleteCustomQuestion = async (questionId: string) => {
@@ -139,15 +136,6 @@ export const KnowledgeBaseForm = ({
     }
   };
   
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="ml-2">Chargement des questions...</p>
-      </div>
-    );
-  }
-  
   return (
     <div className="space-y-6 py-4">
       <div className="space-y-2">
@@ -161,119 +149,36 @@ export const KnowledgeBaseForm = ({
         </p>
       </div>
       
-      {validationErrors.length > 0 && (
-        <div className="bg-destructive/10 border border-destructive text-destructive p-3 rounded-md">
-          <p className="font-semibold">Veuillez corriger les erreurs suivantes :</p>
-          <ul className="list-disc list-inside">
-            {validationErrors.map((error, index) => (
-              <li key={index}>{error}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <ValidationErrors errors={validationErrors} />
       
       <div className="space-y-8">
         {/* Questions imposées */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-medium">Questions générales</h3>
-          {requiredQuestions.map((question, index) => (
-            <div key={question.id} className="space-y-2 p-4 bg-muted/20 rounded-lg">
-              <label className="block font-medium">
-                {index + 1}. {question.question_text} {question.is_required && <span className="text-destructive">*</span>}
-              </label>
-              <Textarea
-                placeholder={`Votre réponse spécifique pour ${propertyName}...`}
-                value={answers.get(question.id) || ""}
-                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                className="w-full"
-              />
-            </div>
-          ))}
-        </div>
+        <RequiredQuestions 
+          questions={requiredQuestions}
+          answers={answers}
+          propertyName={propertyName}
+          onAnswerChange={handleAnswerChange}
+          isLoading={isLoading}
+        />
         
         {/* Questions personnalisées */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium">Questions personnalisées ({customQuestions.length}/10)</h3>
-            <Button 
-              type="button" 
-              onClick={handleAddCustomQuestion} 
-              disabled={customQuestions.length >= 10 || !newCustomQuestion.trim()}
-              variant="outline" 
-              className="flex items-center"
-            >
-              <Plus className="w-4 h-4 mr-1" /> Ajouter une question
-            </Button>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Input
-              placeholder="Saisissez une nouvelle question personnalisée..."
-              value={newCustomQuestion}
-              onChange={(e) => setNewCustomQuestion(e.target.value)}
-              className="flex-grow"
-              disabled={customQuestions.length >= 10}
-            />
-          </div>
-          
-          {customQuestions.map((question, index) => (
-            <div key={question.id} className="space-y-2 p-4 bg-muted/20 rounded-lg">
-              <div className="flex justify-between items-start">
-                <label className="block font-medium">
-                  {requiredQuestions.length + index + 1}. {question.question_text}
-                </label>
-                <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  className="h-8 w-8 text-destructive" 
-                  onClick={() => handleDeleteCustomQuestion(question.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-              <Textarea
-                placeholder={`Votre réponse spécifique pour ${propertyName}...`}
-                value={answers.get(question.id) || ""}
-                onChange={(e) => handleAnswerChange(question.id, e.target.value)}
-                className="w-full"
-              />
-            </div>
-          ))}
-          
-          {customQuestions.length === 0 && (
-            <div className="text-center p-4 border border-dashed border-muted rounded-lg">
-              <p className="text-muted-foreground">
-                Aucune question personnalisée ajoutée. Vous pouvez ajouter jusqu'à 10 questions personnalisées.
-              </p>
-            </div>
-          )}
-        </div>
+        <CustomQuestions
+          questions={customQuestions}
+          answers={answers}
+          propertyName={propertyName}
+          requiredQuestionsLength={requiredQuestions.length}
+          onAnswerChange={handleAnswerChange}
+          onAddCustomQuestion={handleAddCustomQuestion}
+          onDeleteCustomQuestion={handleDeleteCustomQuestion}
+        />
       </div>
       
-      <div className="flex justify-end space-x-2 pt-4">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={onCancel}
-          disabled={isSubmitting}
-        >
-          Annuler
-        </Button>
-        <Button 
-          type="button" 
-          onClick={handleSave}
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-              {isNewProperty ? 'Création en cours...' : 'Sauvegarde en cours...'}
-            </>
-          ) : (
-            isNewProperty ? 'Créer la base de connaissances' : 'Enregistrer les modifications'
-          )}
-        </Button>
-      </div>
+      <FormActions 
+        onCancel={onCancel}
+        onSave={handleSave}
+        isSubmitting={isSubmitting || isSavingAnswers}
+        isNewProperty={isNewProperty}
+      />
     </div>
   );
 };
