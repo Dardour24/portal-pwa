@@ -36,7 +36,6 @@ export const EditPropertyDialog = ({
             initialValues={{
               name: property.name,
               address: property.address || '',
-              beds24_property_id: property.beds24_property_id || null,
               is_active: property.is_active || true
             }}
           />
