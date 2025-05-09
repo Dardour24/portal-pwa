@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FormQuestion, FormAnswer } from "@/types/formQA";
 import { useFormQA } from "@/hooks/use-form-qa";
 import { useAuth } from "@/context/AuthContext";
@@ -39,20 +39,22 @@ export const KnowledgeBaseForm = ({
   const [answers, setAnswers] = useState<Map<string, string>>(new Map());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const dataLoadedRef = useRef(false);
   
   useEffect(() => {
     const loadData = async () => {
-      if (propertyId && !isNewProperty) {
-        await fetchCustomQuestions(propertyId);
-        const propertyAnswers = await fetchAnswers(propertyId);
-        
-        const answerMap = new Map<string, string>();
-        propertyAnswers.forEach(answer => {
-          answerMap.set(answer.question_id, answer.answer_text);
-        });
-        
-        setAnswers(answerMap);
-      }
+      if (!propertyId || isNewProperty || dataLoadedRef.current) return;
+      
+      dataLoadedRef.current = true;
+      await fetchCustomQuestions(propertyId);
+      const propertyAnswers = await fetchAnswers(propertyId);
+      
+      const answerMap = new Map<string, string>();
+      propertyAnswers.forEach(answer => {
+        answerMap.set(answer.question_id, answer.answer_text);
+      });
+      
+      setAnswers(answerMap);
     };
     
     loadData();

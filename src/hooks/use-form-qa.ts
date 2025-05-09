@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/components/ui/use-toast";
 import { FormQuestion, FormAnswer } from "@/types/formQA";
@@ -10,6 +10,7 @@ export const useFormQA = (isAuthenticated: boolean) => {
   const queryClient = useQueryClient();
   const [isLoadingQA, setIsLoadingQA] = useState(false);
   const [customQuestions, setCustomQuestions] = useState<FormQuestion[]>([]);
+  const isInitialLoaded = useRef(false);
   
   // Fetch required questions
   const {
@@ -19,10 +20,21 @@ export const useFormQA = (isAuthenticated: boolean) => {
     queryKey: ['requiredQuestions'],
     queryFn: () => formQAService.getRequiredQuestions(),
     enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false, // Éviter de refetch inutilement
   });
+  
+  // Mettre à jour le flag isInitialLoaded quand les questions sont chargées
+  useEffect(() => {
+    if (requiredQuestions.length > 0 && !isInitialLoaded.current) {
+      isInitialLoaded.current = true;
+    }
+  }, [requiredQuestions]);
   
   // Fetch custom questions for a property
   const fetchCustomQuestions = async (propertyId: string) => {
+    if (isLoadingQA) return customQuestions; // Évite les chargements multiples
+    
     setIsLoadingQA(true);
     try {
       const questions = await formQAService.getCustomQuestionsForProperty(propertyId);
@@ -43,6 +55,8 @@ export const useFormQA = (isAuthenticated: boolean) => {
   
   // Fetch answers for a property
   const fetchAnswers = async (propertyId: string) => {
+    if (isLoadingQA) return []; // Évite les chargements multiples
+    
     setIsLoadingQA(true);
     try {
       const answers = await formQAService.getAnswersForProperty(propertyId);
