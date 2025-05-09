@@ -269,8 +269,9 @@ const Beds24 = () => {
         </CardContent>
       </Card>
       
-      {/* CSS personnalisé pour Swiper */}
-      <style jsx global>{`
+      {/* CSS personnalisé pour Swiper - Corrigé la balise style */}
+      <style>
+        {`
         .swiper {
           width: 100%;
           border-radius: 0.75rem;
@@ -295,7 +296,8 @@ const Beds24 = () => {
         .swiper-pagination-bullet-active {
           background: hsl(var(--primary));
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
