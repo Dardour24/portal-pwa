@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { User } from '../types/auth';
 
-export const useAuthProvider = () => {
+const useAuthProvider = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -156,3 +156,5 @@ export const useAuthProvider = () => {
     logout
   };
 };
+
+export default useAuthProvider;
