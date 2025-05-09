@@ -143,7 +143,7 @@ const Beds24Carousel = () => {
                           Étape précédente
                         </Button>
                       )}
-                      {index < slides.length - 1 && (
+                      {index < slides.length && (
                         <Button variant="outline" onClick={goToNextSlide}>
                           Étape suivante
                         </Button>
@@ -207,22 +207,23 @@ const Beds24Carousel = () => {
         </div>
       </div>
       
-      {/* Styles personnalisés pour la pagination et la navigation */}
-      <style jsx>{`
-        :global(.swiper-pagination-bullet-active) {
+      <style>
+        {`
+        .swiper-pagination-bullet-active {
           background-color: hsl(var(--primary));
         }
         
-        :global(.swiper-button-next),
-        :global(.swiper-button-prev) {
+        .swiper-button-next,
+        .swiper-button-prev {
           color: hsl(var(--primary));
         }
         
-        :global(.swiper-button-disabled) {
+        .swiper-button-disabled {
           opacity: 0.5;
           pointer-events: none;
         }
-      `}</style>
+        `}
+      </style>
     </section>
   );
 };
