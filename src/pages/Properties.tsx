@@ -9,6 +9,8 @@ import { AddPropertyDialog } from "@/components/properties/AddPropertyDialog";
 import { EditPropertyDialog } from "@/components/properties/EditPropertyDialog";
 import { PropertyList } from "@/components/properties/PropertyList";
 import { KnowledgeBaseDialog } from "@/components/properties/KnowledgeBaseDialog";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 const Properties = () => {
   const { toast } = useToast();
@@ -33,7 +35,6 @@ const Properties = () => {
     // Ensure name is always present (it's required by the schema anyway)
     const propertyData = {
       name: values.name, // This is now guaranteed to be non-optional due to the schema
-      beds24_property_id: values.beds24_property_id,
       address: values.address || null,
       is_active: values.is_active
     };
@@ -51,7 +52,6 @@ const Properties = () => {
     // Ensure consistent typing with what updateProperty expects
     const propertyData = {
       name: values.name, // This is now guaranteed to be non-optional
-      beds24_property_id: values.beds24_property_id,
       address: values.address || null,
       is_active: values.is_active
     };
@@ -103,13 +103,17 @@ const Properties = () => {
     <div className="container mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Mes Logements</h1>
-        <AddPropertyDialog
-          isOpen={isAddDialogOpen}
-          onOpenChange={setIsAddDialogOpen}
-          onSubmit={onSubmitAdd}
-          isSubmitting={isAddingProperty}
-        />
+        <Button onClick={() => setIsAddDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" /> Ajouter un logement
+        </Button>
       </div>
+      
+      <AddPropertyDialog
+        isOpen={isAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen}
+        onSubmit={onSubmitAdd}
+        isSubmitting={isAddingProperty}
+      />
       
       <EditPropertyDialog
         isOpen={isEditDialogOpen}

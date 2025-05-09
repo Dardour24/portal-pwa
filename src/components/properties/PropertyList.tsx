@@ -43,12 +43,6 @@ export const PropertyList = ({
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        
-        <Button className="flex items-center gap-1" onClick={onAddProperty}>
-          <CirclePlus className="h-5 w-5" />
-          <span className="hidden sm:inline">Ajouter un logement</span>
-          <span className="sm:hidden">Ajouter</span>
-        </Button>
       </div>
       
       {isLoading ? (

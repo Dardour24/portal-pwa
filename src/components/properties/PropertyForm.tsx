@@ -1,3 +1,4 @@
+
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,8 +14,6 @@ import { Property } from "@/types/property";
 export const propertySchema = z.object({
   name: z.string().min(1, "Le nom est obligatoire"),
   address: z.string().optional(),
-  beds24_property_id: z.string().optional()
-    .transform(val => val && val.trim() !== '' ? Number(val) : null),
   is_active: z.boolean().default(true),
 });
 
@@ -34,9 +33,6 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel, initialValues }
     defaultValues: {
       name: initialValues?.name || "",
       address: initialValues?.address || "",
-      beds24_property_id: initialValues?.beds24_property_id !== undefined && initialValues.beds24_property_id !== null
-        ? Number(initialValues.beds24_property_id)
-        : null,
       is_active: initialValues?.is_active !== undefined ? initialValues.is_active : true
     }
   });
@@ -69,26 +65,6 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel, initialValues }
                   placeholder="123 Rue de Paris, 75001 Paris" 
                   {...field} 
                   value={field.value || ''}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="beds24_property_id"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>ID de propriété Beds24 (optionnel)</FormLabel>
-              <FormControl>
-                <Input 
-                  type="number"
-                  placeholder="12345" 
-                  {...field}
-                  value={field.value === null ? '' : field.value}
-                  onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : null)}
                 />
               </FormControl>
               <FormMessage />
