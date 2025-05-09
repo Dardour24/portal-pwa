@@ -2,7 +2,8 @@
 import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
-import { useCarouselData, SlideData } from './useCarouselData';
+import { useCarouselData } from './useCarouselData';
+import { SlideData } from './carouselData';
 import CarouselSlide from './CarouselSlide';
 import CarouselInviteForm from './CarouselInviteForm';
 import CarouselNavigation from './CarouselNavigation';
