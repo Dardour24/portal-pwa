@@ -30,7 +30,8 @@ export const KnowledgeBaseForm = ({
     isLoading, 
     isSavingAnswers,
     fetchCustomQuestions, 
-    fetchAnswers, 
+    fetchAnswers,
+    resetPropertyData, 
     addCustomQuestion, 
     deleteCustomQuestion, 
     saveAnswers 
@@ -42,19 +43,38 @@ export const KnowledgeBaseForm = ({
   const dataLoadedRef = useRef(false);
   
   useEffect(() => {
+    // Reset data when component unmounts or property changes
+    return () => {
+      resetPropertyData();
+    };
+  }, []);
+  
+  useEffect(() => {
     const loadData = async () => {
+      // Si c'est un nouveau logement ou si les données ont déjà été chargées, ne rien faire
       if (!propertyId || isNewProperty || dataLoadedRef.current) return;
       
+      console.log("Initial data load for property:", propertyId);
       dataLoadedRef.current = true;
-      await fetchCustomQuestions(propertyId);
-      const propertyAnswers = await fetchAnswers(propertyId);
       
-      const answerMap = new Map<string, string>();
-      propertyAnswers.forEach(answer => {
-        answerMap.set(answer.question_id, answer.answer_text);
-      });
-      
-      setAnswers(answerMap);
+      try {
+        // Charger les questions personnalisées d'abord
+        await fetchCustomQuestions(propertyId);
+        
+        // Puis charger les réponses
+        const propertyAnswers = await fetchAnswers(propertyId);
+        
+        const answerMap = new Map<string, string>();
+        propertyAnswers.forEach(answer => {
+          answerMap.set(answer.question_id, answer.answer_text);
+        });
+        
+        setAnswers(answerMap);
+      } catch (error) {
+        console.error("Erreur lors du chargement initial des données:", error);
+        // Reset le flag en cas d'erreur pour permettre une nouvelle tentative
+        dataLoadedRef.current = false;
+      }
     };
     
     loadData();

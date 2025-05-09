@@ -11,17 +11,20 @@ export const useFormQA = (isAuthenticated: boolean) => {
   const [isLoadingQA, setIsLoadingQA] = useState(false);
   const [customQuestions, setCustomQuestions] = useState<FormQuestion[]>([]);
   const isInitialLoaded = useRef(false);
+  const dataLoadedForPropertyId = useRef<string | null>(null);
   
-  // Fetch required questions
+  // Fetch required questions only once
   const {
     data: requiredQuestions = [],
     isLoading: isLoadingRequiredQuestions,
+    isError: isErrorRequiredQuestions,
   } = useQuery({
     queryKey: ['requiredQuestions'],
     queryFn: () => formQAService.getRequiredQuestions(),
     enabled: isAuthenticated,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false, // Éviter de refetch inutilement
+    refetchOnWindowFocus: false,
+    retry: 1, // Limiter les retentatives en cas d'échec
   });
   
   // Mettre à jour le flag isInitialLoaded quand les questions sont chargées
@@ -33,12 +36,25 @@ export const useFormQA = (isAuthenticated: boolean) => {
   
   // Fetch custom questions for a property
   const fetchCustomQuestions = async (propertyId: string) => {
-    if (isLoadingQA) return customQuestions; // Évite les chargements multiples
+    // Éviter de charger pour le même property ID plusieurs fois
+    if (dataLoadedForPropertyId.current === propertyId) {
+      console.log("Data already loaded for property:", propertyId);
+      return customQuestions;
+    }
+    
+    // Éviter les chargements multiples
+    if (isLoadingQA) {
+      console.log("Already loading data, skipping fetch");
+      return customQuestions;
+    }
     
     setIsLoadingQA(true);
     try {
+      console.log("Fetching custom questions for property:", propertyId);
       const questions = await formQAService.getCustomQuestionsForProperty(propertyId);
       setCustomQuestions(questions);
+      // Marquer ce propertyId comme déjà chargé
+      dataLoadedForPropertyId.current = propertyId;
       return questions;
     } catch (error) {
       console.error("Erreur lors du chargement des questions personnalisées:", error);
@@ -53,12 +69,24 @@ export const useFormQA = (isAuthenticated: boolean) => {
     }
   };
   
+  // Reset loading state and cached data when changing property
+  const resetPropertyData = (propertyId?: string) => {
+    if (!propertyId || dataLoadedForPropertyId.current !== propertyId) {
+      dataLoadedForPropertyId.current = null;
+      setCustomQuestions([]);
+    }
+  };
+  
   // Fetch answers for a property
   const fetchAnswers = async (propertyId: string) => {
-    if (isLoadingQA) return []; // Évite les chargements multiples
+    if (isLoadingQA) {
+      console.log("Already loading data, skipping fetch answers");
+      return [];
+    }
     
     setIsLoadingQA(true);
     try {
+      console.log("Fetching answers for property:", propertyId);
       const answers = await formQAService.getAnswersForProperty(propertyId);
       return answers;
     } catch (error) {
@@ -145,6 +173,7 @@ export const useFormQA = (isAuthenticated: boolean) => {
     isSavingAnswers,
     fetchCustomQuestions,
     fetchAnswers,
+    resetPropertyData,
     addCustomQuestion,
     deleteCustomQuestion,
     saveAnswers

@@ -2,6 +2,9 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { KnowledgeBaseForm } from "./KnowledgeBaseForm";
 import { Property } from "@/types/property";
+import { useEffect } from "react";
+import { useFormQA } from "@/hooks/use-form-qa";
+import { useAuth } from "@/context/AuthContext";
 
 interface KnowledgeBaseDialogProps {
   isOpen: boolean;
@@ -16,6 +19,16 @@ export const KnowledgeBaseDialog = ({
   property,
   onSave
 }: KnowledgeBaseDialogProps) => {
+  const { isAuthenticated } = useAuth();
+  const { resetPropertyData } = useFormQA(isAuthenticated);
+  
+  // Reset property data when dialog closes
+  useEffect(() => {
+    if (!isOpen) {
+      resetPropertyData();
+    }
+  }, [isOpen, resetPropertyData]);
+  
   const handleSave = () => {
     onSave();
     onOpenChange(false);
