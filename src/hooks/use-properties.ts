@@ -32,8 +32,9 @@ export function useProperties(isAuthenticated: boolean) {
     queryFn: propertyService.getProperties,
     enabled: isAuthenticated,
     retry: 1,
-    onSettled: (data, error) => {
-      if (error) {
+    // Utiliser la structure correcte pour la gestion d'erreurs dans la dernière version de React Query
+    meta: {
+      onError: (error: Error) => {
         console.error("Erreur lors du chargement des propriétés:", error);
         toast({
           title: "Erreur",
