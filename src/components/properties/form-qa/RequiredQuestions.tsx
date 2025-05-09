@@ -27,6 +27,14 @@ export const RequiredQuestions = ({
     );
   }
 
+  if (questions.length === 0) {
+    return (
+      <div className="p-4 bg-muted/20 rounded-lg text-center">
+        <p className="text-muted-foreground">Aucune question générale disponible.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Questions générales</h3>
