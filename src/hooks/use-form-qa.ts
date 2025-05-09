@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/components/ui/use-toast";
@@ -26,9 +27,9 @@ export const useFormQA = (isAuthenticated: boolean) => {
     },
     enabled: isAuthenticated,
     staleTime: Infinity, // Never consider this data stale
-    cacheTime: 1000 * 60 * 60, // Cache for 1 hour
+    gcTime: 1000 * 60 * 60, // Cache for 1 hour - updated from cacheTime to gcTime
     refetchOnWindowFocus: false,
-    retry: 2, // Augmenté à 2 pour plus de fiabilité
+    retry: 2,
     onSuccess: (data) => {
       console.log("Successfully loaded required questions:", data.length);
       isInitialLoaded.current = true;
