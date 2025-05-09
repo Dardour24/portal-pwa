@@ -30,7 +30,15 @@ const Properties = () => {
 
   // Gérer la soumission du formulaire d'ajout
   const onSubmitAdd = async (values: PropertyFormValues) => {
-    const success = await addProperty(values);
+    // Ensure name is always present (it's required by the schema anyway)
+    const propertyData = {
+      name: values.name, // This is now guaranteed to be non-optional due to the schema
+      beds24_property_id: values.beds24_property_id,
+      address: values.address || null,
+      is_active: values.is_active
+    };
+    
+    const success = await addProperty(propertyData);
     if (success) {
       setIsAddDialogOpen(false);
     }
@@ -40,7 +48,15 @@ const Properties = () => {
   const onSubmitEdit = async (values: PropertyFormValues) => {
     if (!selectedProperty?.id) return;
     
-    const success = await updateProperty(selectedProperty.id, values);
+    // Ensure consistent typing with what updateProperty expects
+    const propertyData = {
+      name: values.name, // This is now guaranteed to be non-optional
+      beds24_property_id: values.beds24_property_id,
+      address: values.address || null,
+      is_active: values.is_active
+    };
+    
+    const success = await updateProperty(selectedProperty.id, propertyData);
     if (success) {
       setIsEditDialogOpen(false);
       setSelectedProperty(null);
