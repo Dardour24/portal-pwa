@@ -34,7 +34,7 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel, initialValues }
     defaultValues: {
       name: initialValues?.name || "",
       address: initialValues?.address || "",
-      beds24_property_id: initialValues?.beds24_property_id !== undefined && initialValues.beds24_property_id !== null && initialValues.beds24_property_id !== ""
+      beds24_property_id: initialValues?.beds24_property_id !== undefined && initialValues.beds24_property_id !== null
         ? Number(initialValues.beds24_property_id)
         : null,
       is_active: initialValues?.is_active !== undefined ? initialValues.is_active : true
