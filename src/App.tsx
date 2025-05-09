@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -48,37 +48,39 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <Routes>
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
-            
-            <Route path="/" element={<Layout />}>
-              <Route index element={
-                <ProtectedRoute>
-                  <Home />
-                </ProtectedRoute>
-              } />
-              <Route path="profile" element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } />
-              <Route path="properties" element={
-                <ProtectedRoute>
-                  <Properties />
-                </ProtectedRoute>
-              } />
-              <Route path="beds24" element={
-                <ProtectedRoute>
-                  <Beds24 />
-                </ProtectedRoute>
-              } />
-              <Route path="faq" element={<Faq />} />
-              <Route path="contact" element={<Contact />} />
-            </Route>
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/signup" element={<SignUp />} />
+              
+              <Route path="/" element={<Layout />}>
+                <Route index element={
+                  <ProtectedRoute>
+                    <Home />
+                  </ProtectedRoute>
+                } />
+                <Route path="profile" element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                } />
+                <Route path="properties" element={
+                  <ProtectedRoute>
+                    <Properties />
+                  </ProtectedRoute>
+                } />
+                <Route path="beds24" element={
+                  <ProtectedRoute>
+                    <Beds24 />
+                  </ProtectedRoute>
+                } />
+                <Route path="faq" element={<Faq />} />
+                <Route path="contact" element={<Contact />} />
+              </Route>
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>
