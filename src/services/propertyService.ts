@@ -46,18 +46,27 @@ export const propertyService = {
     
     console.log("Données à insérer dans Supabase:", propertyWithClientId);
     
-    const { data, error } = await supabase
-      .from('properties')
-      .insert(propertyWithClientId)
-      .select()
-      .single();
-    
-    if (error) {
-      console.error('Erreur lors de la création de la propriété:', error);
-      throw error;
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .insert(propertyWithClientId)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Erreur lors de la création de la propriété:', error);
+        throw error;
+      }
+      
+      if (!data) {
+        throw new Error("Aucune donnée retournée après création");
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Exception lors de la création de la propriété:', error);
+      throw error instanceof Error ? error : new Error("Une erreur inconnue s'est produite");
     }
-    
-    return data;
   },
   
   /**
@@ -67,19 +76,28 @@ export const propertyService = {
     // Log pour déboguer les données reçues
     console.log("updateProperty - données reçues:", property);
     
-    const { data, error } = await supabase
-      .from('properties')
-      .update(property)
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) {
-      console.error('Erreur lors de la mise à jour de la propriété:', error);
-      throw error;
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .update(property)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) {
+        console.error('Erreur lors de la mise à jour de la propriété:', error);
+        throw error;
+      }
+      
+      if (!data) {
+        throw new Error("Aucune donnée retournée après mise à jour");
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Exception lors de la mise à jour de la propriété:', error);
+      throw error instanceof Error ? error : new Error("Une erreur inconnue s'est produite");
     }
-    
-    return data;
   },
   
   /**

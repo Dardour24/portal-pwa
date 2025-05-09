@@ -13,8 +13,10 @@ export const verifySupabaseSetup = async () => {
       .single();
     
     if (error) {
-      if (error.code === 'PGRST109') {
+      if (error.code === 'PGRST109' || error.code === '42P01') {
         console.warn("La table 'properties' n'existe pas encore. Veuillez la créer dans votre projet Supabase.");
+        console.log("Configuration Supabase vérifiée: NON configurée");
+        console.log("IMPORTANT: La configuration Supabase n'est pas complète. Veuillez exécuter le script SQL nécessaire dans l'éditeur SQL de Supabase.");
         return false;
       }
       
@@ -32,6 +34,26 @@ export const verifySupabaseSetup = async () => {
 
 // Script SQL à exécuter dans l'éditeur SQL de Supabase pour configurer la base de données:
 /*
+-- Création de la table clients si elle n'existe pas
+CREATE TABLE IF NOT EXISTS public.clients (
+  id UUID PRIMARY KEY REFERENCES auth.users(id),
+  first_name TEXT,
+  last_name TEXT,
+  email TEXT UNIQUE NOT NULL,
+  phone TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW())
+);
+
+-- Politique RLS pour la table clients
+ALTER TABLE public.clients ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own profile" ON public.clients
+  FOR SELECT USING (auth.uid() = id);
+  
+CREATE POLICY "Users can update their own profile" ON public.clients
+  FOR UPDATE USING (auth.uid() = id);
+
 -- Création de la table properties si elle n'existe pas
 CREATE TABLE IF NOT EXISTS public.properties (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
