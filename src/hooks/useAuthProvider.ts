@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { User } from '../types/auth';
+import { User, LoginResult } from '../types/auth';
 
 const useAuthProvider = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -88,7 +88,7 @@ const useAuthProvider = () => {
     };
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<LoginResult> => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -122,6 +122,8 @@ const useAuthProvider = () => {
         
         return data;
       }
+      
+      return { user: null, session: null };
     } catch (error) {
       console.error("Erreur détaillée lors de la connexion:", error);
       throw error;
@@ -130,7 +132,7 @@ const useAuthProvider = () => {
     }
   };
 
-  const signup = async (email: string, password: string, firstName: string, lastName: string, phoneNumber: string) => {
+  const signup = async (email: string, password: string, firstName: string, lastName: string, phoneNumber: string): Promise<LoginResult> => {
     setIsLoading(true);
     try {
       // Register the user with Supabase
@@ -178,6 +180,8 @@ const useAuthProvider = () => {
         
         return data;
       }
+      
+      return { user: null, session: null };
     } catch (error) {
       console.error("Erreur détaillée lors de l'inscription:", error);
       throw error;

@@ -23,12 +23,22 @@ const SignIn = () => {
     setError(null);
 
     try {
-      await login(email, password);
-      toast({
-        title: "Connecté avec succès",
-        description: "Bienvenue sur votre portail client Botnb.",
-      });
-      navigate("/");
+      const result = await login(email, password);
+      
+      if (result.user) {
+        toast({
+          title: "Connecté avec succès",
+          description: "Bienvenue sur votre portail client Botnb.",
+        });
+        navigate("/");
+      } else {
+        setError("Erreur de connexion : identifiants invalides.");
+        toast({
+          title: "Erreur de connexion",
+          description: "Email ou mot de passe invalide.",
+          variant: "destructive",
+        });
+      }
     } catch (error: any) {
       console.error("Error during login:", error);
       
