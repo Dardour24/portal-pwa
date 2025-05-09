@@ -2,9 +2,9 @@
 import { FormQuestion } from "@/types/formQA";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useState } from "react";
+import { QuestionItem } from "./QuestionItem";
 
 interface CustomQuestionsProps {
   questions: FormQuestion[];
@@ -59,27 +59,16 @@ export const CustomQuestions = ({
       </div>
       
       {questions.map((question, index) => (
-        <div key={question.id} className="space-y-2 p-4 bg-muted/20 rounded-lg">
-          <div className="flex justify-between items-start">
-            <label className="block font-medium">
-              {requiredQuestionsLength + index + 1}. {question.question_text}
-            </label>
-            <Button 
-              size="icon" 
-              variant="ghost" 
-              className="h-8 w-8 text-destructive" 
-              onClick={() => onDeleteCustomQuestion(question.id)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-          <Textarea
-            placeholder={`Votre réponse spécifique pour ${propertyName}...`}
-            value={answers.get(question.id) || ""}
-            onChange={(e) => onAnswerChange(question.id, e.target.value)}
-            className="w-full"
-          />
-        </div>
+        <QuestionItem
+          key={question.id}
+          question={question}
+          index={requiredQuestionsLength + index}
+          propertyName={propertyName}
+          value={answers.get(question.id) || ""}
+          onChange={(value) => onAnswerChange(question.id, value)}
+          onDelete={() => onDeleteCustomQuestion(question.id)}
+          isCustom={true}
+        />
       ))}
       
       {questions.length === 0 && (

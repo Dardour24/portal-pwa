@@ -1,7 +1,7 @@
 
 import { FormQuestion } from "@/types/formQA";
-import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
+import { QuestionItem } from "./QuestionItem";
 
 interface RequiredQuestionsProps {
   questions: FormQuestion[];
@@ -39,17 +39,14 @@ export const RequiredQuestions = ({
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Questions générales</h3>
       {questions.map((question, index) => (
-        <div key={question.id} className="space-y-2 p-4 bg-muted/20 rounded-lg">
-          <label className="block font-medium">
-            {index + 1}. {question.question_text} {question.is_required && <span className="text-destructive">*</span>}
-          </label>
-          <Textarea
-            placeholder={`Votre réponse spécifique pour ${propertyName}...`}
-            value={answers.get(question.id) || ""}
-            onChange={(e) => onAnswerChange(question.id, e.target.value)}
-            className="w-full"
-          />
-        </div>
+        <QuestionItem
+          key={question.id}
+          question={question}
+          index={index}
+          propertyName={propertyName}
+          value={answers.get(question.id) || ""}
+          onChange={(value) => onAnswerChange(question.id, value)}
+        />
       ))}
     </div>
   );
