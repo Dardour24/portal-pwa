@@ -23,6 +23,9 @@ export const propertyService = {
    * Crée une nouvelle propriété pour l'utilisateur connecté
    */
   async createProperty(property: Omit<Property, 'id' | 'client_id' | 'created_at' | 'updated_at'>): Promise<Property> {
+    // Log pour déboguer les données reçues
+    console.log("createProperty - données reçues:", property);
+    
     // Récupérer l'ID de l'utilisateur connecté
     const { data: { user } } = await supabase.auth.getUser();
     
@@ -30,11 +33,18 @@ export const propertyService = {
       throw new Error("Utilisateur non authentifié");
     }
     
+    // Vérifier que name est présent (obligatoire)
+    if (!property.name) {
+      throw new Error("Le nom du logement est obligatoire");
+    }
+    
     // Ajouter client_id à la propriété (lié à l'UUID de l'utilisateur)
     const propertyWithClientId = {
       ...property,
       client_id: user.id
     };
+    
+    console.log("Données à insérer dans Supabase:", propertyWithClientId);
     
     const { data, error } = await supabase
       .from('properties')
@@ -54,6 +64,9 @@ export const propertyService = {
    * Met à jour une propriété existante
    */
   async updateProperty(id: string, property: Partial<Omit<Property, 'id' | 'client_id' | 'created_at' | 'updated_at'>>): Promise<Property> {
+    // Log pour déboguer les données reçues
+    console.log("updateProperty - données reçues:", property);
+    
     const { data, error } = await supabase
       .from('properties')
       .update(property)

@@ -32,11 +32,11 @@ const Properties = () => {
 
   // Gérer la soumission du formulaire d'ajout
   const onSubmitAdd = async (values: PropertyFormValues) => {
-    // Ensure name is always present (it's required by the schema anyway)
+    // Correction de la structure de données pour correspondre au type attendu
     const propertyData = {
-      name: values.name, // This is now guaranteed to be non-optional due to the schema
+      name: values.name, // Obligatoire
       address: values.address || null,
-      is_active: values.is_active
+      is_active: values.is_active !== undefined ? values.is_active : true
     };
     
     const success = await addProperty(propertyData);
@@ -49,11 +49,11 @@ const Properties = () => {
   const onSubmitEdit = async (values: PropertyFormValues) => {
     if (!selectedProperty?.id) return;
     
-    // Ensure consistent typing with what updateProperty expects
+    // Correction de la structure de données pour correspondre au type attendu
     const propertyData = {
-      name: values.name, // This is now guaranteed to be non-optional
+      name: values.name,
       address: values.address || null,
-      is_active: values.is_active
+      is_active: values.is_active !== undefined ? values.is_active : true
     };
     
     const success = await updateProperty(selectedProperty.id, propertyData);

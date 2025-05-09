@@ -22,6 +22,7 @@ export function useProperties(isAuthenticated: boolean) {
   const addProperty = async (propertyData: Omit<Property, 'id' | 'client_id' | 'created_at' | 'updated_at'>) => {
     setIsAddingProperty(true);
     try {
+      console.log("Données à envoyer:", propertyData);
       await propertyService.createProperty(propertyData);
       await queryClient.invalidateQueries({ queryKey: ['properties'] });
       toast({
@@ -49,6 +50,7 @@ export function useProperties(isAuthenticated: boolean) {
   ) => {
     setIsEditingProperty(true);
     try {
+      console.log("Données à mettre à jour (ID:", id, "):", propertyData);
       await propertyService.updateProperty(id, propertyData);
       await queryClient.invalidateQueries({ queryKey: ['properties'] });
       toast({
