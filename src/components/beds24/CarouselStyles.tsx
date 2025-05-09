@@ -3,7 +3,7 @@ import React from 'react';
 
 const CarouselStyles: React.FC = () => {
   return (
-    <style jsx="true">{`
+    <style>{`
       .swiper-pagination-bullet-active {
         background-color: hsl(var(--primary));
       }

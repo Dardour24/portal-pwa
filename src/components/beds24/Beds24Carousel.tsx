@@ -6,6 +6,7 @@ import type { Swiper as SwiperType } from 'swiper';
 import CarouselSlide from './CarouselSlide';
 import CarouselInviteForm from './CarouselInviteForm';
 import CarouselNavigation from './CarouselNavigation';
+import CarouselStyles from './CarouselStyles';
 import { useCarouselData } from './useCarouselData';
 
 // Import Swiper styles
@@ -75,21 +76,7 @@ const Beds24Carousel = () => {
       </div>
       
       {/* CSS personnalisé pour la pagination */}
-      <style jsx="true">{`
-        .swiper-pagination-bullet-active {
-          background-color: hsl(var(--primary));
-        }
-        
-        .swiper-button-next,
-        .swiper-button-prev {
-          color: hsl(var(--primary));
-        }
-        
-        .swiper-button-disabled {
-          opacity: 0.5;
-          pointer-events: none;
-        }
-      `}</style>
+      <CarouselStyles />
     </section>
   );
 };
