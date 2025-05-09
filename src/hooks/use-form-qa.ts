@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from "@/components/ui/use-toast";
@@ -27,20 +26,22 @@ export const useFormQA = (isAuthenticated: boolean) => {
     },
     enabled: isAuthenticated,
     staleTime: Infinity, // Never consider this data stale
-    gcTime: 1000 * 60 * 60, // Cache for 1 hour - updated from cacheTime to gcTime
+    gcTime: 1000 * 60 * 60, // Cache for 1 hour
     refetchOnWindowFocus: false,
     retry: 2,
-    onSuccess: (data) => {
-      console.log("Successfully loaded required questions:", data.length);
-      isInitialLoaded.current = true;
-    },
-    onError: (error) => {
-      console.error("Error loading required questions:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les questions requises",
-        variant: "destructive"
-      });
+    meta: {
+      onSuccess: (data: FormQuestion[]) => {
+        console.log("Successfully loaded required questions:", data.length);
+        isInitialLoaded.current = true;
+      },
+      onError: (error: Error) => {
+        console.error("Error loading required questions:", error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les questions requises",
+          variant: "destructive"
+        });
+      }
     }
   });
   
