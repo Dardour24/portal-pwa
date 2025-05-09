@@ -1,7 +1,7 @@
 
 import { supabase } from '../../lib/supabase';
 import { UserData } from './types';
-import { LoginResult, User } from '../../types/auth';
+import { LoginResult, User, Session } from '../../types/auth';
 
 /**
  * Fetches client data from the database
@@ -52,9 +52,18 @@ export const signInWithEmail = async (email: string, password: string): Promise<
         phone: clientData?.phone,
       };
       
+      // Convert Supabase session to our Session type
+      const session: Session = {
+        access_token: data.session?.access_token || '',
+        refresh_token: data.session?.refresh_token || '',
+        expires_at: data.session?.expires_at,
+        expires_in: data.session?.expires_in,
+        user: user
+      };
+      
       return {
         user,
-        session: data.session,
+        session
       };
     }
     
@@ -119,9 +128,18 @@ export const signUpWithEmail = async (
         phone: phoneNumber,
       };
       
+      // Convert Supabase session to our Session type
+      const session: Session = {
+        access_token: data.session?.access_token || '',
+        refresh_token: data.session?.refresh_token || '',
+        expires_at: data.session?.expires_at,
+        expires_in: data.session?.expires_in,
+        user: user
+      };
+      
       return {
         user,
-        session: data.session
+        session
       };
     }
     
