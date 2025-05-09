@@ -7,17 +7,20 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { AlertCircle } from "lucide-react";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
     try {
       await login(email, password);
@@ -29,20 +32,24 @@ const SignIn = () => {
     } catch (error: any) {
       console.error("Error during login:", error);
       
-      // Gestion spécifique de l'erreur "Email not confirmed"
-      if (error.code === "email_not_confirmed") {
-        toast({
-          title: "Email non confirmé",
-          description: "Veuillez vérifier votre boîte mail et confirmer votre adresse email avant de vous connecter.",
-          variant: "destructive",
-        });
+      // Gestion spécifique des erreurs
+      if (error.message) {
+        if (error.message.includes("Invalid login credentials")) {
+          setError("Email ou mot de passe incorrect. Veuillez réessayer.");
+        } else if (error.message.includes("Email not confirmed")) {
+          setError("Veuillez vérifier votre email pour confirmer votre compte.");
+        } else {
+          setError(error.message || "Une erreur est survenue lors de la connexion.");
+        }
       } else {
-        toast({
-          title: "Erreur de connexion",
-          description: error.message || "Email ou mot de passe invalide.",
-          variant: "destructive",
-        });
+        setError("Une erreur est survenue lors de la connexion.");
       }
+      
+      toast({
+        title: "Erreur de connexion",
+        description: error.message || "Email ou mot de passe invalide.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -69,6 +76,13 @@ const SignIn = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div className="bg-destructive/15 text-destructive p-3 rounded-md flex items-center gap-2 text-sm">
+                  <AlertCircle size={18} />
+                  <span>{error}</span>
+                </div>
+              )}
+              
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -78,6 +92,7 @@ const SignIn = () => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="votre@email.com"
                   required
+                  autoComplete="email"
                 />
               </div>
               <div className="space-y-2">
@@ -97,6 +112,7 @@ const SignIn = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
+                  autoComplete="current-password"
                 />
               </div>
               <Button 
