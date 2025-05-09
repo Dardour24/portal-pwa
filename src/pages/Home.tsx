@@ -10,6 +10,7 @@ const Home = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
+  const [selectedCard, setSelectedCard] = useState<string | null>(null);
 
   useEffect(() => {
     // Extract first name from email if available
@@ -21,6 +22,10 @@ const Home = () => {
       }
     }
   }, [user]);
+
+  const handleCardClick = (cardId: string) => {
+    setSelectedCard(cardId === selectedCard ? null : cardId);
+  };
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-5xl">
@@ -42,7 +47,10 @@ const Home = () => {
       
       {/* Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        <Card className="bg-white hover:shadow-md transition-all duration-200 text-center">
+        <Card 
+          className={`bg-white hover:shadow-md transition-all duration-200 text-center cursor-pointer ${selectedCard === 'logement' ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => handleCardClick('logement')}
+        >
           <CardContent className="p-6 flex flex-col items-center justify-center h-full">
             <HomeIcon className="h-8 w-8 mb-4 text-primary" />
             <h3 className="font-medium mb-1">Transmettez les</h3>
@@ -53,7 +61,10 @@ const Home = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-white hover:shadow-md transition-all duration-200 text-center">
+        <Card 
+          className={`bg-white hover:shadow-md transition-all duration-200 text-center cursor-pointer ${selectedCard === 'beds24' ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => handleCardClick('beds24')}
+        >
           <CardContent className="p-6 flex flex-col items-center justify-center h-full">
             <MessageSquare className="h-8 w-8 mb-4 text-primary" />
             <h3 className="font-medium mb-1">Configurer vos</h3>
@@ -61,7 +72,10 @@ const Home = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-white hover:shadow-md transition-all duration-200 text-center">
+        <Card 
+          className={`bg-white hover:shadow-md transition-all duration-200 text-center cursor-pointer ${selectedCard === 'email' ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => handleCardClick('email')}
+        >
           <CardContent className="p-6 flex flex-col items-center justify-center h-full">
             <Mail className="h-8 w-8 mb-4 text-primary" />
             <h3 className="font-medium mb-1">Recevez les</h3>
@@ -71,7 +85,10 @@ const Home = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-white hover:shadow-md transition-all duration-200 text-center">
+        <Card 
+          className={`bg-white hover:shadow-md transition-all duration-200 text-center cursor-pointer ${selectedCard === 'contact' ? 'ring-2 ring-primary' : ''}`}
+          onClick={() => handleCardClick('contact')}
+        >
           <CardContent className="p-6 flex flex-col items-center justify-center h-full">
             <Phone className="h-8 w-8 mb-4 text-primary" />
             <h3 className="font-medium mb-1">Contactez</h3>
@@ -80,22 +97,43 @@ const Home = () => {
         </Card>
       </div>
       
-      {/* Reminder Text */}
-      <div className="text-center mb-10">
-        <p className="text-lg text-muted-foreground">
-          Rendez-vous sur votre "Zone d'Apprentissage" pour transmettre à votre Botnb toutes les informations sur votre Logement !
-        </p>
-      </div>
-      
-      {/* Image Section */}
-      <div className="flex justify-center mb-6">
-        <img 
-          src="/lovable-uploads/e0275547-126a-4f3d-87cd-e9496acd16c0.png"
-          alt="Utilisateurs de Botnb" 
-          className="rounded-lg max-w-full h-auto"
-          style={{ maxHeight: '400px' }}
-        />
-      </div>
+      {/* Selected Card Image */}
+      {selectedCard && (
+        <div className="flex justify-center mb-10">
+          {selectedCard === 'logement' && (
+            <img 
+              src="/lovable-uploads/6ab33741-bb6b-436a-aee7-ad8b5b81cdff.png" 
+              alt="Transmettez les Informations de votre Logement" 
+              className="rounded-lg max-w-full h-auto"
+              style={{ maxHeight: '400px' }}
+            />
+          )}
+          {selectedCard === 'beds24' && (
+            <img 
+              src="/lovable-uploads/f4040222-fd67-46ef-bba0-b7a1fbdfe543.png" 
+              alt="Configurer vos accès à Beds24" 
+              className="rounded-lg max-w-full h-auto"
+              style={{ maxHeight: '400px' }}
+            />
+          )}
+          {selectedCard === 'email' && (
+            <img 
+              src="/lovable-uploads/99174476-f39b-4cfb-b37a-a91ea6ff8142.png" 
+              alt="Recevez les réponses de Botnb par Email" 
+              className="rounded-lg max-w-full h-auto"
+              style={{ maxHeight: '400px' }}
+            />
+          )}
+          {selectedCard === 'contact' && (
+            <img 
+              src="/lovable-uploads/9d79d896-59e6-4ecd-b9df-318e2e5de422.png" 
+              alt="Contactez Nous" 
+              className="rounded-lg max-w-full h-auto"
+              style={{ maxHeight: '400px' }}
+            />
+          )}
+        </div>
+      )}
       
       {/* Quick Links for Mobile */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 md:hidden">
