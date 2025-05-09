@@ -32,13 +32,15 @@ export function useProperties(isAuthenticated: boolean) {
     queryFn: propertyService.getProperties,
     enabled: isAuthenticated,
     retry: 1,
-    onError: (error) => {
-      console.error("Erreur lors du chargement des propriétés:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les logements. Veuillez rafraîchir la page.",
-        variant: "destructive",
-      });
+    onSettled: (data, error) => {
+      if (error) {
+        console.error("Erreur lors du chargement des propriétés:", error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les logements. Veuillez rafraîchir la page.",
+          variant: "destructive",
+        });
+      }
     }
   });
 
