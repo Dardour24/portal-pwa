@@ -1,68 +1,39 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { Property } from "@/types/property";
 import { propertyService } from "@/services/propertyService";
-import { PropertyFormValues } from "@/components/properties/PropertyForm";
 
-export const useProperties = (isAuthenticated: boolean) => {
+export function useProperties(isAuthenticated: boolean) {
   const { toast } = useToast();
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [isAddingProperty, setIsAddingProperty] = useState(false);
   const [isEditingProperty, setIsEditingProperty] = useState(false);
-  
-  // Charger les propriétés au chargement du composant
-  useEffect(() => {
-    if (isAuthenticated) {
-      loadProperties();
-    }
-  }, [isAuthenticated]);
-  
-  // Fonction pour charger les propriétés
-  const loadProperties = async () => {
+
+  // Fetch all properties
+  const { data: properties = [], isLoading, refetch: refetchProperties } = useQuery({
+    queryKey: ['properties'],
+    queryFn: propertyService.getProperties,
+    enabled: isAuthenticated,
+  });
+
+  // Add a new property
+  const addProperty = async (propertyData: Omit<Property, 'id' | 'client_id' | 'created_at' | 'updated_at'>) => {
+    setIsAddingProperty(true);
     try {
-      setIsLoading(true);
-      const data = await propertyService.getProperties();
-      setProperties(data);
-    } catch (error) {
-      console.error("Erreur lors du chargement des propriétés:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de charger les propriétés",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  // Gérer la soumission du formulaire d'ajout
-  const addProperty = async (values: PropertyFormValues) => {
-    try {
-      setIsAddingProperty(true);
-      
-      await propertyService.createProperty({
-        name: values.name,
-        address: values.address || null,
-        beds24_property_id: values.beds24_property_id,
-        is_active: values.is_active
-      });
-      
-      // Recharger les propriétés après création
-      await loadProperties();
-      
+      await propertyService.createProperty(propertyData);
+      await queryClient.invalidateQueries({ queryKey: ['properties'] });
       toast({
         title: "Succès",
-        description: "Propriété ajoutée avec succès",
+        description: "Le logement a été ajouté avec succès",
       });
-      
       return true;
     } catch (error) {
-      console.error("Erreur lors de l'ajout de la propriété:", error);
+      console.error("Erreur lors de l'ajout du logement:", error);
       toast({
         title: "Erreur",
-        description: "Impossible d'ajouter la propriété",
+        description: "Impossible d'ajouter le logement",
         variant: "destructive",
       });
       return false;
@@ -71,32 +42,25 @@ export const useProperties = (isAuthenticated: boolean) => {
     }
   };
 
-  // Gérer la soumission du formulaire d'édition
-  const updateProperty = async (propertyId: string, values: PropertyFormValues) => {
+  // Update an existing property
+  const updateProperty = async (
+    id: string, 
+    propertyData: Partial<Omit<Property, 'id' | 'client_id' | 'created_at' | 'updated_at'>>
+  ) => {
+    setIsEditingProperty(true);
     try {
-      setIsEditingProperty(true);
-      
-      await propertyService.updateProperty(propertyId, {
-        name: values.name,
-        address: values.address || null,
-        beds24_property_id: values.beds24_property_id,
-        is_active: values.is_active
-      });
-      
-      // Recharger les propriétés après mise à jour
-      await loadProperties();
-      
+      await propertyService.updateProperty(id, propertyData);
+      await queryClient.invalidateQueries({ queryKey: ['properties'] });
       toast({
         title: "Succès",
-        description: "Propriété modifiée avec succès",
+        description: "Le logement a été mis à jour avec succès",
       });
-      
       return true;
     } catch (error) {
-      console.error("Erreur lors de la modification de la propriété:", error);
+      console.error("Erreur lors de la mise à jour du logement:", error);
       toast({
         title: "Erreur",
-        description: "Impossible de modifier la propriété",
+        description: "Impossible de mettre à jour le logement",
         variant: "destructive",
       });
       return false;
@@ -104,14 +68,14 @@ export const useProperties = (isAuthenticated: boolean) => {
       setIsEditingProperty(false);
     }
   };
-  
+
   return {
     properties,
     isLoading,
     isAddingProperty,
     isEditingProperty,
-    loadProperties,
     addProperty,
-    updateProperty
+    updateProperty,
+    refetchProperties
   };
-};
+}

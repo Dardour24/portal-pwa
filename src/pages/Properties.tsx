@@ -8,12 +8,14 @@ import { useProperties } from "@/hooks/use-properties";
 import { AddPropertyDialog } from "@/components/properties/AddPropertyDialog";
 import { EditPropertyDialog } from "@/components/properties/EditPropertyDialog";
 import { PropertyList } from "@/components/properties/PropertyList";
+import { KnowledgeBaseDialog } from "@/components/properties/KnowledgeBaseDialog";
 
 const Properties = () => {
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isKnowledgeBaseDialogOpen, setIsKnowledgeBaseDialogOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   
   const { 
@@ -22,7 +24,8 @@ const Properties = () => {
     isAddingProperty,
     isEditingProperty,
     addProperty,
-    updateProperty
+    updateProperty,
+    refetchProperties
   } = useProperties(isAuthenticated);
 
   // Gérer la soumission du formulaire d'ajout
@@ -62,6 +65,24 @@ const Properties = () => {
     }
   };
   
+  // Gérer la gestion de la base de connaissances
+  const handleManageKnowledgeBase = (propertyId: string) => {
+    const property = properties.find(p => p.id === propertyId);
+    if (property) {
+      setSelectedProperty(property);
+      setIsKnowledgeBaseDialogOpen(true);
+    }
+  };
+  
+  // Gérer la sauvegarde de la base de connaissances
+  const handleSaveKnowledgeBase = () => {
+    toast({
+      title: "Succès",
+      description: "La base de connaissances a été mise à jour avec succès",
+    });
+    refetchProperties();
+  };
+  
   return (
     <div className="container mx-auto">
       <div className="flex items-center justify-between mb-6">
@@ -82,12 +103,20 @@ const Properties = () => {
         property={selectedProperty}
       />
       
+      <KnowledgeBaseDialog
+        isOpen={isKnowledgeBaseDialogOpen}
+        onOpenChange={setIsKnowledgeBaseDialogOpen}
+        property={selectedProperty}
+        onSave={handleSaveKnowledgeBase}
+      />
+      
       <PropertyList
         properties={properties}
         isLoading={isLoading}
         onAddProperty={() => setIsAddDialogOpen(true)}
         onViewDetails={handleViewDetails}
         onEdit={handleEdit}
+        onManageKnowledgeBase={handleManageKnowledgeBase}
       />
     </div>
   );

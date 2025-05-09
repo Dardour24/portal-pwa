@@ -1,5 +1,5 @@
 
-import { House } from "lucide-react";
+import { House, PenBox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Property } from "@/types/property";
@@ -8,9 +8,15 @@ interface PropertyCardProps {
   property: Property;
   onViewDetails: (propertyId: string) => void;
   onEdit: (propertyId: string) => void;
+  onManageKnowledgeBase: (propertyId: string) => void;
 }
 
-export const PropertyCard = ({ property, onViewDetails, onEdit }: PropertyCardProps) => {
+export const PropertyCard = ({ 
+  property, 
+  onViewDetails, 
+  onEdit,
+  onManageKnowledgeBase 
+}: PropertyCardProps) => {
   return (
     <Card className="overflow-hidden">
       <div className="bg-gray-100 h-40 flex items-center justify-center">
@@ -22,20 +28,31 @@ export const PropertyCard = ({ property, onViewDetails, onEdit }: PropertyCardPr
       </CardHeader>
       <CardContent>
         <p className="text-sm text-gray-500 mb-4">{property.address || "Aucune adresse"}</p>
-        <div className="flex justify-between">
+        <div className="flex flex-col space-y-2">
+          <div className="flex justify-between">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => property.id && onViewDetails(property.id)}
+            >
+              Voir détails
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => property.id && onEdit(property.id)}
+            >
+              Modifier
+            </Button>
+          </div>
           <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => property.id && onViewDetails(property.id)}
-          >
-            Voir détails
-          </Button>
-          <Button 
-            variant="outline" 
+            variant="default" 
             size="sm"
-            onClick={() => property.id && onEdit(property.id)}
+            className="w-full"
+            onClick={() => property.id && onManageKnowledgeBase(property.id)}
           >
-            Modifier
+            <PenBox className="h-4 w-4 mr-1" />
+            Base de connaissances
           </Button>
         </div>
       </CardContent>

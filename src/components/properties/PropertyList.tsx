@@ -1,10 +1,10 @@
 
-import { useState } from "react";
-import { Loader2 } from "lucide-react";
-import { Card } from "@/components/ui/card";
-import { Plus } from "lucide-react";
+import { CirclePlus, Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Property } from "@/types/property";
 import { PropertyCard } from "@/components/properties/PropertyCard";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 interface PropertyListProps {
   properties: Property[];
@@ -12,43 +12,80 @@ interface PropertyListProps {
   onAddProperty: () => void;
   onViewDetails: (propertyId: string) => void;
   onEdit: (propertyId: string) => void;
+  onManageKnowledgeBase: (propertyId: string) => void;
 }
 
 export const PropertyList = ({ 
   properties, 
   isLoading, 
-  onAddProperty,
-  onViewDetails,
-  onEdit 
+  onAddProperty, 
+  onViewDetails, 
+  onEdit,
+  onManageKnowledgeBase 
 }: PropertyListProps) => {
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-60">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-      </div>
-    );
-  }
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredProperties = searchTerm 
+    ? properties.filter(property => 
+        property.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : properties;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {properties.map((property) => (
-        <PropertyCard 
-          key={property.id} 
-          property={property}
-          onViewDetails={onViewDetails}
-          onEdit={onEdit}
-        />
-      ))}
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Rechercher un logement..."
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        
+        <Button className="flex items-center gap-1" onClick={onAddProperty}>
+          <CirclePlus className="h-5 w-5" />
+          <span className="hidden sm:inline">Ajouter un logement</span>
+          <span className="sm:hidden">Ajouter</span>
+        </Button>
+      </div>
       
-      {/* Add Property Card */}
-      <Card 
-        className="flex flex-col items-center justify-center h-[300px] border-dashed cursor-pointer hover:bg-gray-50 transition-colors"
-        onClick={onAddProperty}
-      >
-        <Plus className="h-12 w-12 text-gray-400 mb-4" />
-        <h3 className="text-xl font-medium text-gray-600">Ajouter un logement</h3>
-        <p className="text-sm text-gray-500 mt-2">Cliquez pour ajouter un nouveau logement</p>
-      </Card>
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-80 bg-muted rounded-lg"></div>
+          ))}
+        </div>
+      ) : filteredProperties.length ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProperties.map(property => (
+            <PropertyCard 
+              key={property.id} 
+              property={property} 
+              onViewDetails={onViewDetails}
+              onEdit={onEdit}
+              onManageKnowledgeBase={onManageKnowledgeBase}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 border-2 border-dashed border-muted rounded-lg">
+          <div className="flex justify-center mb-4">
+            <CirclePlus className="h-12 w-12 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-medium">Aucun logement trouvé</h3>
+          <p className="text-muted-foreground mt-1 mb-4">
+            {searchTerm 
+              ? "Essayez de modifier votre recherche ou d'ajouter un nouveau logement." 
+              : "Vous n'avez pas encore ajouté de logement. Cliquez sur 'Ajouter un Logement' pour commencer."}
+          </p>
+          <Button onClick={onAddProperty}>
+            <CirclePlus className="h-5 w-5 mr-1" />
+            Ajouter un logement
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
