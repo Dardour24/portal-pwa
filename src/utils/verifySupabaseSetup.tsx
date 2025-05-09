@@ -105,6 +105,10 @@ BEFORE UPDATE ON public.properties
 FOR EACH ROW
 EXECUTE PROCEDURE public.update_updated_at();
 
+-- Supprimer les tables form_questions et form_answers si elles existent déjà
+DROP TABLE IF EXISTS public.form_answers;
+DROP TABLE IF EXISTS public.form_questions;
+
 -- Création de la table form_questions si elle n'existe pas
 CREATE TABLE IF NOT EXISTS public.form_questions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -218,33 +222,31 @@ BEFORE UPDATE ON public.form_answers
 FOR EACH ROW
 EXECUTE PROCEDURE public.update_updated_at();
 
--- Insérer des questions obligatoires par défaut uniquement si elles n'existent pas déjà
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM public.form_questions WHERE question_text = 'Comment accéder au logement ?' AND is_custom = false) THEN
-    INSERT INTO public.form_questions (question_text, is_required, is_custom)
-    VALUES 
-    ('Comment accéder au logement ?', true, false),
-    ('Où se trouve la clé / boîte à clés ?', true, false),
-    ('Quelle est la procédure de check-in ?', true, false),
-    ('Quelle est la procédure de check-out ?', true, false),
-    ('Y a-t-il un code WiFi ? Si oui, quel est-il ?', true, false),
-    ('Comment fonctionne le chauffage ?', true, false),
-    ('Comment fonctionne la climatisation ?', true, false),
-    ('Y a-t-il des instructions spéciales pour les appareils électroménagers ?', true, false),
-    ('Où se trouve le compteur électrique ?', true, false),
-    ('Où se trouvent les poubelles et quels sont les jours de collecte ?', true, false),
-    ('Y a-t-il des règles spéciales pour le voisinage ?', true, false),
-    ('Quels sont les numéros d''urgence à contacter ?', true, false),
-    ('Y a-t-il des recommandations locales (restaurants, activités) ?', true, false),
-    ('Comment fonctionne le système de télévision ?', true, false),
-    ('Y a-t-il des instructions pour le lave-vaisselle ?', true, false),
-    ('Y a-t-il des instructions pour la machine à laver ?', true, false),
-    ('Y a-t-il des instructions pour le sèche-linge ?', true, false),
-    ('Où se trouve le disjoncteur principal ?', true, false),
-    ('Où se trouve la vanne d''arrêt d''eau principale ?', true, false),
-    ('Y a-t-il un détecteur de fumée ? Où se trouve-t-il ?', true, false),
-    ('Y a-t-il un extincteur ? Où se trouve-t-il ?', true, false);
-  END IF;
-END $$;
+-- Supprimer toutes les questions existantes pour éviter les doublons
+TRUNCATE public.form_questions CASCADE;
+
+-- Insérer les 21 questions obligatoires par défaut
+INSERT INTO public.form_questions (question_text, is_required, is_custom)
+VALUES 
+('Comment accéder au logement ?', true, false),
+('Où se trouve la clé / boîte à clés ?', true, false),
+('Quelle est la procédure de check-in ?', true, false),
+('Quelle est la procédure de check-out ?', true, false),
+('Y a-t-il un code WiFi ? Si oui, quel est-il ?', true, false),
+('Comment fonctionne le chauffage ?', true, false),
+('Comment fonctionne la climatisation ?', true, false),
+('Y a-t-il des instructions spéciales pour les appareils électroménagers ?', true, false),
+('Où se trouve le compteur électrique ?', true, false),
+('Où se trouvent les poubelles et quels sont les jours de collecte ?', true, false),
+('Y a-t-il des règles spéciales pour le voisinage ?', true, false),
+('Quels sont les numéros d''urgence à contacter ?', true, false),
+('Y a-t-il des recommandations locales (restaurants, activités) ?', true, false),
+('Comment fonctionne le système de télévision ?', true, false),
+('Y a-t-il des instructions pour le lave-vaisselle ?', true, false),
+('Y a-t-il des instructions pour la machine à laver ?', true, false),
+('Y a-t-il des instructions pour le sèche-linge ?', true, false),
+('Où se trouve le disjoncteur principal ?', true, false),
+('Où se trouve la vanne d''arrêt d''eau principale ?', true, false),
+('Y a-t-il un détecteur de fumée ? Où se trouve-t-il ?', true, false),
+('Y a-t-il un extincteur ? Où se trouve-t-il ?', true, false);
 */

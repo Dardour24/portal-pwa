@@ -11,7 +11,7 @@ export const formQAService = {
       .from('form_questions')
       .select('*')
       .eq('is_custom', false)
-      .order('id');
+      .order('created_at');
     
     if (error) {
       console.error('Erreur lors de la récupération des questions imposées:', error);
