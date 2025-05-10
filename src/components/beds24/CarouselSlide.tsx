@@ -25,11 +25,11 @@ const CarouselSlide: React.FC<CarouselSlideProps> = ({
   return (
     <Card className="border rounded-lg overflow-hidden">
       <div className="p-6 flex flex-col items-center">
-        <div className="mb-6 h-[300px] flex items-center justify-center">
+        <div className="mb-6 h-[400px] flex items-center justify-center w-full">
           <img 
             src={image} 
             alt={alt} 
-            className="max-h-[300px] rounded-lg object-contain" 
+            className="max-h-[400px] w-auto max-w-full rounded-lg object-contain" 
           />
         </div>
         <div className="text-center mb-6">

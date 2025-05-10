@@ -6,7 +6,6 @@ import { useCarouselData } from './useCarouselData';
 import { SlideData } from './carouselData';
 import CarouselSlide from './CarouselSlide';
 import CarouselInviteForm from './CarouselInviteForm';
-import CarouselNavigation from './CarouselNavigation';
 import CarouselStyles from './CarouselStyles';
 
 // Import Swiper styles
@@ -25,10 +24,6 @@ const Beds24Carousel = () => {
         <div className="w-full max-w-4xl mx-auto">
           <Swiper
             modules={[Navigation, Pagination]}
-            navigation={{
-              nextEl: '.swiper-button-next',
-              prevEl: '.swiper-button-prev',
-            }}
             pagination={{ clickable: true }}
             spaceBetween={30}
             slidesPerView={1}
@@ -54,9 +49,6 @@ const Beds24Carousel = () => {
               <CarouselInviteForm onPrev={goToPrevSlide} />
             </SwiperSlide>
           </Swiper>
-          
-          {/* Navigation personnalisée */}
-          <CarouselNavigation />
         </div>
       </div>
       
