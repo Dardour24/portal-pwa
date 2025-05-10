@@ -30,15 +30,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Get the preview status to use as a key for route rerendering
-const getPreviewKey = () => {
-  return window.location.hostname.includes('lovable.app') || 
-         window.location.search.includes('preview=true') || 
-         window.location.search.includes('forceHideBadge=true') 
-         ? 'preview-mode' 
-         : 'normal-mode';
-};
-
 const App = () => {
   useEffect(() => {
     // Vérifier la configuration Supabase au chargement initial de l'application
@@ -50,9 +41,6 @@ const App = () => {
         }
       });
   }, []);
-
-  // Use the preview key to force route rerendering when needed
-  const routeKey = getPreviewKey();
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -67,22 +55,22 @@ const App = () => {
               
               <Route path="/" element={<Layout />}>
                 <Route index element={
-                  <ProtectedRoute key={`home-${routeKey}`}>
+                  <ProtectedRoute>
                     <Home />
                   </ProtectedRoute>
                 } />
                 <Route path="profile" element={
-                  <ProtectedRoute key={`profile-${routeKey}`}>
+                  <ProtectedRoute>
                     <Profile />
                   </ProtectedRoute>
                 } />
                 <Route path="properties" element={
-                  <ProtectedRoute key={`properties-${routeKey}`}>
+                  <ProtectedRoute>
                     <Properties />
                   </ProtectedRoute>
                 } />
                 <Route path="beds24" element={
-                  <ProtectedRoute key={`beds24-${routeKey}`}>
+                  <ProtectedRoute>
                     <Beds24 />
                   </ProtectedRoute>
                 } />

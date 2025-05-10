@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Property } from "@/types/property";
 import { PropertyCard } from "@/components/properties/PropertyCard";
 import { Input } from "@/components/ui/input";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface PropertyListProps {
   properties: Property[];
@@ -24,60 +24,12 @@ export const PropertyList = ({
   onManageKnowledgeBase 
 }: PropertyListProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [isPreviewEnvironment, setIsPreviewEnvironment] = useState(false);
-
-  useEffect(() => {
-    // Check if we're in a preview environment
-    const checkPreviewEnvironment = () => {
-      const isPreview = 
-        window.location.hostname.includes('lovable.app') || 
-        window.location.search.includes('preview=true') ||
-        window.location.search.includes('forceHideBadge=true');
-      
-      setIsPreviewEnvironment(isPreview);
-      console.log("PropertyList - Preview environment detection:", isPreview);
-    };
-    
-    checkPreviewEnvironment();
-  }, []);
 
   const filteredProperties = searchTerm 
     ? properties.filter(property => 
         property.name.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : properties;
-
-  // In preview mode with no properties, show dummy data
-  const dummyProperties = isPreviewEnvironment && filteredProperties.length === 0 ? [
-    {
-      id: 'preview-1',
-      name: 'Villa de Démonstration',
-      description: 'Une belle villa pour la démonstration',
-      address: '123 Rue de la Demo, Paris',
-      capacity: 4,
-      beds24_property_id: '12345',
-      beds24_property_name: 'Villa Demo',
-      image_url: '/lovable-uploads/6ab33741-bb6b-436a-aee7-ad8b5b81cdff.png',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      owner_id: 'preview-user',
-    },
-    {
-      id: 'preview-2',
-      name: 'Appartement Vue sur Mer',
-      description: 'Magnifique appartement avec vue sur la mer',
-      address: '45 Boulevard Maritime, Nice',
-      capacity: 2,
-      beds24_property_id: '67890',
-      beds24_property_name: 'Sea View Apartment',
-      image_url: '/lovable-uploads/9d79d896-59e6-4ecd-b9df-318e2e5de422.png',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      owner_id: 'preview-user',
-    }
-  ] : [];
-
-  const displayProperties = filteredProperties.length ? filteredProperties : dummyProperties;
 
   return (
     <div className="space-y-6">
@@ -99,9 +51,9 @@ export const PropertyList = ({
             <div key={i} className="h-80 bg-muted rounded-lg"></div>
           ))}
         </div>
-      ) : displayProperties.length ? (
+      ) : filteredProperties.length ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayProperties.map(property => (
+          {filteredProperties.map(property => (
             <PropertyCard 
               key={property.id} 
               property={property} 
