@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -39,7 +38,6 @@ const SignIn = () => {
         toast({
           title: "Erreur de connexion",
           description: "Email ou mot de passe invalide.",
-          variant: "destructive",
         });
       }
     } catch (error: any) {
@@ -61,7 +59,6 @@ const SignIn = () => {
       toast({
         title: "Erreur de connexion",
         description: error.message || "Email ou mot de passe invalide.",
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);

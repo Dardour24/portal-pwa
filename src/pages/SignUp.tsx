@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -26,7 +25,6 @@ const SignUp = () => {
       toast({
         title: "Erreur d'inscription",
         description: "Les mots de passe ne correspondent pas",
-        variant: "destructive",
       });
       return;
     }
@@ -44,7 +42,6 @@ const SignUp = () => {
       toast({
         title: "Erreur d'inscription",
         description: error.message || "Échec de la création du compte. Veuillez réessayer.",
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
