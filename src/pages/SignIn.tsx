@@ -1,6 +1,6 @@
 
-import { useState, useEffect } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,38 +14,26 @@ const SignIn = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login, isAuthenticated } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  
-  // Extraire le paramètre redirect de l'URL
-  const searchParams = new URLSearchParams(location.search);
-  const redirectPath = searchParams.get('redirect') || "/";
-  
-  // Rediriger si déjà authentifié
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate(redirectPath);
-    }
-  }, [isAuthenticated, navigate, redirectPath]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
     
-    console.log("Tentative de connexion avec:", email);
+    console.log("Login attempt with:", email);
 
     try {
       const result = await login(email, password);
-      console.log("Résultat de connexion:", result);
+      console.log("Login result:", result);
       
       if (result.user) {
         toast({
           title: "Connecté avec succès",
           description: "Bienvenue sur votre portail client Botnb.",
         });
-        navigate(redirectPath);
+        navigate("/");
       } else {
         setError("Erreur de connexion : identifiants invalides.");
         toast({
@@ -55,7 +43,7 @@ const SignIn = () => {
         });
       }
     } catch (error: any) {
-      console.error("Erreur pendant la connexion:", error);
+      console.error("Error during login:", error);
       
       // Gestion spécifique des erreurs
       if (error.message) {
@@ -90,11 +78,6 @@ const SignIn = () => {
             className="h-16 mx-auto mb-4" 
           />
           <h2 className="text-3xl font-bold">Portail Client Botnb</h2>
-          {redirectPath && redirectPath !== "/" && (
-            <p className="text-sm text-muted-foreground mt-2">
-              Vous serez redirigé vers: {redirectPath}
-            </p>
-          )}
         </div>
         
         <Card>
@@ -154,25 +137,13 @@ const SignIn = () => {
               </Button>
             </form>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-2">
+          <CardFooter className="justify-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Pas encore de compte ?{" "}
               <Link to="/signup" className="text-primary hover:underline">
                 S'inscrire
               </Link>
             </p>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => {
-                const url = new URL(window.location.href);
-                url.searchParams.set('preview', 'true');
-                window.location.href = redirectPath + (redirectPath.includes('?') ? '&' : '?') + 'preview=true';
-              }}
-              className="text-xs"
-            >
-              Mode démonstration
-            </Button>
           </CardFooter>
         </Card>
       </div>

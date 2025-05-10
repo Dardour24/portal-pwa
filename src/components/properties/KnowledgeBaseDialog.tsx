@@ -21,28 +21,33 @@ export const KnowledgeBaseDialog = ({
 }: KnowledgeBaseDialogProps) => {
   const { isAuthenticated } = useAuth();
   const { resetPropertyData } = useFormQA(isAuthenticated);
-  // Utiliser une référence pour suivre si la réinitialisation a été effectuée
   const hasResetRef = useRef(false);
-  const dialogStateRef = useRef(isOpen);
   
-  // Effectuer une seule réinitialisation lors de la fermeture du dialogue
+  // Correction: use useRef to track if we've already reset to avoid infinite loop
   useEffect(() => {
-    console.log(`Dialog state changed: ${dialogStateRef.current} -> ${isOpen}`);
-    
-    // Ne réinitialiser que lors de la fermeture du dialogue (isOpen: true -> false)
-    if (dialogStateRef.current && !isOpen && !hasResetRef.current) {
+    // Reset property data only when dialog closes AND hasResetRef is false
+    if (!isOpen && !hasResetRef.current) {
       console.log("Dialog closed, resetting property data (once)");
       resetPropertyData();
       hasResetRef.current = true;
     }
     
-    // Réinitialiser le drapeau lorsque le dialogue s'ouvre
+    // Reset our tracking flag when dialog opens again
     if (isOpen) {
       hasResetRef.current = false;
     }
-    
-    dialogStateRef.current = isOpen;
   }, [isOpen, resetPropertyData]);
+  
+  // Also reset when component unmounts, but only if not already reset
+  useEffect(() => {
+    return () => {
+      if (!hasResetRef.current) {
+        console.log("Dialog unmounting, resetting property data (once)");
+        resetPropertyData();
+        hasResetRef.current = true;
+      }
+    };
+  }, [resetPropertyData]);
   
   const handleSave = () => {
     onSave();
