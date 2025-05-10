@@ -196,3 +196,45 @@ export const mapUserData = (supabaseUser: any, clientData: UserData | null): Use
     phone: clientData?.phone,
   };
 };
+
+/**
+ * Sends a password reset email to the specified email address
+ */
+export const resetPassword = async (email: string): Promise<{ success: boolean, error?: string }> => {
+  try {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    
+    if (error) {
+      console.error("Password reset error:", error);
+      return { success: false, error: error.message };
+    }
+    
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error in resetPassword:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Updates the user's password
+ */
+export const updatePassword = async (newPassword: string): Promise<{ success: boolean, error?: string }> => {
+  try {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword
+    });
+    
+    if (error) {
+      console.error("Password update error:", error);
+      return { success: false, error: error.message };
+    }
+    
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error in updatePassword:", error);
+    return { success: false, error: error.message };
+  }
+};

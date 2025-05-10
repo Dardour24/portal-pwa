@@ -1,79 +1,63 @@
 
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
+import { resetPassword } from "../hooks/auth/authService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const loginSchema = z.object({
-  email: z.string().email("Veuillez entrer un email valide"),
-  password: z.string().min(1, "Le mot de passe est requis")
+const emailSchema = z.object({
+  email: z.string().email("Veuillez entrer un email valide")
 });
 
-type FormValues = z.infer<typeof loginSchema>;
+type FormValues = z.infer<typeof emailSchema>;
 
-const SignIn = () => {
+const ForgotPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login } = useAuth();
-  const navigate = useNavigate();
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(emailSchema),
     defaultValues: {
       email: "",
-      password: ""
     }
   });
 
   const handleSubmit = async (values: FormValues) => {
     setIsLoading(true);
     setError(null);
+    setSuccess(false);
     
     try {
-      const result = await login(values.email, values.password);
+      const result = await resetPassword(values.email);
       
-      if (result.user) {
+      if (result.success) {
+        setSuccess(true);
         toast({
-          title: "Connecté avec succès",
-          description: "Bienvenue sur votre portail client Botnb."
+          title: "Email envoyé",
+          description: "Si un compte existe avec cet email, vous recevrez un lien de réinitialisation."
         });
-        navigate("/");
       } else {
-        setError("Erreur de connexion : identifiants invalides.");
+        setError(result.error || "Une erreur est survenue lors de l'envoi du lien de réinitialisation.");
         toast({
-          title: "Erreur de connexion",
-          description: "Email ou mot de passe invalide."
+          title: "Erreur",
+          description: result.error || "Une erreur est survenue."
         });
       }
     } catch (error: any) {
-      console.error("Error during login:", error);
-      
-      // Gestion spécifique des erreurs
-      if (error.message) {
-        if (error.message.includes("Invalid login credentials")) {
-          setError("Email ou mot de passe incorrect. Veuillez réessayer.");
-        } else if (error.message.includes("Email not confirmed")) {
-          setError("Veuillez vérifier votre email pour confirmer votre compte.");
-        } else {
-          setError(error.message || "Une erreur est survenue lors de la connexion.");
-        }
-      } else {
-        setError("Une erreur est survenue lors de la connexion.");
-      }
-      
+      setError(error.message || "Une erreur est survenue lors de l'envoi du lien de réinitialisation.");
       toast({
-        title: "Erreur de connexion",
-        description: error.message || "Email ou mot de passe invalide."
+        title: "Erreur",
+        description: error.message || "Une erreur est survenue."
       });
     } finally {
       setIsLoading(false);
@@ -94,9 +78,9 @@ const SignIn = () => {
         
         <Card>
           <CardHeader>
-            <CardTitle>Connexion</CardTitle>
+            <CardTitle>Mot de passe oublié</CardTitle>
             <CardDescription>
-              Connectez-vous à votre compte pour accéder à votre portail client
+              Entrez votre adresse email pour recevoir un lien de réinitialisation
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -104,6 +88,15 @@ const SignIn = () => {
               <Alert variant="destructive" className="mb-4 animate-fade-in">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            
+            {success && (
+              <Alert className="mb-4 bg-green-50 text-green-800 border-green-200 animate-fade-in">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <AlertDescription>
+                  Un email de réinitialisation a été envoyé. Veuillez vérifier votre boîte de réception.
+                </AlertDescription>
               </Alert>
             )}
             
@@ -127,48 +120,20 @@ const SignIn = () => {
                   )}
                 />
                 
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <div className="flex items-center justify-between">
-                        <FormLabel>Mot de passe</FormLabel>
-                        <Link 
-                          to="/forgot-password" 
-                          className="text-sm text-primary hover:underline"
-                        >
-                          Mot de passe oublié ?
-                        </Link>
-                      </div>
-                      <FormControl>
-                        <Input
-                          type="password"
-                          placeholder="••••••••"
-                          {...field}
-                          autoComplete="current-password"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
                 <Button 
                   type="submit" 
                   className="w-full" 
                   disabled={isLoading}
                 >
-                  {isLoading ? "Connexion..." : "Se connecter"}
+                  {isLoading ? "Envoi en cours..." : "Envoyer le lien de réinitialisation"}
                 </Button>
               </form>
             </Form>
           </CardContent>
           <CardFooter className="justify-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Pas encore de compte ?{" "}
-              <Link to="/signup" className="text-primary hover:underline">
-                S'inscrire
+              <Link to="/signin" className="text-primary hover:underline">
+                Retour à la connexion
               </Link>
             </p>
           </CardFooter>
@@ -178,4 +143,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default ForgotPassword;
