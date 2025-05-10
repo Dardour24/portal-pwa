@@ -30,11 +30,13 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
   // Handle unauthenticated state
   if (!isAuthenticated) {
-    // Preview mode detection - allow viewing protected content in preview environments
+    // Enhanced preview mode detection - allow viewing protected content in preview environments
     // Check for specific URL params or environment flags
     const isPreviewMode = 
       window.location.hostname.includes('lovable.app') || // Check if on Lovable preview domain
-      window.location.search.includes('preview=true'); // Or if preview param exists
+      window.location.search.includes('preview=true') ||  // Check for preview param
+      window.location.search.includes('forceHideBadge=true') || // Check for Lovable preview param
+      window.location.hostname === 'localhost'; // Also allow on localhost
     
     if (isPreviewMode) {
       console.log("ProtectedRoute - Preview mode detected, rendering content anyway");

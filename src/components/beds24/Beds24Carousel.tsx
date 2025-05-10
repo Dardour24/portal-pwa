@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 import { useCarouselData } from './useCarouselData';
@@ -16,16 +16,31 @@ import 'swiper/css/pagination';
 
 const Beds24Carousel = () => {
   const { slides, swiperInstance, setSwiperInstance, goToNextSlide, goToPrevSlide } = useCarouselData();
+  const [hasError, setHasError] = useState(false);
   
   // Add error boundary to prevent crashes
-  React.useEffect(() => {
+  useEffect(() => {
     // Log when component mounts to help with debugging
     console.log("Beds24Carousel mounted", { slidesCount: slides.length });
+    
+    // Check if Swiper is available globally
+    if (typeof window !== 'undefined') {
+      console.log("Window environment detected, Swiper should work");
+    }
     
     return () => {
       console.log("Beds24Carousel unmounted");
     };
   }, [slides]);
+  
+  // Fallback in case of error
+  if (hasError) {
+    return (
+      <div className="py-12 text-center">
+        <p>Le carrousel n'a pas pu être chargé. Veuillez réessayer.</p>
+      </div>
+    );
+  }
 
   return (
     <section id="carousel-section" className="py-12 bg-white">
@@ -47,6 +62,10 @@ const Beds24Carousel = () => {
               setSwiperInstance(swiper);
             }}
             className="rounded-lg shadow-md"
+            onError={() => {
+              console.error("Swiper error detected");
+              setHasError(true);
+            }}
           >
             {slides.map((slide: SlideData, index: number) => (
               <SwiperSlide key={index}>
