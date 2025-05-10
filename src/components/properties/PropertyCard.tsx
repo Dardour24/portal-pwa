@@ -3,6 +3,7 @@ import { House, PenBox, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Property } from "@/types/property";
+import { motion } from "framer-motion";
 
 interface PropertyCardProps {
   property: Property;
@@ -18,45 +19,63 @@ export const PropertyCard = ({
   onManageKnowledgeBase 
 }: PropertyCardProps) => {
   return (
-    <Card className="overflow-hidden">
-      <div className="bg-gray-100 h-40 flex items-center justify-center">
-        <House className="h-16 w-16 text-gray-400" />
-      </div>
-      <CardHeader>
-        <CardTitle>{property.name}</CardTitle>
-        <CardDescription>{property.is_active ? "Actif" : "Inactif"}</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-gray-500 mb-4">{property.address || "Aucune adresse"}</p>
-        <div className="flex flex-col space-y-2">
-          <div className="flex justify-between">
+    <motion.div
+      whileHover={{ scale: 1.02 }}
+      transition={{ duration: 0.2 }}
+    >
+      <Card className="overflow-hidden rounded-card shadow-card hover:shadow-card-hover transition-all">
+        <div className="bg-gray-100 h-40 flex items-center justify-center">
+          <House className="h-16 w-16 text-gray-400" />
+        </div>
+        <CardHeader>
+          <CardTitle>{property.name}</CardTitle>
+          <CardDescription>
+            {property.is_active ? (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                Actif
+              </span>
+            ) : (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                Inactif
+              </span>
+            )}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-gray-500 mb-4">{property.address || "Aucune adresse"}</p>
+          <div className="flex flex-col space-y-2">
+            <div className="flex justify-between gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex-1 hover:bg-gray-50"
+                onClick={() => property.id && onEdit(property.id)}
+              >
+                <PenBox className="h-4 w-4 mr-1" />
+                Modifier
+              </Button>
+              <Button 
+                variant="destructive" 
+                size="sm"
+                className="hover:bg-red-600 transition-colors"
+                onClick={() => property.id && onDelete(property.id)}
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Supprimer
+              </Button>
+            </div>
             <Button 
-              variant="outline" 
+              variant="default" 
               size="sm"
-              onClick={() => property.id && onEdit(property.id)}
+              className="w-full btn-primary-hover"
+              onClick={() => property.id && onManageKnowledgeBase(property.id)}
             >
-              Modifier
-            </Button>
-            <Button 
-              variant="destructive" 
-              size="sm"
-              onClick={() => property.id && onDelete(property.id)}
-            >
-              <Trash2 className="h-4 w-4 mr-1" />
-              Supprimer
+              <PenBox className="h-4 w-4 mr-1" />
+              Base de connaissances
             </Button>
           </div>
-          <Button 
-            variant="default" 
-            size="sm"
-            className="w-full"
-            onClick={() => property.id && onManageKnowledgeBase(property.id)}
-          >
-            <PenBox className="h-4 w-4 mr-1" />
-            Base de connaissances
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };

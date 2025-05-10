@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Home, House, Bed, HelpCircle, Mail, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 const Sidebar = () => {
   const location = useLocation();
@@ -12,7 +13,6 @@ const Sidebar = () => {
 
   const menuItems = [
     { title: "Accueil", path: "/", icon: Home },
-    // Removed "Mon Compte / Profil" entry
     { title: "Mes Logements", path: "/properties", icon: House },
     { title: "Mon Beds24", path: "/beds24", icon: Bed },
     { title: "FAQ", path: "/faq", icon: HelpCircle },
@@ -27,7 +27,7 @@ const Sidebar = () => {
   };
 
   return (
-    <SidebarComponent>
+    <SidebarComponent className="w-[230px] shadow-md">
       <SidebarHeader className="py-6">
         <div className="logo-container">
           <img 
@@ -45,9 +45,18 @@ const Sidebar = () => {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton
-                    className={isActive(item.path) ? "bg-sidebar-accent" : ""}
+                    className={`relative ${isActive(item.path) ? "bg-sidebar-accent text-primary font-medium" : ""}`}
                     onClick={() => navigate(item.path)}
                   >
+                    {isActive(item.path) && (
+                      <motion.span 
+                        className="sidebar-active-indicator"
+                        layoutId="sidebar-indicator"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.2 }}
+                      />
+                    )}
                     <item.icon className="mr-2 h-5 w-5" />
                     <span>{item.title}</span>
                   </SidebarMenuButton>
@@ -60,7 +69,7 @@ const Sidebar = () => {
       <SidebarFooter>
         <Button 
           variant="ghost" 
-          className="w-full justify-start" 
+          className="w-full justify-start hover:bg-red-50 hover:text-red-600 transition-colors" 
           onClick={handleLogout}
         >
           <LogOut className="mr-2 h-5 w-5" />

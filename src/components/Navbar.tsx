@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { motion } from "framer-motion";
 
 interface NavbarProps {
   isMobile: boolean;
@@ -44,7 +45,7 @@ const Navbar = ({ isMobile }: NavbarProps) => {
 
   return (
     <header
-      className={`sticky top-0 z-30 flex items-center justify-between px-4 py-3 transition-shadow duration-300 bg-white dark:bg-gray-950 ${
+      className={`sticky top-0 z-30 flex items-center justify-between px-6 py-3 transition-all duration-300 bg-white dark:bg-gray-950 ${
         scrolled ? "shadow-md" : ""
       }`}
     >
@@ -52,7 +53,7 @@ const Navbar = ({ isMobile }: NavbarProps) => {
       <div className="flex items-center">
         {!isMobile && (
           <SidebarTrigger>
-            <Button variant="ghost" size="icon" className="mr-2">
+            <Button variant="ghost" size="icon" className="mr-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle sidebar</span>
             </Button>
@@ -60,13 +61,18 @@ const Navbar = ({ isMobile }: NavbarProps) => {
         )}
         
         {isMobile && (
-          <div className="logo-container">
+          <motion.div 
+            className="logo-container"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+          >
             <img 
               src="/lovable-uploads/b97f6b22-40f5-4de9-9245-072e4eeb6895.png" 
               alt="Botnb Logo" 
               className="h-10" 
             />
-          </div>
+          </motion.div>
         )}
       </div>
 
@@ -75,17 +81,23 @@ const Navbar = ({ isMobile }: NavbarProps) => {
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full">
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 <User className="h-5 w-5 text-gray-600 dark:text-gray-400" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-56 bg-white shadow-lg rounded-card border border-gray-100">
               <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/profile")}>
+              <DropdownMenuSeparator className="bg-separator" />
+              <DropdownMenuItem 
+                onClick={() => navigate("/profile")}
+                className="cursor-pointer hover:bg-gray-50"
+              >
                 Profil
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout}>
+              <DropdownMenuItem 
+                onClick={handleLogout}
+                className="cursor-pointer hover:bg-red-50 hover:text-red-600"
+              >
                 Déconnexion
               </DropdownMenuItem>
             </DropdownMenuContent>

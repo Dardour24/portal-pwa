@@ -6,6 +6,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import MobileNavbar from "./MobileNavbar";
+import { AnimatePresence, motion } from "framer-motion";
 
 const Layout = () => {
   const isMobile = useIsMobile();
@@ -18,8 +19,6 @@ const Layout = () => {
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
-  console.log("Layout rendering", { isMobile, path: location.pathname });
-
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col w-full">
@@ -27,8 +26,18 @@ const Layout = () => {
           <>
             <Navbar isMobile={true} />
             <main className="flex-1 pb-16">
-              <div className={`page-transition ${isRouteChanging ? 'page-exit-active' : 'page-enter-active'}`}>
-                <Outlet />
+              <div className="container-layout py-6">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={location.pathname}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <Outlet />
+                  </motion.div>
+                </AnimatePresence>
               </div>
             </main>
             <MobileNavbar />
@@ -39,8 +48,18 @@ const Layout = () => {
             <div className="flex flex-col flex-1">
               <Navbar isMobile={false} />
               <main className="flex-1 p-6 overflow-auto">
-                <div className={`page-transition ${isRouteChanging ? 'page-exit-active' : 'page-enter-active'}`}>
-                  <Outlet />
+                <div className="container-layout">
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={location.pathname}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <Outlet />
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
               </main>
             </div>
