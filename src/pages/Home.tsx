@@ -32,7 +32,7 @@ const cardData = [
     id: "whatsapp",
     title: "Recevez les réponses de Botnb sur votre Whatsapp",
     text: "Botnb vous propose une réponse, vous validez ou modifiez via WhatsApp et votre réponse est envoyée vers Beds24.",
-    image: "/lovable-uploads/99174476-f39b-4cfb-b37a-a91ea6ff8142.png",
+    image: "/lovable-uploads/9d79d896-59e6-4ecd-b9df-318e2e5de422.png",
     icon: <Mail className="h-8 w-8 mb-4 text-primary" />,
     buttonText: null,
     buttonLink: null
@@ -41,7 +41,7 @@ const cardData = [
     id: "info",
     title: "Modifier vos informations logements à tous moments",
     text: "Rendez Vous sur l'ongle 'Mes Logements' pour ajuster les informations de votre logement",
-    image: "/lovable-uploads/9d79d896-59e6-4ecd-b9df-318e2e5de422.png", 
+    image: "/lovable-uploads/99174476-f39b-4cfb-b37a-a91ea6ff8142.png", 
     icon: <Phone className="h-8 w-8 mb-4 text-primary" />,
     buttonText: "Mes Logements",
     buttonLink: "/properties"
