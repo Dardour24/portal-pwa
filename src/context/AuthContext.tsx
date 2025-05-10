@@ -9,24 +9,32 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const auth = useAuthProvider();
   
-  // Check for development or preview mode
+  // Vérifier le mode prévisualisation
+  const searchParams = new URLSearchParams(window.location.search);
+  const isUrlPreviewMode = 
+    searchParams.has('preview') || 
+    searchParams.has('demo') || 
+    searchParams.has('debug');
+  
   const isPreviewMode = 
     window.location.hostname === 'localhost' || 
-    window.location.search.includes('preview=true') ||
-    window.location.search.includes('demo=true') ||
+    isUrlPreviewMode ||
     process.env.NODE_ENV !== 'production' ||
     import.meta.env.VITE_PREVIEW_MODE === 'true';
   
-  // Log detailed info about auth state and configuration
-  const { hasUrl, hasKey } = checkSupabaseConfig();
+  // Journaliser les informations détaillées sur l'état de l'authentification
+  const { hasUrl, hasKey, isPreviewMode: configPreviewMode } = checkSupabaseConfig();
   
-  console.log("AuthProvider rendering with auth state:", { 
+  console.log("AuthProvider - État:", { 
     isAuthenticated: auth.isAuthenticated,
     isLoading: auth.isLoading,
     isPreviewMode: isPreviewMode,
+    isUrlPreviewMode: isUrlPreviewMode,
+    hostname: window.location.hostname,
     supabaseConfig: {
       hasUrl,
-      hasKey
+      hasKey,
+      configPreviewMode
     }
   });
 
@@ -40,10 +48,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error("useAuth doit être utilisé à l'intérieur d'un AuthProvider");
   }
   return context;
 };
 
-// Re-export supabase for other files that import it from AuthContext
+// Réexporter supabase pour les autres fichiers qui l'importent depuis AuthContext
 export { supabase } from "../lib/supabase";
