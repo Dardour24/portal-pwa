@@ -4,13 +4,14 @@ import { useAuth } from "../context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import { checkSupabaseConfig } from "../lib/supabase";
+import { toast } from "@/hooks/use-toast";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   
-  // Check for preview mode from various sources
+  // Vérification du mode preview
   const { isPreviewMode } = checkSupabaseConfig();
   const urlHasPreview = 
     window.location.search.includes('preview=true') ||
@@ -19,23 +20,30 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     window.location.hostname === 'localhost' || 
     process.env.NODE_ENV !== 'production';
   
-  // Combined preview mode check
+  // Mode preview combiné
   const isInPreviewMode = isPreviewMode || urlHasPreview || isDevelopment;
 
   console.log("ProtectedRoute - Environment check:", { 
     isPreviewMode, 
     urlHasPreview, 
     isDevelopment, 
-    combined: isInPreviewMode 
+    combined: isInPreviewMode,
+    hostname: window.location.hostname,
+    search: window.location.search
   });
 
-  // Add loading timeout to prevent infinite loading
+  // Ajouter un timeout pour éviter le chargement infini
   useEffect(() => {
     if (isLoading) {
       const timer = setTimeout(() => {
-        console.log("Authentication loading timed out after 5 seconds");
+        console.log("Authentification: délai d'attente dépassé après 5 secondes");
         setLoadingTimeout(true);
-      }, 5000); // 5 seconds timeout
+        toast({
+          title: "Mode prévisualisation activé",
+          description: "L'authentification prend trop de temps, la prévisualisation est automatiquement activée.",
+          duration: 5000
+        });
+      }, 5000); // 5 secondes de timeout
       
       return () => clearTimeout(timer);
     }
@@ -48,9 +56,9 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     loadingTimeout 
   });
 
-  // If loading timed out, allow access in preview mode
-  if ((isLoading && loadingTimeout && isInPreviewMode) || isInPreviewMode) {
-    console.log("Preview mode is active or loading timed out, bypassing authentication");
+  // Si le timeout est dépassé ou en mode preview, permettre l'accès
+  if ((isLoading && loadingTimeout) || isInPreviewMode) {
+    console.log("Mode prévisualisation actif ou délai d'authentification dépassé, authentification contournée");
     return <>{children}</>;
   }
 
@@ -66,11 +74,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
 
   if (!isAuthenticated) {
-    console.log("Not authenticated, redirecting to signin");
+    console.log("Non authentifié, redirection vers signin");
     return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 
-  console.log("Authenticated, rendering children");
+  console.log("Authentifié, affichage du contenu");
   return <>{children}</>;
 };
 
