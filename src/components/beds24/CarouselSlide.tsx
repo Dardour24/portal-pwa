@@ -46,6 +46,11 @@ const CarouselSlide: React.FC<CarouselSlideProps> = ({
               Étape suivante
             </Button>
           )}
+          {isLast && (
+            <Button variant="default" onClick={onNext}>
+              Compléter le formulaire
+            </Button>
+          )}
         </div>
       </div>
     </Card>

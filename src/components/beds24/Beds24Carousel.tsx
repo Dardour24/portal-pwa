@@ -44,7 +44,7 @@ const Beds24Carousel = () => {
                   onNext={goToNextSlide}
                   onPrev={goToPrevSlide}
                   isFirst={index === 0}
-                  isLast={false}
+                  isLast={index === slides.length - 1}
                 />
               </SwiperSlide>
             ))}
