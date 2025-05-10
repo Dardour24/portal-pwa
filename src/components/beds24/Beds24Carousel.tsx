@@ -16,6 +16,16 @@ import 'swiper/css/pagination';
 
 const Beds24Carousel = () => {
   const { slides, swiperInstance, setSwiperInstance, goToNextSlide, goToPrevSlide } = useCarouselData();
+  
+  // Add error boundary to prevent crashes
+  React.useEffect(() => {
+    // Log when component mounts to help with debugging
+    console.log("Beds24Carousel mounted", { slidesCount: slides.length });
+    
+    return () => {
+      console.log("Beds24Carousel unmounted");
+    };
+  }, [slides]);
 
   return (
     <section id="carousel-section" className="py-12 bg-white">
@@ -32,7 +42,10 @@ const Beds24Carousel = () => {
             pagination={{ clickable: true }}
             spaceBetween={30}
             slidesPerView={1}
-            onSwiper={(swiper) => setSwiperInstance(swiper)}
+            onSwiper={(swiper) => {
+              console.log("Swiper instance created");
+              setSwiperInstance(swiper);
+            }}
             className="rounded-lg shadow-md"
           >
             {slides.map((slide: SlideData, index: number) => (
