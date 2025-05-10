@@ -45,7 +45,7 @@ const Navbar = ({ isMobile }: NavbarProps) => {
 
   return (
     <header
-      className={`sticky top-0 z-30 flex items-center justify-between px-6 py-3 transition-all duration-300 bg-white dark:bg-gray-950 ${
+      className={`sticky top-0 z-30 flex items-center justify-between px-6 py-3 transition-all duration-300 bg-pageBackground dark:bg-gray-950 ${
         scrolled ? "shadow-md" : ""
       }`}
     >
@@ -81,8 +81,9 @@ const Navbar = ({ isMobile }: NavbarProps) => {
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex flex-col items-center">
                 <User className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                <span className="text-xs mt-1 text-gray-600 dark:text-gray-400">Mon Compte</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 bg-white shadow-lg rounded-card border border-gray-100">

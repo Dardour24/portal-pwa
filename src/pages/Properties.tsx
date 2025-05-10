@@ -9,9 +9,7 @@ import { AddPropertyDialog } from "@/components/properties/AddPropertyDialog";
 import { EditPropertyDialog } from "@/components/properties/EditPropertyDialog";
 import { PropertyList } from "@/components/properties/PropertyList";
 import { KnowledgeBaseDialog } from "@/components/properties/KnowledgeBaseDialog";
-import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Plus } from "lucide-react";
 
 const Properties = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -121,9 +119,7 @@ const Properties = () => {
     <div className="container mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Mes Logements</h1>
-        <Button onClick={() => setIsAddDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Ajouter un logement
-        </Button>
+        {/* Bouton "Ajouter un logement" en haut - nous gardons uniquement celui-ci */}
       </div>
       
       <AddPropertyDialog

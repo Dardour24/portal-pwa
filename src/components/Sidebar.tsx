@@ -2,7 +2,7 @@
 import { Sidebar as SidebarComponent, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarFooter } from "@/components/ui/sidebar";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Home, House, Bed, HelpCircle, Mail, LogOut } from "lucide-react";
+import { Navigation, House, Bed, HelpCircle, Mail, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
@@ -12,7 +12,7 @@ const Sidebar = () => {
   const { logout } = useAuth();
 
   const menuItems = [
-    { title: "Accueil", path: "/", icon: Home },
+    { title: "Accueil", path: "/", icon: Navigation },
     { title: "Mes Logements", path: "/properties", icon: House },
     { title: "Mon Beds24", path: "/beds24", icon: Bed },
     { title: "FAQ", path: "/faq", icon: HelpCircle },
