@@ -1,73 +1,83 @@
-# Welcome to your Lovable project
+
+# Portail Client Botnb
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/8c1a8e0e-575f-494c-9599-b38bc29ed6e7
+Application de gestion de logements connectée avec Beds24.
 
-## How can I edit this code?
+## Déploiement sur EasyPanel via GitHub
 
-There are several ways of editing your application.
+### Prérequis
 
-**Use Lovable**
+1. Un compte GitHub avec ce dépôt
+2. Un compte EasyPanel
+3. Une instance Supabase configurée
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/8c1a8e0e-575f-494c-9599-b38bc29ed6e7) and start prompting.
+### Configuration sur EasyPanel
 
-Changes made via Lovable will be committed automatically to this repo.
+1. Dans le tableau de bord EasyPanel, cliquez sur "Create App"
+2. Sélectionnez "GitHub" comme source
+3. Connectez-vous à votre compte GitHub et sélectionnez ce dépôt
+4. Configurer les paramètres de build:
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
 
-**Use your preferred IDE**
+### Variables d'environnement requises
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Ajoutez ces variables d'environnement dans les paramètres de l'application EasyPanel:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-Follow these steps:
+### Adresse du site
+
+Après le déploiement, votre application sera accessible à l'URL fournie par EasyPanel.
+
+## Développement local
+
+Si vous voulez travailler localement sur ce projet, vous devez avoir Node.js & npm installés - [installer avec nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+Suivez ces étapes:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Étape 1: Cloner le dépôt en utilisant l'URL Git du projet
+git clone <VOTRE_URL_GIT>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Étape 2: Naviguer vers le répertoire du projet
+cd <NOM_DE_VOTRE_PROJET>
 
-# Step 3: Install the necessary dependencies.
+# Étape 3: Installer les dépendances nécessaires
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Étape 4: Créer un fichier .env avec les variables nécessaires (voir .env.example)
+cp .env.example .env
+# Puis éditez le fichier .env avec vos valeurs
+
+# Étape 5: Démarrer le serveur de développement
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Technologies utilisées
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
+Ce projet est construit avec:
 
 - Vite
 - TypeScript
 - React
 - shadcn-ui
 - Tailwind CSS
+- Supabase
 
-## How can I deploy this project?
+## Structure du projet
 
-Simply open [Lovable](https://lovable.dev/projects/8c1a8e0e-575f-494c-9599-b38bc29ed6e7) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- `/src`: Code source du projet
+  - `/components`: Composants React réutilisables
+  - `/context`: Contextes React (auth, etc.)
+  - `/hooks`: Hooks personnalisés
+  - `/lib`: Bibliothèques et configurations
+  - `/pages`: Pages de l'application
+  - `/services`: Services pour interagir avec les API
+  - `/types`: Définitions de types TypeScript
+  - `/utils`: Fonctions utilitaires

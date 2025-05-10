@@ -7,9 +7,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const auth = useAuthProvider();
+  
+  // Check for development or preview mode
+  const isPreviewMode = 
+    window.location.hostname === 'localhost' || 
+    window.location.search.includes('preview=true') ||
+    process.env.NODE_ENV !== 'production';
+  
   console.log("AuthProvider rendering with auth state:", { 
     isAuthenticated: auth.isAuthenticated,
-    isLoading: auth.isLoading 
+    isLoading: auth.isLoading,
+    isPreviewMode: isPreviewMode
   });
 
   return (

@@ -6,8 +6,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
+  
+  // Check for development or preview mode
+  const isPreviewMode = 
+    window.location.hostname === 'localhost' || 
+    window.location.search.includes('preview=true') ||
+    process.env.NODE_ENV !== 'production';
 
-  console.log("ProtectedRoute - isAuthenticated:", isAuthenticated, "isLoading:", isLoading);
+  console.log("ProtectedRoute - isAuthenticated:", isAuthenticated, "isLoading:", isLoading, "isPreviewMode:", isPreviewMode);
 
   if (isLoading) {
     return (
@@ -18,6 +24,12 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
         <Skeleton className="h-4 w-1/2 max-w-[200px]" />
       </div>
     );
+  }
+
+  // Allow access in preview mode regardless of authentication
+  if (isPreviewMode) {
+    console.log("Preview mode is active, bypassing authentication");
+    return <>{children}</>;
   }
 
   if (!isAuthenticated) {
