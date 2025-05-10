@@ -1,6 +1,6 @@
 
 // Export Sonner's toast functionality with compatibility layer
-import { toast as sonnerToast } from "sonner";
+import { toast as sonnerToast, ToasterProps } from "sonner";
 
 // Create a wrapper around Sonner's toast to support the old API format
 export const toast = (props: string | { 
@@ -24,15 +24,21 @@ export const toast = (props: string | {
     return sonnerToast(title, rest);
   }
   
-  // Fallback for any other case
-  return sonnerToast(props);
+  // Fallback for any other case - convert object to string to avoid type errors
+  return sonnerToast(String(props));
 };
 
-// Export toast directly for convenience
-export { toast as useToast };
+// Create a mock useToast hook that maintains compatibility
+export const useToast = () => {
+  return {
+    toast,
+    // Empty toasts array to maintain compatibility with existing code
+    toasts: []
+  };
+};
 
-// Export original Sonner types for compatibility
-export type { ToasterProps } from "sonner";
+// Export types for compatibility
+export type { ToasterProps };
 
 // Custom Toast type for backward compatibility
 export interface Toast {
