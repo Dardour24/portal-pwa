@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -24,7 +25,7 @@ const SignUp = () => {
     if (password !== confirmPassword) {
       toast({
         title: "Erreur d'inscription",
-        description: "Les mots de passe ne correspondent pas",
+        description: "Les mots de passe ne correspondent pas"
       });
       return;
     }
@@ -35,13 +36,13 @@ const SignUp = () => {
       await signup(email, password, firstName, lastName, phoneNumber);
       toast({
         title: "Compte créé avec succès",
-        description: "Bienvenue sur votre portail client Botnb.",
+        description: "Bienvenue sur votre portail client Botnb."
       });
       navigate("/");
     } catch (error: any) {
       toast({
         title: "Erreur d'inscription",
-        description: error.message || "Échec de la création du compte. Veuillez réessayer.",
+        description: error.message || "Échec de la création du compte. Veuillez réessayer."
       });
     } finally {
       setIsLoading(false);

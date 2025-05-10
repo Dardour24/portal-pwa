@@ -40,8 +40,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
         setLoadingTimeout(true);
         toast({
           title: "Mode prévisualisation activé",
-          description: "L'authentification prend trop de temps, la prévisualisation est automatiquement activée.",
-          duration: 5000
+          description: "L'authentification prend trop de temps, la prévisualisation est automatiquement activée."
         });
       }, 5000); // 5 secondes de timeout
       

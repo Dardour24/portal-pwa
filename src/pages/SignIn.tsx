@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -30,14 +31,14 @@ const SignIn = () => {
       if (result.user) {
         toast({
           title: "Connecté avec succès",
-          description: "Bienvenue sur votre portail client Botnb.",
+          description: "Bienvenue sur votre portail client Botnb."
         });
         navigate("/");
       } else {
         setError("Erreur de connexion : identifiants invalides.");
         toast({
           title: "Erreur de connexion",
-          description: "Email ou mot de passe invalide.",
+          description: "Email ou mot de passe invalide."
         });
       }
     } catch (error: any) {
@@ -58,7 +59,7 @@ const SignIn = () => {
       
       toast({
         title: "Erreur de connexion",
-        description: error.message || "Email ou mot de passe invalide.",
+        description: error.message || "Email ou mot de passe invalide."
       });
     } finally {
       setIsLoading(false);

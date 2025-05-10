@@ -24,7 +24,7 @@ const Contact = () => {
       setIsLoading(false);
       toast({
         title: "Message envoyé",
-        description: "Nous avons bien reçu votre message et vous répondrons dans les plus brefs délais.",
+        description: "Nous avons bien reçu votre message et vous répondrons dans les plus brefs délais."
       });
       
       // Reset form

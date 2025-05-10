@@ -23,7 +23,7 @@ const Profile = () => {
       setIsLoading(false);
       toast({
         title: "Profil mis à jour",
-        description: "Vos informations ont été enregistrées avec succès.",
+        description: "Vos informations ont été enregistrées avec succès."
       });
     }, 1000);
   };

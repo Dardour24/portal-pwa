@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { PropertyFormValues } from "@/components/properties/PropertyForm";
 import { Property } from "@/types/property";
 import { useProperties } from "@/hooks/use-properties";
@@ -14,13 +14,12 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus } from "lucide-react";
 
 const Properties = () => {
-  const { toast } = useToast();
-  const { isAuthenticated } = useAuth();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isKnowledgeBaseDialogOpen, setIsKnowledgeBaseDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const { isAuthenticated } = useAuth();
   
   const { 
     properties,
@@ -84,7 +83,7 @@ const Properties = () => {
     if (success) {
       toast({
         title: "Succès",
-        description: "Le logement a été supprimé avec succès",
+        description: "Le logement a été supprimé avec succès"
       });
     }
     setIsDeleteDialogOpen(false);
@@ -113,7 +112,7 @@ const Properties = () => {
   const handleSaveKnowledgeBase = () => {
     toast({
       title: "Succès",
-      description: "La base de connaissances a été mise à jour avec succès",
+      description: "La base de connaissances a été mise à jour avec succès"
     });
     refetchProperties();
   };

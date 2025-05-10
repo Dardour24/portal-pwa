@@ -35,8 +35,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isPreviewMode && !auth.isAuthenticated && !auth.isLoading) {
       toast({
         title: "Mode prévisualisation actif",
-        description: "Vous pouvez naviguer dans l'application sans vous connecter.",
-        duration: 5000
+        description: "Vous pouvez naviguer dans l'application sans vous connecter."
       });
     }
   }, [auth.isAuthenticated, auth.isLoading, isPreviewMode]);
