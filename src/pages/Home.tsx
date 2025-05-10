@@ -49,39 +49,55 @@ const cardData = [
 ];
 
 const Home = () => {
+  console.log("Home component rendering");
   const { user } = useAuth();
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [selectedCard, setSelectedCard] = useState<string>("beds24"); // Default to beds24
   const intervalRef = useRef<number | null>(null);
+  const [isErrorState, setIsErrorState] = useState(false);
   
   // Extract first name from email
   useEffect(() => {
-    if (user?.email) {
-      const emailName = user.email.split("@")[0];
-      const nameParts = emailName.split(".");
-      if (nameParts.length > 0) {
-        setFirstName(nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1));
+    try {
+      if (user?.email) {
+        const emailName = user.email.split("@")[0];
+        const nameParts = emailName.split(".");
+        if (nameParts.length > 0) {
+          setFirstName(nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1));
+        }
       }
+    } catch (error) {
+      console.error("Error processing user email:", error);
     }
   }, [user]);
 
-  // Carousel automatic rotation
+  // Carousel automatic rotation with error handling
   useEffect(() => {
     const startCarousel = () => {
-      // Clear any existing interval
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      try {
+        // Clear any existing interval
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+        }
 
-      // Set new interval
-      intervalRef.current = window.setInterval(() => {
-        setSelectedCard(current => {
-          const currentIndex = cardData.findIndex(card => card.id === current);
-          const nextIndex = (currentIndex + 1) % cardData.length;
-          return cardData[nextIndex].id;
-        });
-      }, INTERVAL_TIME);
+        // Set new interval
+        intervalRef.current = window.setInterval(() => {
+          setSelectedCard(current => {
+            try {
+              const currentIndex = cardData.findIndex(card => card.id === current);
+              const nextIndex = (currentIndex + 1) % cardData.length;
+              return cardData[nextIndex].id;
+            } catch (error) {
+              console.error("Error updating carousel:", error);
+              return current; // Keep current on error
+            }
+          });
+        }, INTERVAL_TIME);
+      } catch (error) {
+        console.error("Error starting carousel:", error);
+        setIsErrorState(true);
+      }
     };
 
     // Initial start of carousel
@@ -89,33 +105,61 @@ const Home = () => {
 
     // Cleanup on component unmount
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      try {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+        }
+      } catch (error) {
+        console.error("Error cleaning up carousel:", error);
       }
     };
   }, []);
 
   // Handle card click - reset interval when user interacts
   const handleCardClick = (cardId: string) => {
-    setSelectedCard(cardId);
-    
-    // Reset interval after manual selection
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
+    try {
+      setSelectedCard(cardId);
+      
+      // Reset interval after manual selection
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      
+      // Restart the interval
+      intervalRef.current = window.setInterval(() => {
+        setSelectedCard(current => {
+          const currentIndex = cardData.findIndex(card => card.id === current);
+          const nextIndex = (currentIndex + 1) % cardData.length;
+          return cardData[nextIndex].id;
+        });
+      }, INTERVAL_TIME);
+    } catch (error) {
+      console.error("Error handling card click:", error);
+      setIsErrorState(true);
     }
-    
-    // Restart the interval
-    intervalRef.current = window.setInterval(() => {
-      setSelectedCard(current => {
-        const currentIndex = cardData.findIndex(card => card.id === current);
-        const nextIndex = (currentIndex + 1) % cardData.length;
-        return cardData[nextIndex].id;
-      });
-    }, INTERVAL_TIME);
   };
 
   // Get the currently selected card data
-  const currentCard = cardData.find(card => card.id === selectedCard);
+  const currentCard = cardData.find(card => card.id === selectedCard) || cardData[0];
+
+  // Fallback UI if we're in an error state
+  if (isErrorState) {
+    return (
+      <div className="container mx-auto px-4 py-6 max-w-5xl">
+        <div className="text-center mb-10">
+          <h1 className="text-4xl font-bold mb-4">
+            Bienvenue sur votre Espace Botnb
+          </h1>
+          <p className="text-lg text-muted-foreground mb-2">
+            Un problème est survenu lors du chargement de cette page. Veuillez rafraîchir.
+          </p>
+          <Button onClick={() => window.location.reload()}>
+            Rafraîchir la page
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-5xl">
