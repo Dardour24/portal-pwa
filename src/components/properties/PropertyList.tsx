@@ -10,7 +10,7 @@ interface PropertyListProps {
   properties: Property[];
   isLoading: boolean;
   onAddProperty: () => void;
-  onViewDetails: (propertyId: string) => void;
+  onDelete: (propertyId: string) => void;
   onEdit: (propertyId: string) => void;
   onManageKnowledgeBase: (propertyId: string) => void;
 }
@@ -19,7 +19,7 @@ export const PropertyList = ({
   properties, 
   isLoading, 
   onAddProperty, 
-  onViewDetails, 
+  onDelete, 
   onEdit,
   onManageKnowledgeBase 
 }: PropertyListProps) => {
@@ -57,7 +57,7 @@ export const PropertyList = ({
             <PropertyCard 
               key={property.id} 
               property={property} 
-              onViewDetails={onViewDetails}
+              onDelete={onDelete}
               onEdit={onEdit}
               onManageKnowledgeBase={onManageKnowledgeBase}
             />

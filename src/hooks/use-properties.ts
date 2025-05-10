@@ -13,16 +13,19 @@ export function useProperties(isAuthenticated: boolean) {
   const queryClient = useQueryClient();
   const [isAddingProperty, setIsAddingProperty] = useState(false);
   const [isEditingProperty, setIsEditingProperty] = useState(false);
+  const [isDeletingProperty, setIsDeletingProperty] = useState(false);
   
   // Références pour les timeouts
   const addTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const editTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const deleteTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Nettoyer les timeouts lors du démontage du composant
   useEffect(() => {
     return () => {
       if (addTimeoutRef.current) clearTimeout(addTimeoutRef.current);
       if (editTimeoutRef.current) clearTimeout(editTimeoutRef.current);
+      if (deleteTimeoutRef.current) clearTimeout(deleteTimeoutRef.current);
     };
   }, []);
 
@@ -158,13 +161,66 @@ export function useProperties(isAuthenticated: boolean) {
     }
   };
 
+  // Delete a property and its associated answers
+  const deleteProperty = async (id: string) => {
+    setIsDeletingProperty(true);
+    
+    // Configurer un timeout pour éviter le blocage infini
+    deleteTimeoutRef.current = setTimeout(() => {
+      console.warn("Timeout atteint lors de la suppression du logement");
+      setIsDeletingProperty(false);
+      toast({
+        title: "Erreur",
+        description: "L'opération a pris trop de temps. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    }, OPERATION_TIMEOUT);
+    
+    try {
+      console.log("Suppression du logement (ID:", id, ")");
+      await propertyService.deleteProperty(id);
+      
+      // Annuler le timeout si l'opération a réussi
+      if (deleteTimeoutRef.current) {
+        clearTimeout(deleteTimeoutRef.current);
+        deleteTimeoutRef.current = null;
+      }
+      
+      await queryClient.invalidateQueries({ queryKey: ['properties'] });
+      return true;
+    } catch (error) {
+      // Annuler le timeout en cas d'erreur
+      if (deleteTimeoutRef.current) {
+        clearTimeout(deleteTimeoutRef.current);
+        deleteTimeoutRef.current = null;
+      }
+      
+      console.error("Erreur lors de la suppression du logement:", error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Impossible de supprimer le logement";
+      
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      // S'assurer que isDeletingProperty est remis à false même en cas d'erreur non gérée
+      setIsDeletingProperty(false);
+    }
+  };
+
   return {
     properties,
     isLoading,
     isAddingProperty,
     isEditingProperty,
+    isDeletingProperty,
     addProperty,
     updateProperty,
+    deleteProperty,
     refetchProperties
   };
 }

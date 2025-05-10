@@ -101,17 +101,49 @@ export const propertyService = {
   },
   
   /**
-   * Supprime une propriété
+   * Supprime une propriété et toutes les réponses associées
    */
   async deleteProperty(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('properties')
-      .delete()
-      .eq('id', id);
-    
-    if (error) {
-      console.error('Erreur lors de la suppression de la propriété:', error);
-      throw error;
+    try {
+      // Démarrer une transaction pour supprimer les réponses associées puis la propriété
+      console.log("Suppression des réponses associées au logement:", id);
+      const { error: answersError } = await supabase
+        .from('form_answers')
+        .delete()
+        .eq('property_id', id);
+      
+      if (answersError) {
+        console.error('Erreur lors de la suppression des réponses:', answersError);
+        throw answersError;
+      }
+      
+      console.log("Suppression des questions personnalisées associées au logement:", id);
+      const { error: questionsError } = await supabase
+        .from('form_questions')
+        .delete()
+        .eq('property_id', id)
+        .eq('is_custom', true);
+      
+      if (questionsError) {
+        console.error('Erreur lors de la suppression des questions personnalisées:', questionsError);
+        throw questionsError;
+      }
+      
+      console.log("Suppression du logement:", id);
+      const { error: propertyError } = await supabase
+        .from('properties')
+        .delete()
+        .eq('id', id);
+      
+      if (propertyError) {
+        console.error('Erreur lors de la suppression du logement:', propertyError);
+        throw propertyError;
+      }
+      
+      console.log("Logement et données associées supprimés avec succès");
+    } catch (error) {
+      console.error('Exception lors de la suppression du logement et des données associées:', error);
+      throw error instanceof Error ? error : new Error("Une erreur inconnue s'est produite");
     }
   }
 };

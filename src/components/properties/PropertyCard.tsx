@@ -1,19 +1,19 @@
 
-import { House, PenBox } from "lucide-react";
+import { House, PenBox, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Property } from "@/types/property";
 
 interface PropertyCardProps {
   property: Property;
-  onViewDetails: (propertyId: string) => void;
+  onDelete: (propertyId: string) => void;
   onEdit: (propertyId: string) => void;
   onManageKnowledgeBase: (propertyId: string) => void;
 }
 
 export const PropertyCard = ({ 
   property, 
-  onViewDetails, 
+  onDelete, 
   onEdit,
   onManageKnowledgeBase 
 }: PropertyCardProps) => {
@@ -32,17 +32,18 @@ export const PropertyCard = ({
           <div className="flex justify-between">
             <Button 
               variant="outline" 
-              size="sm" 
-              onClick={() => property.id && onViewDetails(property.id)}
-            >
-              Voir détails
-            </Button>
-            <Button 
-              variant="outline" 
               size="sm"
               onClick={() => property.id && onEdit(property.id)}
             >
               Modifier
+            </Button>
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={() => property.id && onDelete(property.id)}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Supprimer
             </Button>
           </div>
           <Button 

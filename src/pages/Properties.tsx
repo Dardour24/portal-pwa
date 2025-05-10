@@ -10,6 +10,7 @@ import { EditPropertyDialog } from "@/components/properties/EditPropertyDialog";
 import { PropertyList } from "@/components/properties/PropertyList";
 import { KnowledgeBaseDialog } from "@/components/properties/KnowledgeBaseDialog";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Plus } from "lucide-react";
 
 const Properties = () => {
@@ -18,6 +19,7 @@ const Properties = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isKnowledgeBaseDialogOpen, setIsKnowledgeBaseDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   
   const { 
@@ -25,8 +27,10 @@ const Properties = () => {
     isLoading,
     isAddingProperty,
     isEditingProperty,
+    isDeletingProperty,
     addProperty,
     updateProperty,
+    deleteProperty,
     refetchProperties
   } = useProperties(isAuthenticated);
 
@@ -63,13 +67,28 @@ const Properties = () => {
     }
   };
 
-  // Gérer la visualisation des détails d'une propriété
-  const handleViewDetails = (propertyId: string) => {
-    // Pour l'instant, juste afficher un message
-    toast({
-      title: "Information",
-      description: `Détails de la propriété ${propertyId} à implémenter`,
-    });
+  // Gérer la suppression d'une propriété
+  const handleDelete = (propertyId: string) => {
+    const property = properties.find(p => p.id === propertyId);
+    if (property) {
+      setSelectedProperty(property);
+      setIsDeleteDialogOpen(true);
+    }
+  };
+
+  // Confirmer la suppression
+  const confirmDelete = async () => {
+    if (!selectedProperty?.id) return;
+
+    const success = await deleteProperty(selectedProperty.id);
+    if (success) {
+      toast({
+        title: "Succès",
+        description: "Le logement a été supprimé avec succès",
+      });
+    }
+    setIsDeleteDialogOpen(false);
+    setSelectedProperty(null);
   };
 
   // Gérer l'édition d'une propriété
@@ -130,11 +149,32 @@ const Properties = () => {
         onSave={handleSaveKnowledgeBase}
       />
       
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Êtes-vous sûr de vouloir supprimer ce logement ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action supprimera définitivement le logement "{selectedProperty?.name}" et toutes les réponses associées. Cette action ne peut pas être annulée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isDeletingProperty}
+            >
+              {isDeletingProperty ? "Suppression..." : "Supprimer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
       <PropertyList
         properties={properties}
         isLoading={isLoading}
         onAddProperty={() => setIsAddDialogOpen(true)}
-        onViewDetails={handleViewDetails}
+        onDelete={handleDelete}
         onEdit={handleEdit}
         onManageKnowledgeBase={handleManageKnowledgeBase}
       />
