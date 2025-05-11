@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 
 interface FormActionsProps {
   onCancel: () => void;
-  onSave: (e?: React.FormEvent) => void;  // Updated to accept an optional event parameter
+  onSave: () => void;
   isSubmitting: boolean;
   isNewProperty: boolean;
 }
@@ -21,8 +21,8 @@ export const FormActions = ({ onCancel, onSave, isSubmitting, isNewProperty }: F
         Annuler
       </Button>
       <Button 
-        type="submit"
-        onClick={(e) => onSave(e)}  // Pass the event to onSave function
+        type="button" 
+        onClick={onSave}
         disabled={isSubmitting}
       >
         {isSubmitting ? (

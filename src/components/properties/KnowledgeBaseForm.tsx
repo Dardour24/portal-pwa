@@ -1,158 +1,206 @@
-import React, { useState, useEffect } from "react";
-import { Text, Ban } from "lucide-react";
+
+import { useState, useEffect, useRef } from "react";
+import { FormQuestion, FormAnswer } from "@/types/formQA";
+import { useFormQA } from "@/hooks/use-form-qa";
+import { useAuth } from "@/context/AuthContext";
 import { RequiredQuestions } from "./form-qa/RequiredQuestions";
 import { CustomQuestions } from "./form-qa/CustomQuestions";
-import { FormActions } from "./form-qa/FormActions";
 import { ValidationErrors } from "./form-qa/ValidationErrors";
-import { useFormQA } from "@/hooks/use-form-qa";
-import { Property } from "@/types/property";
-import { useAuth } from "@/context/AuthContext";
+import { FormActions } from "./form-qa/FormActions";
 
 interface KnowledgeBaseFormProps {
-  property: Property | null;
-  onSubmit: () => void;
+  propertyId: string;
+  propertyName: string;
+  onSave: () => void;
+  onCancel: () => void;
+  isNewProperty?: boolean;
 }
 
-export const KnowledgeBaseForm = ({ property, onSubmit }: KnowledgeBaseFormProps) => {
+export const KnowledgeBaseForm = ({ 
+  propertyId, 
+  propertyName, 
+  onSave, 
+  onCancel,
+  isNewProperty = false
+}: KnowledgeBaseFormProps) => {
   const { isAuthenticated } = useAuth();
   const { 
     requiredQuestions, 
     customQuestions, 
     isLoading, 
     isSavingAnswers,
-    fetchCustomQuestions,
+    fetchCustomQuestions, 
     fetchAnswers,
-    addCustomQuestion,
-    deleteCustomQuestion,
-    saveAnswers
+    resetPropertyData, 
+    addCustomQuestion, 
+    deleteCustomQuestion, 
+    saveAnswers 
   } = useFormQA(isAuthenticated);
   
   const [answers, setAnswers] = useState<Map<string, string>>(new Map());
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const dataLoadedRef = useRef(false);
   
   useEffect(() => {
-    if (property?.id) {
-      // Load custom questions for this property
-      fetchCustomQuestions(property.id);
+    // Reset data when component unmounts or property changes
+    return () => {
+      resetPropertyData();
+    };
+  }, []);
+  
+  useEffect(() => {
+    const loadData = async () => {
+      // Si c'est un nouveau logement ou si les données ont déjà été chargées, ne rien faire
+      if (!propertyId || isNewProperty || dataLoadedRef.current) return;
       
-      // Load answers for this property
-      fetchAnswers(property.id).then(loadedAnswers => {
-        const answersMap = new Map<string, string>();
-        loadedAnswers.forEach(answer => {
-          answersMap.set(answer.question_id, answer.answer_text);
+      console.log("Initial data load for property:", propertyId);
+      dataLoadedRef.current = true;
+      
+      try {
+        // Charger les questions personnalisées d'abord
+        await fetchCustomQuestions(propertyId);
+        
+        // Puis charger les réponses
+        const propertyAnswers = await fetchAnswers(propertyId);
+        
+        const answerMap = new Map<string, string>();
+        propertyAnswers.forEach(answer => {
+          answerMap.set(answer.question_id, answer.answer_text);
         });
-        setAnswers(answersMap);
-      });
-    }
-  }, [property?.id, fetchCustomQuestions, fetchAnswers]);
+        
+        setAnswers(answerMap);
+      } catch (error) {
+        console.error("Erreur lors du chargement initial des données:", error);
+        // Reset le flag en cas d'erreur pour permettre une nouvelle tentative
+        dataLoadedRef.current = false;
+      }
+    };
+    
+    loadData();
+  }, [propertyId, isNewProperty]);
   
   const handleAnswerChange = (questionId: string, value: string) => {
-    setAnswers(prev => {
-      const newAnswers = new Map(prev);
-      newAnswers.set(questionId, value);
-      return newAnswers;
+    const newAnswers = new Map(answers);
+    newAnswers.set(questionId, value);
+    setAnswers(newAnswers);
+  };
+  
+  const handleAddCustomQuestion = async (questionText: string) => {
+    if (!questionText.trim()) return;
+    
+    if (customQuestions.length >= 10) {
+      return setValidationErrors(["Vous avez atteint la limite de 10 questions personnalisées."]);
+    }
+    
+    await addCustomQuestion({
+      question_text: questionText,
+      is_required: false,
+      property_id: propertyId
     });
   };
   
-  const handleAddCustomQuestion = (questionText: string) => {
-    if (property?.id) {
-      addCustomQuestion({
-        question_text: questionText,
-        is_required: false,
-        property_id: property.id
-      });
-    }
+  const handleDeleteCustomQuestion = async (questionId: string) => {
+    await deleteCustomQuestion(questionId);
   };
   
-  const handleDeleteCustomQuestion = (questionId: string) => {
-    deleteCustomQuestion(questionId);
-  };
-  
-  const validateForm = (): boolean => {
-    const errors: string[] = [];
+  const handleSave = async () => {
+    setValidationErrors([]);
+    setIsSubmitting(true);
     
-    // Check required questions
+    // Validation des réponses requises
+    const errors: string[] = [];
     requiredQuestions.forEach(question => {
-      if (question.is_required && (!answers.has(question.id) || !answers.get(question.id)?.trim())) {
-        errors.push(`La question "${question.question_text}" nécessite une réponse.`);
+      if (question.is_required && (!answers.has(question.id) || !answers.get(question.id))) {
+        errors.push(`La réponse à "${question.question_text}" est obligatoire.`);
       }
     });
     
-    setValidationErrors(errors);
-    return errors.length === 0;
-  };
-  
-  const handleSubmit = async (e?: React.FormEvent) => {
-    if (e) {
-      e.preventDefault();
-    }
-    
-    if (!property?.id || !validateForm()) {
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      setIsSubmitting(false);
       return;
     }
     
-    // Convert answers map to array for saving
-    const answersArray = Array.from(answers).map(([questionId, answerText]) => ({
-      property_id: property.id!,
-      question_id: questionId,
-      answer_text: answerText
-    }));
+    // Préparer les réponses à enregistrer
+    const answersToSave: Omit<FormAnswer, 'id' | 'created_at' | 'updated_at'>[] = [];
     
-    await saveAnswers(answersArray);
-    onSubmit();
+    // Réponses pour les questions requises
+    requiredQuestions.forEach(question => {
+      if (answers.has(question.id)) {
+        answersToSave.push({
+          property_id: propertyId,
+          question_id: question.id,
+          answer_text: answers.get(question.id) || ""
+        });
+      }
+    });
+    
+    // Réponses pour les questions personnalisées
+    customQuestions.forEach(question => {
+      if (answers.has(question.id)) {
+        answersToSave.push({
+          property_id: propertyId,
+          question_id: question.id,
+          answer_text: answers.get(question.id) || ""
+        });
+      }
+    });
+    
+    try {
+      await saveAnswers(answersToSave);
+      onSave();
+    } catch (error) {
+      console.error("Erreur lors de l'enregistrement des réponses:", error);
+      setValidationErrors(["Une erreur est survenue lors de l'enregistrement des réponses. Veuillez réessayer."]);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
-  if (!property) return null;
-
+  
   return (
-    <div className="space-y-6">
-      <form onSubmit={(e) => handleSubmit(e)} className="space-y-6">
-        <div className="space-y-4">
-          <div className="space-y-4 text-sm text-muted-foreground">
-            <p className="font-medium text-foreground text-base">BotnB est déjà un expert de la location courte durée.</p>
-            <p>Cependant, vous pouvez l'aider à connaitre votre logement :<br />Renseignez le Formulaire ci dessous</p>
-            
-            <div className="flex items-start gap-2 mt-4">
-              <Text className="h-5 w-5 mt-0.5 flex-shrink-0" />
-              <p>Apprenez tout ce que Botnb doit savoir sur votre logement pour qu'il réponde correctement aux questions de vos précieux voyageurs. Ne mettez pas d'URL, d'adresse internet</p>
-            </div>
-            
-            <div className="flex items-start gap-2 mt-4">
-              <Ban className="h-5 w-5 mt-0.5 flex-shrink-0" />
-              <p>Si vous envisagez que Botnb réponde sur Airbnb, les adresses de site internet seront bloquées par Airbnb</p>
-            </div>
-          </div>
-
-          {validationErrors.length > 0 && (
-            <ValidationErrors errors={validationErrors} />
-          )}
-
-          <RequiredQuestions 
-            questions={requiredQuestions}
-            answers={answers}
-            propertyName={property.name}
-            onAnswerChange={handleAnswerChange}
-            isLoading={isLoading}
-          />
-          
-          <CustomQuestions 
-            questions={customQuestions}
-            answers={answers}
-            propertyName={property.name}
-            requiredQuestionsLength={requiredQuestions.length}
-            onAnswerChange={handleAnswerChange}
-            onAddCustomQuestion={handleAddCustomQuestion}
-            onDeleteCustomQuestion={handleDeleteCustomQuestion}
-          />
-        </div>
-        
-        <FormActions 
-          onCancel={() => onSubmit()}
-          onSave={handleSubmit}
-          isSubmitting={isSavingAnswers} 
-          isNewProperty={!property.id}
+    <div className="space-y-6 py-4">
+      <div className="space-y-2">
+        <h2 className="text-xl font-semibold">
+          {isNewProperty ? "Nouvelle Base de Connaissances pour : " : "Modifier la Base de Connaissances pour : "}
+          {propertyName}
+        </h2>
+        <p className="text-muted-foreground">
+          Renseignez les questions suivantes pour créer la base de connaissances de votre logement.
+          Les champs marqués d'un * sont obligatoires.
+        </p>
+      </div>
+      
+      <ValidationErrors errors={validationErrors} />
+      
+      <div className="space-y-8">
+        {/* Questions imposées */}
+        <RequiredQuestions 
+          questions={requiredQuestions}
+          answers={answers}
+          propertyName={propertyName}
+          onAnswerChange={handleAnswerChange}
+          isLoading={isLoading}
         />
-      </form>
+        
+        {/* Questions personnalisées */}
+        <CustomQuestions
+          questions={customQuestions}
+          answers={answers}
+          propertyName={propertyName}
+          requiredQuestionsLength={requiredQuestions.length}
+          onAnswerChange={handleAnswerChange}
+          onAddCustomQuestion={handleAddCustomQuestion}
+          onDeleteCustomQuestion={handleDeleteCustomQuestion}
+        />
+      </div>
+      
+      <FormActions 
+        onCancel={onCancel}
+        onSave={handleSave}
+        isSubmitting={isSubmitting || isSavingAnswers}
+        isNewProperty={isNewProperty}
+      />
     </div>
   );
 };

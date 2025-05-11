@@ -23,31 +23,38 @@ export const KnowledgeBaseDialog = ({
   const { resetPropertyData } = useFormQA(isAuthenticated);
   const hasResetRef = useRef(false);
   
-  // Correction: utilisation plus sûre de useEffect pour éviter les boucles infinies
+  // Correction: use useRef to track if we've already reset to avoid infinite loop
   useEffect(() => {
-    // Réinitialiser les données de la propriété uniquement lorsque le dialogue se ferme
+    // Reset property data only when dialog closes AND hasResetRef is false
     if (!isOpen && !hasResetRef.current) {
       console.log("Dialog closed, resetting property data (once)");
       resetPropertyData();
       hasResetRef.current = true;
     }
     
-    // Réinitialiser notre drapeau de suivi lorsque le dialogue s'ouvre à nouveau
+    // Reset our tracking flag when dialog opens again
     if (isOpen) {
       hasResetRef.current = false;
     }
-    
-    // Nettoyage lors du démontage du composant
-    return () => {
-      if (!hasResetRef.current && !isOpen) {
-        console.log("Dialog unmounting, resetting property data (once)");
-        resetPropertyData();
-      }
-    };
   }, [isOpen, resetPropertyData]);
   
-  const handleSubmit = () => {
+  // Also reset when component unmounts, but only if not already reset
+  useEffect(() => {
+    return () => {
+      if (!hasResetRef.current) {
+        console.log("Dialog unmounting, resetting property data (once)");
+        resetPropertyData();
+        hasResetRef.current = true;
+      }
+    };
+  }, [resetPropertyData]);
+  
+  const handleSave = () => {
     onSave();
+    onOpenChange(false);
+  };
+  
+  const handleCancel = () => {
     onOpenChange(false);
   };
   
@@ -60,8 +67,10 @@ export const KnowledgeBaseDialog = ({
         
         {property && isOpen && (
           <KnowledgeBaseForm
-            property={property}
-            onSubmit={handleSubmit}
+            propertyId={property.id || ""}
+            propertyName={property.name}
+            onSave={handleSave}
+            onCancel={handleCancel}
           />
         )}
       </DialogContent>
