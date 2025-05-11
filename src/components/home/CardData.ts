@@ -46,14 +46,5 @@ export const cardData = [
     icon: createIconElement(Text),
     buttonText: "Mes Logements",
     buttonLink: "/properties"
-  },
-  {
-    id: "warning",
-    title: "Attention aux URLs",
-    text: "Si vous envisagez que Botnb réponde sur Airbnb, les adresses de site internet seront bloquées par Airbnb",
-    image: "/lovable-uploads/99174476-f39b-4cfb-b37a-a91ea6ff8142.png", 
-    icon: createIconElement(Ban),
-    buttonText: null,
-    buttonLink: null
-  }
+  },  
 ];
