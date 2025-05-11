@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from "react";
-import { Form } from "@/components/ui/form";
 import { Text, Ban } from "lucide-react";
 import { RequiredQuestions } from "./form-qa/RequiredQuestions";
 import { CustomQuestions } from "./form-qa/CustomQuestions";
@@ -108,7 +107,7 @@ export const KnowledgeBaseForm = ({ property, onSubmit }: KnowledgeBaseFormProps
   if (!property) return null;
 
   return (
-    <Form>
+    <div className="space-y-6">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div className="space-y-4 text-sm text-muted-foreground">
@@ -156,6 +155,6 @@ export const KnowledgeBaseForm = ({ property, onSubmit }: KnowledgeBaseFormProps
           isNewProperty={!property.id}
         />
       </form>
-    </Form>
+    </div>
   );
 };
