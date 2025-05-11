@@ -28,7 +28,6 @@ const CardItem: React.FC<CardItemProps> = ({
       <CardContent className="p-6 flex flex-col items-center justify-center h-full">
         {icon}
         <h3 className="font-medium mb-1">{title}</h3>
-        <div className="border-b w-full mt-4"></div>
       </CardContent>
     </Card>
   );
