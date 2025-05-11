@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Form } from "@/components/ui/form";
 import { Text, Ban } from "lucide-react";
 import { RequiredQuestions } from "./form-qa/RequiredQuestions";
@@ -8,6 +8,8 @@ import { FormActions } from "./form-qa/FormActions";
 import { ValidationErrors } from "./form-qa/ValidationErrors";
 import { useFormQA } from "@/hooks/use-form-qa";
 import { Property } from "@/types/property";
+import { useAuth } from "@/context/AuthContext";
+import { FormQuestion } from "@/types/formQA";
 
 interface KnowledgeBaseFormProps {
   property: Property | null;
@@ -15,23 +17,98 @@ interface KnowledgeBaseFormProps {
 }
 
 export const KnowledgeBaseForm = ({ property, onSubmit }: KnowledgeBaseFormProps) => {
-  const {
-    form,
-    validationErrors,
-    handleSubmit,
-    isSubmitting,
-    isFormValid,
-    customQuestions,
-    setCustomQuestions,
+  const { isAuthenticated } = useAuth();
+  const { 
+    requiredQuestions, 
+    customQuestions, 
+    isLoading, 
+    isSavingAnswers,
+    fetchCustomQuestions,
+    fetchAnswers,
     addCustomQuestion,
-    removeCustomQuestion,
-    updateCustomQuestion
-  } = useFormQA(property, onSubmit);
+    deleteCustomQuestion,
+    saveAnswers
+  } = useFormQA(isAuthenticated);
+  
+  const [answers, setAnswers] = useState<Map<string, string>>(new Map());
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  
+  useEffect(() => {
+    if (property?.id) {
+      // Load custom questions for this property
+      fetchCustomQuestions(property.id);
+      
+      // Load answers for this property
+      fetchAnswers(property.id).then(loadedAnswers => {
+        const answersMap = new Map<string, string>();
+        loadedAnswers.forEach(answer => {
+          answersMap.set(answer.question_id, answer.answer_text);
+        });
+        setAnswers(answersMap);
+      });
+    }
+  }, [property?.id, fetchCustomQuestions, fetchAnswers]);
+  
+  const handleAnswerChange = (questionId: string, value: string) => {
+    setAnswers(prev => {
+      const newAnswers = new Map(prev);
+      newAnswers.set(questionId, value);
+      return newAnswers;
+    });
+  };
+  
+  const handleAddCustomQuestion = (questionText: string) => {
+    if (property?.id) {
+      addCustomQuestion({
+        question_text: questionText,
+        is_required: false,
+        property_id: property.id
+      });
+    }
+  };
+  
+  const handleDeleteCustomQuestion = (questionId: string) => {
+    deleteCustomQuestion(questionId);
+  };
+  
+  const validateForm = (): boolean => {
+    const errors: string[] = [];
+    
+    // Check required questions
+    requiredQuestions.forEach(question => {
+      if (question.is_required && (!answers.has(question.id) || !answers.get(question.id)?.trim())) {
+        errors.push(`La question "${question.question_text}" nécessite une réponse.`);
+      }
+    });
+    
+    setValidationErrors(errors);
+    return errors.length === 0;
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!property?.id || !validateForm()) {
+      return;
+    }
+    
+    // Convert answers map to array for saving
+    const answersArray = Array.from(answers).map(([questionId, answerText]) => ({
+      property_id: property.id!,
+      question_id: questionId,
+      answer_text: answerText
+    }));
+    
+    await saveAnswers(answersArray);
+    onSubmit();
+  };
+  
+  const isFormValid = validationErrors.length === 0;
 
   if (!property) return null;
 
   return (
-    <Form {...form}>
+    <Form>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div className="space-y-4 text-sm text-muted-foreground">
@@ -53,19 +130,30 @@ export const KnowledgeBaseForm = ({ property, onSubmit }: KnowledgeBaseFormProps
             <ValidationErrors errors={validationErrors} />
           )}
 
-          <RequiredQuestions form={form} />
+          <RequiredQuestions 
+            questions={requiredQuestions}
+            answers={answers}
+            propertyName={property.name}
+            onAnswerChange={handleAnswerChange}
+            isLoading={isLoading}
+          />
           
           <CustomQuestions 
-            customQuestions={customQuestions}
-            addCustomQuestion={addCustomQuestion}
-            removeCustomQuestion={removeCustomQuestion}
-            updateCustomQuestion={updateCustomQuestion}
+            questions={customQuestions}
+            answers={answers}
+            propertyName={property.name}
+            requiredQuestionsLength={requiredQuestions.length}
+            onAnswerChange={handleAnswerChange}
+            onAddCustomQuestion={handleAddCustomQuestion}
+            onDeleteCustomQuestion={handleDeleteCustomQuestion}
           />
         </div>
         
         <FormActions 
-          isSubmitting={isSubmitting} 
-          isFormValid={isFormValid}
+          onCancel={() => onSubmit()}
+          onSave={handleSubmit}
+          isSubmitting={isSavingAnswers} 
+          isNewProperty={!property.id}
         />
       </form>
     </Form>

@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 
 interface FormActionsProps {
   onCancel: () => void;
-  onSave: () => void;
+  onSave: (e: React.FormEvent) => void;
   isSubmitting: boolean;
   isNewProperty: boolean;
 }
