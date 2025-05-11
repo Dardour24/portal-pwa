@@ -28,16 +28,16 @@ const Sidebar = () => {
 
   return (
     <SidebarComponent className="w-[230px] shadow-md">
-      <SidebarHeader className="py-6">
-        <div className="logo-container">
+      <SidebarHeader className="py-4">
+        <div className="logo-container flex justify-center">
           <img 
             src="/lovable-uploads/b97f6b22-40f5-4de9-9245-072e4eeb6895.png" 
             alt="Botnb Logo" 
-            className="h-12" 
+            className="h-10" 
           />
         </div>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="mt-1">
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>

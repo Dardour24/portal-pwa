@@ -45,7 +45,7 @@ const Navbar = ({ isMobile }: NavbarProps) => {
 
   return (
     <header
-      className={`sticky top-0 z-30 flex items-center justify-between px-6 py-3 transition-all duration-300 bg-pageBackground dark:bg-gray-950 ${
+      className={`sticky top-0 z-30 flex items-center justify-between px-4 py-2 transition-all duration-300 bg-pageBackground dark:bg-gray-950 ${
         scrolled ? "shadow-md" : ""
       }`}
     >
@@ -70,7 +70,7 @@ const Navbar = ({ isMobile }: NavbarProps) => {
             <img 
               src="/lovable-uploads/b97f6b22-40f5-4de9-9245-072e4eeb6895.png" 
               alt="Botnb Logo" 
-              className="h-10" 
+              className="h-8" 
             />
           </motion.div>
         )}
@@ -81,9 +81,9 @@ const Navbar = ({ isMobile }: NavbarProps) => {
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex flex-col items-center">
+              <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                 <User className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                <span className="text-xs mt-1 text-gray-600 dark:text-gray-400">Mon Compte</span>
+                <span className="sr-only">Mon Compte</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 bg-white shadow-lg rounded-card border border-gray-100">

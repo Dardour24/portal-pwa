@@ -18,7 +18,7 @@ const Layout = () => {
 
   useEffect(() => {
     setIsRouteChanging(true);
-    const timer = setTimeout(() => setIsRouteChanging(false), 200); // Réduit de 300ms à 200ms
+    const timer = setTimeout(() => setIsRouteChanging(false), 200);
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
@@ -29,14 +29,14 @@ const Layout = () => {
           <>
             <Navbar isMobile={true} />
             <main className={`flex-1 ${needsReducedPadding ? 'pb-12' : 'pb-16'}`}>
-              <div className="container-layout py-4 md:py-6">
+              <div className="container-layout py-3 md:py-4">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={location.pathname}
-                    initial={{ opacity: 0, y: 5 }} // Réduit de 10px à 5px
+                    initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -5 }} // Réduit de 10px à 5px
-                    transition={{ duration: 0.2 }} // Réduit de 0.3s à 0.2s
+                    exit={{ opacity: 0, y: -5 }}
+                    transition={{ duration: 0.2 }}
                   >
                     <Outlet />
                   </motion.div>
@@ -50,15 +50,15 @@ const Layout = () => {
             <Sidebar />
             <div className="flex flex-col flex-1">
               <Navbar isMobile={false} />
-              <main className="flex-1 p-6 overflow-auto">
+              <main className="flex-1 p-5 overflow-auto">
                 <div className="container-layout">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={location.pathname}
-                      initial={{ opacity: 0, y: 5 }} // Réduit de 10px à 5px
+                      initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -5 }} // Réduit de 10px à 5px
-                      transition={{ duration: 0.2 }} // Réduit de 0.3s à 0.2s
+                      exit={{ opacity: 0, y: -5 }}
+                      transition={{ duration: 0.2 }}
                     >
                       <Outlet />
                     </motion.div>
