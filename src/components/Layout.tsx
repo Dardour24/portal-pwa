@@ -13,9 +13,12 @@ const Layout = () => {
   const location = useLocation();
   const [isRouteChanging, setIsRouteChanging] = useState(false);
 
+  // Déterminer si nous devons ajouter un padding-bottom plus petit pour certaines pages
+  const needsReducedPadding = ['/beds24'].includes(location.pathname);
+
   useEffect(() => {
     setIsRouteChanging(true);
-    const timer = setTimeout(() => setIsRouteChanging(false), 300);
+    const timer = setTimeout(() => setIsRouteChanging(false), 200); // Réduit de 300ms à 200ms
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
@@ -25,15 +28,15 @@ const Layout = () => {
         {isMobile ? (
           <>
             <Navbar isMobile={true} />
-            <main className="flex-1 pb-16">
-              <div className="container-layout py-6">
+            <main className={`flex-1 ${needsReducedPadding ? 'pb-12' : 'pb-16'}`}>
+              <div className="container-layout py-4 md:py-6">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={location.pathname}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 5 }} // Réduit de 10px à 5px
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
+                    exit={{ opacity: 0, y: -5 }} // Réduit de 10px à 5px
+                    transition={{ duration: 0.2 }} // Réduit de 0.3s à 0.2s
                   >
                     <Outlet />
                   </motion.div>
@@ -52,10 +55,10 @@ const Layout = () => {
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={location.pathname}
-                      initial={{ opacity: 0, y: 10 }}
+                      initial={{ opacity: 0, y: 5 }} // Réduit de 10px à 5px
                       animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.3 }}
+                      exit={{ opacity: 0, y: -5 }} // Réduit de 10px à 5px
+                      transition={{ duration: 0.2 }} // Réduit de 0.3s à 0.2s
                     >
                       <Outlet />
                     </motion.div>

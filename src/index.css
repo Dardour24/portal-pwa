@@ -101,6 +101,19 @@
   :focus-visible {
     @apply outline-2 outline-primary rounded-md;
   }
+
+  /* Mobile text size adjustments */
+  h1 {
+    @apply text-2xl md:text-4xl;
+  }
+
+  h2 {
+    @apply text-xl md:text-2xl;
+  }
+
+  h3 {
+    @apply text-lg md:text-xl;
+  }
 }
 
 @layer components {
@@ -109,7 +122,7 @@
   }
 
   .container-layout {
-    @apply px-6 lg:px-8 mx-auto max-w-layout;
+    @apply px-4 md:px-6 lg:px-8 mx-auto max-w-layout;
   }
 
   .btn-primary-hover {
@@ -119,10 +132,20 @@
   .sidebar-active-indicator {
     @apply absolute left-0 top-1/2 h-4/5 w-[3px] bg-primary transform -translate-y-1/2 rounded-r animate-sidebar-indicator;
   }
+
+  /* Mobile-optimized card spacing */
+  .card {
+    @apply p-3 md:p-6;
+  }
+
+  /* Mobile-optimized gaps */
+  .mobile-gap-reduced {
+    @apply gap-2 md:gap-4;
+  }
 }
 
 .logo-container {
-  @apply w-full h-60 flex items-center justify-center;
+  @apply w-full h-40 md:h-60 flex items-center justify-center;
 }
 
 .logo-container img {
@@ -130,11 +153,11 @@
 }
 
 .mobile-nav-link {
-  @apply flex flex-col items-center justify-center text-xs font-medium;
+  @apply flex flex-col items-center justify-center text-xs font-medium min-h-[44px] min-w-[44px];
 }
 
 .mobile-nav-link svg {
-  @apply h-5 w-5 mb-1;
+  @apply h-6 w-6 mb-1;
 }
 
 /* PWA Install Prompt */
@@ -148,7 +171,7 @@
 }
 
 .page-transition {
-  @apply transition-opacity duration-300;
+  @apply transition-opacity duration-200;
 }
 
 .page-enter {
@@ -165,4 +188,50 @@
 
 .page-exit-active {
   @apply opacity-0;
+}
+
+/* Improved touch targets for mobile */
+@media (max-width: 768px) {
+  button, 
+  a, 
+  input[type="button"], 
+  input[type="submit"],
+  .clickable {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  .input-field {
+    @apply py-3;
+  }
+  
+  .form-spacing {
+    @apply space-y-4;
+  }
+}
+
+/* Styles pour très petits écrans */
+@media (max-width: 374px) {
+  .xs-text-center {
+    @apply text-center;
+  }
+  
+  .xs-stack {
+    @apply flex flex-col;
+  }
+  
+  .xs-reduced-padding {
+    @apply p-2;
+  }
+  
+  h1 {
+    @apply text-xl;
+  }
+  
+  h2 {
+    @apply text-lg;
+  }
+  
+  .mobile-nav-link span {
+    @apply text-[10px];
+  }
 }
