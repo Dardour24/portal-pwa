@@ -1,25 +1,28 @@
 
 import React from "react";
 import { HomeIcon, Settings, Pencil } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
-// For WhatsApp icon - lucide doesn't have WhatsappIcon
-export const createWhatsAppIcon = () => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className="h-8 w-8 mb-4 text-primary"
-  >
-    <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
-    <path d="M9 10a.5.5 0 0 1 1 0c0 1.97 1.6 3.57 3.57 3.57a.5.5 0 0 1 0 1c-2.53 0-4.57-2.04-4.57-4.57z" />
-    <path d="M13.5 14a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-2z" />
-    <path d="M11.5 12a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-2z" />
-  </svg>
-);
+// Create a proper WhatsApp icon using a React component approach
+export const createWhatsAppIcon = () => {
+  return React.createElement(
+    "svg",
+    {
+      xmlns: "http://www.w3.org/2000/svg",
+      viewBox: "0 0 24 24",
+      fill: "none",
+      stroke: "currentColor",
+      strokeWidth: "2",
+      strokeLinecap: "round",
+      strokeLinejoin: "round",
+      className: "h-8 w-8 mb-4 text-primary"
+    },
+    React.createElement("path", { d: "M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" }),
+    React.createElement("path", { d: "M9 10a.5.5 0 0 1 1 0c0 1.97 1.6 3.57 3.57 3.57a.5.5 0 0 1 0 1c-2.53 0-4.57-2.04-4.57-4.57z" }),
+    React.createElement("path", { d: "M13.5 14a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-2z" }),
+    React.createElement("path", { d: "M11.5 12a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-2z" })
+  );
+};
 
 // Card data configuration
 export const cardData = [
