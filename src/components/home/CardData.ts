@@ -1,7 +1,6 @@
 
 import React from "react";
-import { HomeIcon, Settings, Pencil } from "lucide-react";
-import { LucideIcon } from "lucide-react";
+import { HomeIcon, Settings, Pencil, LucideIcon } from "lucide-react";
 
 // Create a proper WhatsApp icon using a React component approach
 export const createWhatsAppIcon = () => {
@@ -25,7 +24,7 @@ export const createWhatsAppIcon = () => {
 };
 
 // Helper to create icon elements with standard styling
-const createIconElement = (Icon: typeof LucideIcon) => {
+const createIconElement = (Icon: React.ComponentType<any>) => {
   return React.createElement(Icon, {
     className: "h-8 w-8 mb-4 text-primary"
   });
