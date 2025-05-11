@@ -27,7 +27,7 @@ export const cardData = [
     image: "/lovable-uploads/6ab33741-bb6b-436a-aee7-ad8b5b81cdff.png",
     icon: createIconElement(HomeIcon),
     buttonText: "Ajouter un Logement",
-    buttonLink: "/properties/add"
+    buttonLink: "/properties"
   },
   {
     id: "whatsapp",
