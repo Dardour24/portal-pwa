@@ -1,5 +1,5 @@
 
-import { House, PenBox, Trash2 } from "lucide-react";
+import { PenBox, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Property } from "@/types/property";
@@ -18,14 +18,25 @@ export const PropertyCard = ({
   onEdit,
   onManageKnowledgeBase 
 }: PropertyCardProps) => {
+  // Utilisation d'une image par défaut si aucune image n'est fournie
+  const defaultImage = "https://images.unsplash.com/photo-1487958449943-2429e8be8625"; 
+
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
       transition={{ duration: 0.2 }}
     >
       <Card className="overflow-hidden rounded-card shadow-card hover:shadow-card-hover transition-all">
-        <div className="bg-gray-100 h-40 flex items-center justify-center">
-          <House className="h-16 w-16 text-gray-400" />
+        <div className="bg-gray-100 h-40 overflow-hidden">
+          <img 
+            src={property.imageUrl || defaultImage} 
+            alt={property.name} 
+            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = defaultImage;
+            }}
+          />
         </div>
         <CardHeader>
           <CardTitle>{property.name}</CardTitle>
