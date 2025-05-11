@@ -1,3 +1,4 @@
+
 // Service worker for PWA functionality
 const CACHE_NAME = 'botnb-client-portal-v1';
 
@@ -6,7 +7,13 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/lovable-uploads/b97f6b22-40f5-4de9-9245-072e4eeb6895.png'
+  '/lovable-uploads/favicon.ico',
+  '/lovable-uploads/favicon-16.png',
+  '/lovable-uploads/favicon-32.png',
+  '/lovable-uploads/favicon-152.png',
+  '/lovable-uploads/favicon-180.png',
+  '/lovable-uploads/favicon-192.png',
+  '/lovable-uploads/favicon-512.png'
 ];
 
 // Install service worker
