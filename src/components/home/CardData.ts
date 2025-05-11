@@ -24,6 +24,13 @@ export const createWhatsAppIcon = () => {
   );
 };
 
+// Helper to create icon elements with standard styling
+const createIconElement = (Icon: typeof LucideIcon) => {
+  return React.createElement(Icon, {
+    className: "h-8 w-8 mb-4 text-primary"
+  });
+};
+
 // Card data configuration
 export const cardData = [
   {
@@ -31,7 +38,7 @@ export const cardData = [
     title: "Configurer vos accès à Beds24",
     text: "Rendez-vous sur la page Beds24 pour configurer un accès à votre compte afin de le connecter à votre Botnb.",
     image: "/lovable-uploads/f4040222-fd67-46ef-bba0-b7a1fbdfe543.png",
-    icon: <Settings className="h-8 w-8 mb-4 text-primary" />,
+    icon: createIconElement(Settings),
     buttonText: "Mon Beds24",
     buttonLink: "/beds24"
   },
@@ -40,7 +47,7 @@ export const cardData = [
     title: "Transmettez les Informations de votre Logement",
     text: "Rendez-vous sur 'Mes Logements' pour transmettre à votre Botnb toutes les informations sur votre Logement !",
     image: "/lovable-uploads/6ab33741-bb6b-436a-aee7-ad8b5b81cdff.png",
-    icon: <HomeIcon className="h-8 w-8 mb-4 text-primary" />,
+    icon: createIconElement(HomeIcon),
     buttonText: "Ajouter un Logement",
     buttonLink: "/properties/add"
   },
@@ -58,7 +65,7 @@ export const cardData = [
     title: "Modifier vos informations logements à tous moments",
     text: "Rendez Vous sur l'ongle 'Mes Logements' pour ajuster les informations de votre logement",
     image: "/lovable-uploads/99174476-f39b-4cfb-b37a-a91ea6ff8142.png", 
-    icon: <Pencil className="h-8 w-8 mb-4 text-primary" />,
+    icon: createIconElement(Pencil),
     buttonText: "Mes Logements",
     buttonLink: "/properties"
   }
