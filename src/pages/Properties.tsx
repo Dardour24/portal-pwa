@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
@@ -36,8 +35,7 @@ const Properties = () => {
     // Correction de la structure de données pour correspondre au type attendu
     const propertyData = {
       name: values.name, // Obligatoire
-      address: values.address || null,
-      is_active: values.is_active !== undefined ? values.is_active : true
+      address: values.address || null
     };
     
     const success = await addProperty(propertyData);
@@ -53,8 +51,7 @@ const Properties = () => {
     // Correction de la structure de données pour correspondre au type attendu
     const propertyData = {
       name: values.name,
-      address: values.address || null,
-      is_active: values.is_active !== undefined ? values.is_active : true
+      address: values.address || null
     };
     
     const success = await updateProperty(selectedProperty.id, propertyData);

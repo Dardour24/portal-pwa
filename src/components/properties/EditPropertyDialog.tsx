@@ -35,8 +35,7 @@ export const EditPropertyDialog = ({
             onCancel={() => onOpenChange(false)}
             initialValues={{
               name: property.name,
-              address: property.address || '',
-              is_active: property.is_active || true
+              address: property.address || ''
             }}
           />
         )}
