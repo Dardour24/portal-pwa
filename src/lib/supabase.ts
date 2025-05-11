@@ -29,7 +29,22 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    storage: localStorage
+    storage: localStorage,
+    storageKey: 'botnb-auth-token',
+    detectSessionInUrl: true,
+    flowType: 'implicit'
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'BotnB Client'
+    }
+  },
+  // Optimize network requests
+  realtime: {
+    // Disable realtime subscriptions if not needed
+    params: {
+      eventsPerSecond: 2
+    }
   }
 });
 

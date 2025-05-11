@@ -1,13 +1,25 @@
-
 import { supabase } from '../../lib/supabase';
 import { UserData } from './types';
 import { LoginResult, User, Session } from '../../types/auth';
 
+// Cache for client data with expiration time
+const clientDataCache = new Map<string, { data: UserData | null, timestamp: number }>();
+const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes in milliseconds
+
 /**
- * Fetches client data from the database
+ * Fetches client data from the database with caching
  */
 export const fetchClientData = async (userId: string): Promise<UserData | null> => {
   try {
+    // Check if we have cached data that's still valid
+    const cachedData = clientDataCache.get(userId);
+    const now = Date.now();
+    
+    if (cachedData && (now - cachedData.timestamp < CACHE_EXPIRY_TIME)) {
+      console.log("Using cached client data for user:", userId);
+      return cachedData.data;
+    }
+    
     console.log("Fetching client data for user:", userId);
     const { data, error } = await supabase
       .from('clients')
@@ -21,6 +33,10 @@ export const fetchClientData = async (userId: string): Promise<UserData | null> 
     }
 
     console.log("Client data fetched:", data);
+    
+    // Update cache
+    clientDataCache.set(userId, { data, timestamp: now });
+    
     return data;
   } catch (error) {
     console.error("Error in fetchClientData:", error);
@@ -33,6 +49,11 @@ export const fetchClientData = async (userId: string): Promise<UserData | null> 
  */
 export const signInWithEmail = async (email: string, password: string): Promise<LoginResult> => {
   try {
+    // Check network connectivity before attempting authentication
+    if (!navigator.onLine) {
+      throw new Error("Aucune connexion réseau disponible. Vérifiez votre connexion internet.");
+    }
+    
     console.log("Attempting login with email:", email);
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -64,6 +85,14 @@ export const signInWithEmail = async (email: string, password: string): Promise<
         expires_in: data.session?.expires_in,
         user: user
       };
+      
+      // Store authentication data in localStorage as fallback
+      try {
+        localStorage.setItem('botnb-auth-user', JSON.stringify(user));
+        localStorage.setItem('botnb-auth-last-login', Date.now().toString());
+      } catch (storageError) {
+        console.warn("Could not store auth data in localStorage:", storageError);
+      }
       
       return {
         user,
@@ -166,10 +195,11 @@ export const signOut = async (): Promise<void> => {
 };
 
 /**
- * Gets the current session
+ * Gets the current session with fallback to localStorage
  */
 export const getCurrentSession = async () => {
   try {
+    // First try to get session from Supabase
     const { data: { session }, error } = await supabase.auth.getSession();
     
     if (error) {
@@ -177,7 +207,29 @@ export const getCurrentSession = async () => {
       throw error;
     }
     
-    return session;
+    if (session) {
+      return session;
+    }
+    
+    // If no session from Supabase, try fallback from localStorage
+    const fallbackUser = localStorage.getItem('botnb-auth-user');
+    const lastLogin = localStorage.getItem('botnb-auth-last-login');
+    
+    if (fallbackUser && lastLogin) {
+      const loginTime = parseInt(lastLogin, 10);
+      const now = Date.now();
+      const FALLBACK_SESSION_MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
+      
+      // Only use fallback if it's not too old
+      if (now - loginTime < FALLBACK_SESSION_MAX_AGE) {
+        console.warn("Using fallback authentication from localStorage");
+        // We don't have a real session, but we can provide the user data
+        // This can be used to show a limited UI while trying to reauthenticate
+        return { user: JSON.parse(fallbackUser) };
+      }
+    }
+    
+    return null;
   } catch (error) {
     console.error("Error in getCurrentSession:", error);
     throw error;
@@ -236,5 +288,31 @@ export const updatePassword = async (newPassword: string): Promise<{ success: bo
   } catch (error: any) {
     console.error("Error in updatePassword:", error);
     return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Clears the client data cache
+ */
+export const clearClientDataCache = () => {
+  clientDataCache.clear();
+};
+
+/**
+ * Refreshes the authentication token if needed
+ */
+export const refreshAuthToken = async (): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.auth.refreshSession();
+    
+    if (error) {
+      console.error("Error refreshing token:", error);
+      return false;
+    }
+    
+    return !!data.session;
+  } catch (error) {
+    console.error("Error in refreshAuthToken:", error);
+    return false;
   }
 };

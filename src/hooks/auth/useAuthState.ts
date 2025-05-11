@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { fetchClientData, mapUserData } from './authService';
+import { fetchClientData, mapUserData, refreshAuthToken } from './authService';
 import { AuthState } from './types';
 import { User } from '../../types/auth';
 
@@ -13,6 +13,31 @@ export const useAuthState = (): AuthState => {
     user: null,
     isLoading: true
   });
+
+  // Try to get user from localStorage for immediate UI rendering
+  useEffect(() => {
+    try {
+      const cachedUser = localStorage.getItem('botnb-auth-user');
+      const lastLogin = localStorage.getItem('botnb-auth-last-login');
+      
+      if (cachedUser && lastLogin) {
+        const loginTime = parseInt(lastLogin, 10);
+        const now = Date.now();
+        const FALLBACK_SESSION_MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
+        
+        // Only use fallback if it's not too old
+        if (now - loginTime < FALLBACK_SESSION_MAX_AGE) {
+          console.log("Using cached user data for initial render");
+          setState({ 
+            user: JSON.parse(cachedUser),
+            isLoading: true // Keep loading true until we verify with Supabase
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error reading from localStorage:", error);
+    }
+  }, []);
 
   useEffect(() => {
     const checkUserSession = async () => {
@@ -28,13 +53,30 @@ export const useAuthState = (): AuthState => {
         }
         
         if (session?.user) {
-          // Get client data from Supabase
+          // Try to refresh token if needed
+          if (session.expires_at && Date.now() > session.expires_at * 1000) {
+            console.log("Session expired, attempting refresh");
+            await refreshAuthToken();
+          }
+          
+          // Get client data from Supabase with caching implemented in fetchClientData
           const clientData = await fetchClientData(session.user.id);
 
           const user: User = mapUserData(session.user, clientData);
           setState({ user, isLoading: false });
+          
+          // Update localStorage cache
+          try {
+            localStorage.setItem('botnb-auth-user', JSON.stringify(user));
+            localStorage.setItem('botnb-auth-last-login', Date.now().toString());
+          } catch (storageError) {
+            console.warn("Could not update auth data in localStorage:", storageError);
+          }
         } else {
           setState({ user: null, isLoading: false });
+          // Clear localStorage cache if no session
+          localStorage.removeItem('botnb-auth-user');
+          localStorage.removeItem('botnb-auth-last-login');
         }
       } catch (error) {
         console.error("Error checking session:", error);
@@ -44,29 +86,57 @@ export const useAuthState = (): AuthState => {
 
     checkUserSession();
     
-    // Set up auth state change listener
+    // Set up auth state change listener with debouncing to avoid multiple calls
+    let debounceTimeout: number | undefined;
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("Auth state changed:", event, session?.user?.id);
-        try {
-          if (session?.user) {
-            const clientData = await fetchClientData(session.user.id);
-            const user: User = mapUserData(session.user, clientData);
-            setState({ user, isLoading: false });
-          } else {
+        
+        // Clear any pending debounce
+        if (debounceTimeout) clearTimeout(debounceTimeout);
+        
+        // Debounce to avoid multiple rapid calls
+        debounceTimeout = window.setTimeout(async () => {
+          try {
+            if (session?.user) {
+              // Avoid unnecessary client data fetch if we already have this user
+              if (state.user?.id === session.user.id) {
+                console.log("User ID unchanged, skipping client data fetch");
+                setState(prev => ({ ...prev, isLoading: false }));
+                return;
+              }
+              
+              const clientData = await fetchClientData(session.user.id);
+              const user: User = mapUserData(session.user, clientData);
+              setState({ user, isLoading: false });
+              
+              // Update localStorage cache
+              try {
+                localStorage.setItem('botnb-auth-user', JSON.stringify(user));
+                localStorage.setItem('botnb-auth-last-login', Date.now().toString());
+              } catch (storageError) {
+                console.warn("Could not update auth data in localStorage:", storageError);
+              }
+            } else {
+              setState({ user: null, isLoading: false });
+              // Clear localStorage cache
+              localStorage.removeItem('botnb-auth-user');
+              localStorage.removeItem('botnb-auth-last-login');
+            }
+          } catch (error) {
+            console.error("Error during auth state change:", error);
             setState({ user: null, isLoading: false });
           }
-        } catch (error) {
-          console.error("Error during auth state change:", error);
-          setState({ user: null, isLoading: false });
-        }
+        }, 100); // Small debounce to avoid multiple rapid updates
       }
     );
 
     return () => {
+      if (debounceTimeout) clearTimeout(debounceTimeout);
       subscription.unsubscribe();
     };
-  }, []);
+  }, [state.user?.id]);
 
   return state;
 };

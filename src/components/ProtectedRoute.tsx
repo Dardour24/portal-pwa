@@ -36,13 +36,13 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   useEffect(() => {
     if (isLoading) {
       const timer = setTimeout(() => {
-        console.log("Authentification: délai d'attente dépassé après 5 secondes");
+        console.log("Authentification: délai d'attente dépassé après 15 secondes");
         setLoadingTimeout(true);
         toast({
           title: "Mode prévisualisation activé",
           description: "L'authentification prend trop de temps, la prévisualisation est automatiquement activée."
         });
-      }, 5000); // 5 secondes de timeout
+      }, 15000); // 15 secondes de timeout (augmenté de 5 à 15 secondes)
       
       return () => clearTimeout(timer);
     }
