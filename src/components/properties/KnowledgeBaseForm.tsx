@@ -101,8 +101,6 @@ export const KnowledgeBaseForm = ({ property, onSubmit }: KnowledgeBaseFormProps
     await saveAnswers(answersArray);
     onSubmit();
   };
-  
-  const isFormValid = validationErrors.length === 0;
 
   if (!property) return null;
 

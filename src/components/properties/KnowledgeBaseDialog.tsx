@@ -23,31 +23,28 @@ export const KnowledgeBaseDialog = ({
   const { resetPropertyData } = useFormQA(isAuthenticated);
   const hasResetRef = useRef(false);
   
-  // Correction: use useRef to track if we've already reset to avoid infinite loop
+  // Correction: utilisation plus sûre de useEffect pour éviter les boucles infinies
   useEffect(() => {
-    // Reset property data only when dialog closes AND hasResetRef is false
+    // Réinitialiser les données de la propriété uniquement lorsque le dialogue se ferme
     if (!isOpen && !hasResetRef.current) {
       console.log("Dialog closed, resetting property data (once)");
       resetPropertyData();
       hasResetRef.current = true;
     }
     
-    // Reset our tracking flag when dialog opens again
+    // Réinitialiser notre drapeau de suivi lorsque le dialogue s'ouvre à nouveau
     if (isOpen) {
       hasResetRef.current = false;
     }
-  }, [isOpen, resetPropertyData]);
-  
-  // Also reset when component unmounts, but only if not already reset
-  useEffect(() => {
+    
+    // Nettoyage lors du démontage du composant
     return () => {
-      if (!hasResetRef.current) {
+      if (!hasResetRef.current && !isOpen) {
         console.log("Dialog unmounting, resetting property data (once)");
         resetPropertyData();
-        hasResetRef.current = true;
       }
     };
-  }, [resetPropertyData]);
+  }, [isOpen, resetPropertyData]);
   
   const handleSubmit = () => {
     onSave();
