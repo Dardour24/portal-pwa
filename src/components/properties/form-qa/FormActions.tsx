@@ -21,8 +21,7 @@ export const FormActions = ({ onCancel, onSave, isSubmitting, isNewProperty }: F
         Annuler
       </Button>
       <Button 
-        type="button" 
-        onClick={onSave}
+        type="submit" 
         disabled={isSubmitting}
       >
         {isSubmitting ? (
