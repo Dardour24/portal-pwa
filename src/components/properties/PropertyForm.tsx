@@ -7,13 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 
 // Schema de validation pour le formulaire de propriété
 export const propertySchema = z.object({
   name: z.string().min(1, "Le nom est obligatoire"),
   address: z.string().optional(),
-  is_active: z.boolean().default(true),
 });
 
 export type PropertyFormValues = z.infer<typeof propertySchema>;
@@ -32,7 +30,6 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel, initialValues }
     defaultValues: {
       name: initialValues?.name || "",
       address: initialValues?.address || "",
-      is_active: initialValues?.is_active !== undefined ? initialValues.is_active : true
     }
   });
 
@@ -67,24 +64,6 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel, initialValues }
                 />
               </FormControl>
               <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="is_active"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel>Actif</FormLabel>
-              </div>
             </FormItem>
           )}
         />

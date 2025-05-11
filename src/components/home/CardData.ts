@@ -1,6 +1,6 @@
 
 import React from "react";
-import { HomeIcon, Settings, Pencil, MessageCircle, LucideIcon } from "lucide-react";
+import { HomeIcon, Settings, Pencil, MessageCircle, Text, Ban } from "lucide-react";
 
 // Helper to create icon elements with standard styling
 const createIconElement = (Icon: React.ComponentType<any>) => {
@@ -23,7 +23,7 @@ export const cardData = [
   {
     id: "logement",
     title: "Transmettez les Informations de votre Logement",
-    text: "Rendez-vous sur 'Mes Logements' pour transmettre à votre Botnb toutes les informations sur votre Logement !",
+    text: "BotnB est déjà un expert de la location courte durée.\n\nCependant, vous pouvez l'aider à connaitre votre logement : Renseignez le Formulaire ci dessous",
     image: "/lovable-uploads/6ab33741-bb6b-436a-aee7-ad8b5b81cdff.png",
     icon: createIconElement(HomeIcon),
     buttonText: "Ajouter un Logement",
@@ -41,10 +41,19 @@ export const cardData = [
   {
     id: "info",
     title: "Modifier vos informations logements à tous moments",
-    text: "Rendez Vous sur l'ongle 'Mes Logements' pour ajuster les informations de votre logement",
+    text: "Apprenez tout ce que Botnb doit savoir sur votre logement pour qu'il réponde correctement aux questions de vos précieux voyageurs. Ne mettez pas d'URL, d'adresse internet",
     image: "/lovable-uploads/99174476-f39b-4cfb-b37a-a91ea6ff8142.png", 
-    icon: createIconElement(Pencil),
+    icon: createIconElement(Text),
     buttonText: "Mes Logements",
     buttonLink: "/properties"
+  },
+  {
+    id: "warning",
+    title: "Attention aux URLs",
+    text: "Si vous envisagez que Botnb réponde sur Airbnb, les adresses de site internet seront bloquées par Airbnb",
+    image: "/lovable-uploads/99174476-f39b-4cfb-b37a-a91ea6ff8142.png", 
+    icon: createIconElement(Ban),
+    buttonText: null,
+    buttonLink: null
   }
 ];

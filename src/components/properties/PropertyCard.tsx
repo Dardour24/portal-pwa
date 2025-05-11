@@ -29,17 +29,6 @@ export const PropertyCard = ({
         </div>
         <CardHeader>
           <CardTitle>{property.name}</CardTitle>
-          <CardDescription>
-            {property.is_active ? (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                Actif
-              </span>
-            ) : (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                Inactif
-              </span>
-            )}
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-500 mb-4">{property.address || "Aucune adresse"}</p>
