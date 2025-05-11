@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../context/AuthContext";
-import { ArrowRight, Home as HomeIcon, Mail, MessageSquare, Phone } from "lucide-react";
+import { ArrowRight, HomeIcon, Settings, Pencil, WhatsappIcon } from "lucide-react";
 
 const INTERVAL_TIME = 7000; // 7 seconds
 
@@ -15,7 +15,7 @@ const cardData = [
     title: "Configurer vos accès à Beds24",
     text: "Rendez-vous sur la page Beds24 pour configurer un accès à votre compte afin de le connecter à votre Botnb.",
     image: "/lovable-uploads/f4040222-fd67-46ef-bba0-b7a1fbdfe543.png",
-    icon: <MessageSquare className="h-8 w-8 mb-4 text-primary" />,
+    icon: <Settings className="h-8 w-8 mb-4 text-primary" />,
     buttonText: "Mon Beds24",
     buttonLink: "/beds24"
   },
@@ -33,7 +33,7 @@ const cardData = [
     title: "Recevez les réponses de Botnb sur votre Whatsapp",
     text: "Botnb vous propose une réponse, vous validez ou modifiez via WhatsApp et votre réponse est envoyée vers Beds24.",
     image: "/lovable-uploads/9d79d896-59e6-4ecd-b9df-318e2e5de422.png",
-    icon: <Mail className="h-8 w-8 mb-4 text-primary" />,
+    icon: <WhatsappIcon className="h-8 w-8 mb-4 text-primary" />,
     buttonText: null,
     buttonLink: null
   },
@@ -42,7 +42,7 @@ const cardData = [
     title: "Modifier vos informations logements à tous moments",
     text: "Rendez Vous sur l'ongle 'Mes Logements' pour ajuster les informations de votre logement",
     image: "/lovable-uploads/99174476-f39b-4cfb-b37a-a91ea6ff8142.png", 
-    icon: <Phone className="h-8 w-8 mb-4 text-primary" />,
+    icon: <Pencil className="h-8 w-8 mb-4 text-primary" />,
     buttonText: "Mes Logements",
     buttonLink: "/properties"
   }
