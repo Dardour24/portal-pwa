@@ -4,7 +4,7 @@ import { Loader2 } from "lucide-react";
 
 interface FormActionsProps {
   onCancel: () => void;
-  onSave: () => void;  // Nous avons retiré le paramètre de l'événement car le formulaire le gère déjà
+  onSave: (e?: React.FormEvent) => void;  // Updated to accept an optional event parameter
   isSubmitting: boolean;
   isNewProperty: boolean;
 }
@@ -22,6 +22,7 @@ export const FormActions = ({ onCancel, onSave, isSubmitting, isNewProperty }: F
       </Button>
       <Button 
         type="submit"
+        onClick={(e) => onSave(e)}  // Pass the event to onSave function
         disabled={isSubmitting}
       >
         {isSubmitting ? (

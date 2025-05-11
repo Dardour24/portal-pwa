@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Text, Ban } from "lucide-react";
 import { RequiredQuestions } from "./form-qa/RequiredQuestions";
@@ -8,7 +7,6 @@ import { ValidationErrors } from "./form-qa/ValidationErrors";
 import { useFormQA } from "@/hooks/use-form-qa";
 import { Property } from "@/types/property";
 import { useAuth } from "@/context/AuthContext";
-import { FormQuestion } from "@/types/formQA";
 
 interface KnowledgeBaseFormProps {
   property: Property | null;
@@ -84,8 +82,10 @@ export const KnowledgeBaseForm = ({ property, onSubmit }: KnowledgeBaseFormProps
     return errors.length === 0;
   };
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
     
     if (!property?.id || !validateForm()) {
       return;
@@ -106,7 +106,7 @@ export const KnowledgeBaseForm = ({ property, onSubmit }: KnowledgeBaseFormProps
 
   return (
     <div className="space-y-6">
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={(e) => handleSubmit(e)} className="space-y-6">
         <div className="space-y-4">
           <div className="space-y-4 text-sm text-muted-foreground">
             <p className="font-medium text-foreground text-base">BotnB est déjà un expert de la location courte durée.</p>
