@@ -27,7 +27,7 @@ const Sidebar = () => {
   };
 
   return (
-    <SidebarComponent className="w-[230px] shadow-md">
+    <SidebarComponent className="w-[230px] shadow-md" aria-label="Navigation principale">
       <SidebarHeader className="py-4">
         <div className="logo-container flex justify-center">
           <img 
@@ -39,14 +39,16 @@ const Sidebar = () => {
       </SidebarHeader>
       <SidebarContent className="mt-1">
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
+          <SidebarGroupLabel id="navigation-group">Navigation</SidebarGroupLabel>
+          <SidebarGroupContent aria-labelledby="navigation-group">
+            <SidebarMenu role="menu">
               {menuItems.map((item) => (
-                <SidebarMenuItem key={item.path}>
+                <SidebarMenuItem key={item.path} role="none">
                   <SidebarMenuButton
+                    role="menuitem"
                     className={`relative ${isActive(item.path) ? "bg-sidebar-accent text-primary font-medium" : ""}`}
                     onClick={() => navigate(item.path)}
+                    aria-current={isActive(item.path) ? "page" : undefined}
                   >
                     {isActive(item.path) && (
                       <motion.span 
@@ -55,9 +57,10 @@ const Sidebar = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.2 }}
+                        aria-hidden="true"
                       />
                     )}
-                    <item.icon className="mr-2 h-5 w-5" />
+                    <item.icon className="mr-2 h-5 w-5" aria-hidden="true" />
                     <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -71,8 +74,9 @@ const Sidebar = () => {
           variant="ghost" 
           className="w-full justify-start hover:bg-red-50 hover:text-red-600 transition-colors" 
           onClick={handleLogout}
+          aria-label="Déconnexion"
         >
-          <LogOut className="mr-2 h-5 w-5" />
+          <LogOut className="mr-2 h-5 w-5" aria-hidden="true" />
           <span>Déconnexion</span>
         </Button>
       </SidebarFooter>

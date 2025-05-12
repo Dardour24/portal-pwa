@@ -22,6 +22,7 @@ const NavItem = memo(({ icon: Icon, label, path, isActive, onClick }: NavItemPro
       }`}
       onClick={onClick}
       aria-label={label}
+      aria-current={isActive ? "page" : undefined}
     >
       {isActive && (
         <motion.span
@@ -30,9 +31,10 @@ const NavItem = memo(({ icon: Icon, label, path, isActive, onClick }: NavItemPro
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2 }}
+          aria-hidden="true"
         />
       )}
-      <Icon className="h-5 w-5 mx-auto mb-1 transition-colors" />
+      <Icon className="h-5 w-5 mx-auto mb-1 transition-colors" aria-hidden="true" />
       <span className="text-xs">{label}</span>
     </button>
   );
@@ -59,8 +61,11 @@ const MobileNavbar = () => {
   }, [navigate]);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-950 border-t border-separator shadow-lg">
-      <div className="flex justify-around items-center h-16">
+    <nav 
+      className="fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-950 border-t border-separator shadow-lg"
+      aria-label="Navigation mobile"
+    >
+      <div className="flex justify-around items-center h-16" role="menubar">
         {navItems.map((item) => (
           <NavItem
             key={item.path}

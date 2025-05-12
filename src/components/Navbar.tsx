@@ -27,8 +27,9 @@ const MenuButton = memo(({ onClick }: MenuButtonProps) => (
     size="icon" 
     className="mr-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
     onClick={onClick}
+    aria-label="Ouvrir le menu latéral"
   >
-    <Menu className="h-5 w-5" />
+    <Menu className="h-5 w-5" aria-hidden="true" />
     <span className="sr-only">Toggle sidebar</span>
   </Button>
 ));
@@ -66,8 +67,13 @@ const UserMenu = memo(({ user, onProfileClick, onLogout }: UserMenuProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-          <User className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          aria-label="Menu utilisateur"
+        >
+          <User className="h-5 w-5 text-gray-600 dark:text-gray-400" aria-hidden="true" />
           <span className="sr-only">Mon Compte</span>
         </Button>
       </DropdownMenuTrigger>
@@ -77,12 +83,14 @@ const UserMenu = memo(({ user, onProfileClick, onLogout }: UserMenuProps) => {
         <DropdownMenuItem 
           onClick={onProfileClick}
           className="cursor-pointer hover:bg-gray-50"
+          role="menuitem"
         >
           Profil
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={onLogout}
           className="cursor-pointer hover:bg-red-50 hover:text-red-600"
+          role="menuitem"
         >
           Déconnexion
         </DropdownMenuItem>
@@ -132,6 +140,7 @@ const Navbar = ({ isMobile }: NavbarProps) => {
       className={`sticky top-0 z-30 flex items-center justify-between px-4 py-2 transition-all duration-300 bg-pageBackground dark:bg-gray-950 ${
         scrolled ? "shadow-md" : ""
       }`}
+      role="banner"
     >
       {/* Left side */}
       <div className="flex items-center">
