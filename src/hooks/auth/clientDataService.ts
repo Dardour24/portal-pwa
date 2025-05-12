@@ -1,50 +1,60 @@
-
 import { supabase } from '../../lib/supabase';
 import { UserData } from './types';
 import { User } from '../../types/auth';
 import { isValidCache, updateCache } from './clientCache';
 
 /**
- * Récupère les données client depuis la base de données avec mise en cache
+ * Fetches client data from the database with caching and optimistic updates
  */
 export const fetchClientData = async (userId: string): Promise<UserData | null> => {
   try {
-    // Vérifier si nous avons des données en cache encore valides
+    // Check if we have valid cached data
     const { isValid, cachedData } = isValidCache(userId);
     
     if (isValid) {
-      console.log("Utilisation des données client en cache pour l'utilisateur:", userId);
+      console.log("Using cached client data for user:", userId);
       return cachedData || null;
     }
     
-    console.log("Récupération des données client pour l'utilisateur:", userId);
+    console.log("Fetching client data for user:", userId);
     const { data, error } = await supabase
       .from('clients')
       .select('first_name, last_name, phone')
       .eq('id', userId)
-      .maybeSingle(); // Changé de .single() à .maybeSingle() pour ne pas générer d'erreur si aucune donnée
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 est le code pour "no rows returned"
-      console.error("Erreur lors de la récupération des données client:", error);
+    if (error && error.code !== 'PGRST116') { // PGRST116 is the code for "no rows returned"
+      console.error("Error fetching client data:", error);
       return null;
     }
 
-    console.log("Données client récupérées:", data);
+    console.log("Client data retrieved:", data);
     
-    // Mettre à jour le cache avec les données (même si null)
+    // Update cache with the new data
     updateCache(userId, data || null);
     
     return data;
   } catch (error) {
-    console.error("Erreur dans fetchClientData:", error);
+    console.error("Error in fetchClientData:", error);
     return null;
   }
 };
 
 /**
- * Mappe les données utilisateur Supabase à notre type User
+ * Maps Supabase user data to our User type with optimistic update capability
  */
-export const mapUserData = (supabaseUser: any, clientData: UserData | null): User => {
+export const mapUserData = (supabaseUser: any, clientData: UserData | null, existingUser?: User): User => {
+  // If we have an existing user and the same ID, use it for optimistic updates
+  if (existingUser && existingUser.id === supabaseUser.id) {
+    return {
+      ...existingUser,
+      // Only update email from supabaseUser as it might have changed
+      email: supabaseUser.email || existingUser.email || '',
+      // Keep other fields from existing user for optimistic update
+    };
+  }
+  
+  // Otherwise create a new user object
   return {
     id: supabaseUser.id,
     email: supabaseUser.email || '',
