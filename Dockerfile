@@ -1,4 +1,3 @@
-
 # Base image
 FROM node:20-alpine as build
 
@@ -39,14 +38,15 @@ HEALTHCHECK --interval=5s --timeout=3s --start-period=5s --retries=2 \
 # Copy built files from build stage to nginx serve directory
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Create a special directory for lovable-uploads and copy everything there
+# Create a special directory for lovable-uploads
 RUN mkdir -p /usr/share/nginx/html/lovable-uploads
 
-# Copy image files with explicit error handling
-COPY --from=build /app/public/lovable-uploads/* /usr/share/nginx/html/lovable-uploads/ 2>/dev/null || :
+# Copy the shell script
+COPY copy-files.sh /copy-files.sh
+RUN chmod +x /copy-files.sh
 
-# Create a backup of these images directly in the root as fallback
-COPY --from=build /app/public/lovable-uploads/* /usr/share/nginx/html/ 2>/dev/null || :
+# Run the shell script to copy files
+RUN /copy-files.sh
 
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
