@@ -1,8 +1,6 @@
 
-import { logSW } from './config.js';
-
 // Create the offline fallback response
-export const createOfflineResponse = () => {
+const createOfflineResponse = () => {
   return new Response(
     `<!DOCTYPE html>
     <html lang="fr">
@@ -94,7 +92,7 @@ export const createOfflineResponse = () => {
 };
 
 // Check if a request is for a page (HTML)
-export const isPageRequest = (request) => {
+const isPageRequest = (request) => {
   const url = new URL(request.url);
   const hasExtension = /\.\w+$/.test(url.pathname);
   
@@ -117,9 +115,9 @@ export const isPageRequest = (request) => {
 };
 
 // Log network status changes
-export const monitorNetworkStatus = () => {
+const monitorNetworkStatus = () => {
   self.addEventListener('online', () => {
-    logSW('Network is online');
+    self.logSW('Network is online');
     self.clients.matchAll().then(clients => {
       clients.forEach(client => {
         client.postMessage({ 
@@ -131,7 +129,7 @@ export const monitorNetworkStatus = () => {
   });
 
   self.addEventListener('offline', () => {
-    logSW('Network is offline');
+    self.logSW('Network is offline');
     self.clients.matchAll().then(clients => {
       clients.forEach(client => {
         client.postMessage({ 
@@ -145,3 +143,7 @@ export const monitorNetworkStatus = () => {
 
 // Initialize network monitoring
 monitorNetworkStatus();
+
+// Expose to global scope
+self.createOfflineResponse = createOfflineResponse;
+self.isPageRequest = isPageRequest;

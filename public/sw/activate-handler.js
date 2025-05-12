@@ -1,11 +1,9 @@
 
-import { CACHE_NAME_STATIC, CACHE_NAME_DYNAMIC, logSW } from './config.js';
-
 // Clean up old caches when a new service worker activates - with safer approach
-export const handleActivate = (event) => {
-  logSW('Activating...');
+const handleActivate = (event) => {
+  self.logSW('Activating...');
   
-  const currentCaches = [CACHE_NAME_STATIC, CACHE_NAME_DYNAMIC];
+  const currentCaches = [self.CACHE_NAME_STATIC, self.CACHE_NAME_DYNAMIC];
   
   const cleanupPromise = caches.keys()
     .then(cacheNames => {
@@ -13,7 +11,7 @@ export const handleActivate = (event) => {
         cacheNames.map(cacheName => {
           // Only delete caches that start with our prefix but aren't the current versions
           if (cacheName.startsWith('botnb-client-') && !currentCaches.includes(cacheName)) {
-            logSW('Deleting old cache:', cacheName);
+            self.logSW('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
           return Promise.resolve();
@@ -21,11 +19,11 @@ export const handleActivate = (event) => {
       );
     })
     .then(() => {
-      logSW('Old caches cleared');
+      self.logSW('Old caches cleared');
       return self.clients.claim();
     })
     .then(() => {
-      logSW('Claimed clients');
+      self.logSW('Claimed clients');
       // Notify clients that the service worker has been updated
       return self.clients.matchAll().then(clients => {
         clients.forEach(client => {
@@ -46,3 +44,6 @@ export const handleActivate = (event) => {
   
   event.waitUntil(cleanupPromise);
 };
+
+// Expose to global scope
+self.handleActivate = handleActivate;

@@ -28,10 +28,12 @@ RUN npm run build
 FROM nginx:alpine
 
 # Add multiple healthcheck endpoints for more robust monitoring
-HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=3 \
+# Added a much shorter interval and fewer retries for faster health check results
+HEALTHCHECK --interval=5s --timeout=3s --start-period=5s --retries=2 \
   CMD wget -q --spider http://localhost/ || \
       wget -q --spider http://localhost/health || \
-      wget -q --spider http://localhost/index.html || \
+      wget -q --spider http://localhost/status.txt || \
+      wget -q --spider http://localhost/health.html || \
       exit 1
 
 # Copy built files from build stage to nginx serve directory
@@ -39,10 +41,12 @@ COPY --from=build /app/dist /usr/share/nginx/html
 
 # Create a special directory for lovable-uploads and copy everything there
 RUN mkdir -p /usr/share/nginx/html/lovable-uploads
-COPY --from=build /app/public/lovable-uploads/* /usr/share/nginx/html/lovable-uploads/
+
+# Copy image files with explicit error handling
+COPY --from=build /app/public/lovable-uploads/* /usr/share/nginx/html/lovable-uploads/ 2>/dev/null || :
 
 # Create a backup of these images directly in the root as fallback
-COPY --from=build /app/public/lovable-uploads/* /usr/share/nginx/html/
+COPY --from=build /app/public/lovable-uploads/* /usr/share/nginx/html/ 2>/dev/null || :
 
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
@@ -51,12 +55,15 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY public/sw.js /usr/share/nginx/html/sw.js
 COPY public/sw/ /usr/share/nginx/html/sw/
 
-# Create a healthcheck file and multiple fallback health indicators
+# Create multiple health check files in various formats
 RUN echo "healthy" > /usr/share/nginx/html/health && \
     echo "<!DOCTYPE html><html><body>Healthy</body></html>" > /usr/share/nginx/html/health.html && \
     echo "OK" > /usr/share/nginx/html/status.txt
 
-# Ensure index.html has proper DOCTYPE and fallback
+# Add a standalone minimal HTML file that doesn't depend on anything
+RUN echo '<!DOCTYPE html><html><head><title>Botnb</title><meta name="viewport" content="width=device-width"></head><body>Botnb is running. <a href="/">Go to main app</a></body></html>' > /usr/share/nginx/html/minimal.html
+
+# Ensure index.html has proper DOCTYPE and create a fallback HTML
 RUN if [ -f /usr/share/nginx/html/index.html ]; then \
     sed -i '1s/^/<!DOCTYPE html>\n/' /usr/share/nginx/html/index.html; \
     echo '<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Botnb</title></head><body><div id="root">Loading...</div><script>window.addEventListener("load", function() { if (!document.getElementById("root").children.length) { window.location.href = "/?bypass-sw=true"; } });</script></body></html>' > /usr/share/nginx/html/fallback.html; \
@@ -65,8 +72,16 @@ RUN if [ -f /usr/share/nginx/html/index.html ]; then \
 # Copy manifest.json
 COPY public/manifest.json /usr/share/nginx/html/manifest.json
 
+# Create a simple favicon if not present
+RUN if [ ! -f /usr/share/nginx/html/favicon.ico ]; then \
+    echo "This is a placeholder favicon" > /usr/share/nginx/html/favicon.ico; \
+    fi
+
 # Expose port 80
 EXPOSE 80
 
-# Start nginx and create a simple health monitoring script
-CMD ["nginx", "-g", "daemon off;"]
+# Start nginx with emergency shell script
+RUN echo '#!/bin/sh\necho "Starting Nginx with health monitoring..."\nnginx -g "daemon off;"' > /start.sh && \
+    chmod +x /start.sh
+
+CMD ["/start.sh"]

@@ -1,19 +1,16 @@
 
-import { CACHE_NAME_STATIC, CACHE_NAME_DYNAMIC, STATIC_ASSETS, logSW } from './config.js';
-import { createOfflineResponse, isPageRequest } from './offline-handler.js';
-
 // Simplified helper functions for cleaner code - with reduced caching
 const serveFromNetworkFirst = async (request) => {
   try {
     // Try network first
     const response = await fetch(request, { cache: 'no-cache' });
-    logSW(`Network response for ${request.url}:`, response.status);
+    self.logSW(`Network response for ${request.url}:`, response.status);
     
     // Only cache successful responses
     if (response && response.status === 200) {
       try {
         const clonedResponse = response.clone();
-        const cache = await caches.open(CACHE_NAME_DYNAMIC);
+        const cache = await caches.open(self.CACHE_NAME_DYNAMIC);
         cache.put(request, clonedResponse);
       } catch (err) {
         console.warn('[SW] Failed to cache successful response:', err);
@@ -21,16 +18,16 @@ const serveFromNetworkFirst = async (request) => {
     }
     return response;
   } catch (error) {
-    logSW(`Network request failed for ${request.url}, trying cache`, error);
+    self.logSW(`Network request failed for ${request.url}, trying cache`, error);
     try {
       const cachedResponse = await caches.match(request);
       
       if (cachedResponse) {
-        logSW(`Serving from cache: ${request.url}`);
+        self.logSW(`Serving from cache: ${request.url}`);
         return cachedResponse;
       }
     } catch (cacheError) {
-      logSW(`Cache retrieval failed for ${request.url}`, cacheError);
+      self.logSW(`Cache retrieval failed for ${request.url}`, cacheError);
     }
     
     // Return offline page for HTML requests or error response
@@ -62,7 +59,7 @@ const createErrorResponse = () => {
 };
 
 // Main fetch handler - with safety mechanisms
-export const handleFetch = (event) => {
+const handleFetch = (event) => {
   // Allow bypassing the service worker completely
   const url = new URL(event.request.url);
   if (url.searchParams.has('bypass-sw')) {
@@ -99,3 +96,6 @@ export const handleFetch = (event) => {
     return;
   }
 };
+
+// Expose to global scope
+self.handleFetch = handleFetch;

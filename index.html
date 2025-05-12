@@ -21,15 +21,21 @@
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0ea5e9">
     
-    <!-- Favicon -->
+    <!-- Favicon with multiple fallbacks -->
     <link rel="icon" href="/lovable-uploads/favicon.ico" type="image/x-icon">
     <link rel="icon" href="/lovable-uploads/favicon-32.png" sizes="32x32" type="image/png">
     <link rel="icon" href="/lovable-uploads/favicon-16.png" sizes="16x16" type="image/png">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+    <link rel="icon" href="/favicon-16.png" sizes="16x16" type="image/png">
     
-    <!-- Apple Touch Icons -->
+    <!-- Apple Touch Icons with fallbacks -->
     <link rel="apple-touch-icon" href="/lovable-uploads/favicon-192.png">
     <link rel="apple-touch-icon" sizes="152x152" href="/lovable-uploads/favicon-152.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/lovable-uploads/favicon-180.png">
+    <link rel="apple-touch-icon" href="/favicon-192.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/favicon-152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180.png">
   </head>
 
   <body>
@@ -40,12 +46,14 @@
     <script>
       // Service Worker Registration with improved error handling and emergency disable feature
       if ('serviceWorker' in navigator) {
-        // Check if service worker should be disabled (add ?disable_sw=true to URL)
+        // EMERGENCY BYPASS: Add ?disable_sw=true to URL to bypass service worker completely
+        // Or add ?bypass-sw=true to bypass service worker for specific page load
         const urlParams = new URLSearchParams(window.location.search);
         const disableSW = urlParams.get('disable_sw') === 'true';
+        const bypassSW = urlParams.get('bypass-sw') === 'true';
         
         if (disableSW) {
-          // Unregister any existing service workers
+          // Unregister all service workers
           navigator.serviceWorker.getRegistrations().then(registrations => {
             for (const registration of registrations) {
               console.log('Unregistering service worker due to disable_sw parameter');
@@ -55,20 +63,26 @@
             const newUrl = window.location.pathname + window.location.hash;
             window.location.replace(newUrl);
           });
-        } else {
-          // Register the service worker as normal
+        } else if (!bypassSW) {
+          // Register service worker with more robust error handling
           window.addEventListener('load', () => {
+            // Add a safety timeout to prevent blocking page load if service worker hangs
+            const swTimeout = setTimeout(() => {
+              console.warn('Service worker registration timed out - continuing without SW');
+            }, 5000);
+            
             navigator.serviceWorker.register('/sw.js')
               .then(reg => {
+                clearTimeout(swTimeout);
                 console.log('Service worker registered:', reg);
                 
-                // Check if there's an updated service worker waiting
+                // Update service worker immediately if needed
                 if (reg.waiting) {
-                  console.log('New service worker waiting');
-                  // You could notify the user here
+                  console.log('New service worker waiting - activating immediately');
+                  reg.waiting.postMessage('SKIP_WAITING');
                 }
                 
-                // Listen for new service workers
+                // Monitor for updates
                 reg.addEventListener('updatefound', () => {
                   const newWorker = reg.installing;
                   console.log('New service worker installing');
@@ -79,50 +93,69 @@
                     });
                   }
                 });
-
-                // Health check for service worker
-                setInterval(() => {
-                  if (navigator.serviceWorker.controller) {
-                    const start = Date.now();
-                    const timeoutPromise = new Promise((_, reject) => 
-                      setTimeout(() => reject(new Error('Service Worker timeout')), 3000)
-                    );
-                    
-                    const messageChannel = new MessageChannel();
-                    messageChannel.port1.onmessage = (event) => {
-                      if (event.data && event.data.action === 'pong') {
-                        const duration = Date.now() - start;
-                        console.log(`Service Worker responded in ${duration}ms`);
-                      }
-                    };
-                    
-                    Promise.race([
-                      navigator.serviceWorker.ready.then(registration => {
-                        registration.active.postMessage(
-                          { action: 'ping' },
-                          [messageChannel.port2]
-                        );
-                      }),
-                      timeoutPromise
-                    ]).catch(error => {
-                      console.warn('Service worker health check failed:', error);
-                      console.log('Consider using ?disable_sw=true if you have persistent issues');
-                    });
-                  }
-                }, 60000); // Check every minute
               })
               .catch(err => {
+                clearTimeout(swTimeout);
                 console.error('Service worker registration failed:', err);
-                // Consider disabling service worker functionality on error
+                console.log('Continuing without service worker');
               });
-              
-            // Listen for controller change events
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-              console.log('Service worker controller changed');
-            });
+
+            // Health check for service worker - simplified to run less frequently
+            setInterval(() => {
+              if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                  action: 'ping',
+                  timestamp: Date.now()
+                });
+              }
+            }, 120000); // Every 2 minutes
           });
         }
+        
+        // Display emergency instructions when service worker causes issues
+        window.addEventListener('error', (event) => {
+          // If we detect critical errors, offer a way to disable service worker
+          if (event.message && event.message.includes('ServiceWorker')) {
+            console.error('ServiceWorker related error detected:', event);
+            
+            // Only show this message once per session
+            if (!sessionStorage.getItem('sw_error_shown')) {
+              sessionStorage.setItem('sw_error_shown', 'true');
+              console.log('To fix service worker issues, try adding ?disable_sw=true to the URL');
+            }
+          }
+        });
       }
+      
+      // Add emergency reload function
+      window.emergencyReload = function() {
+        window.location.href = '/?bypass-sw=true';
+      };
+      
+      // Add a timeout to check if the application has loaded correctly
+      setTimeout(() => {
+        const rootEl = document.getElementById('root');
+        if (!rootEl || !rootEl.children || rootEl.children.length === 0) {
+          console.error('Application failed to load within timeout - reloading with bypass');
+          window.location.href = '/?bypass-sw=true';
+        }
+      }, 10000);
+    </script>
+    <!-- Emergency reload button that appears if loading fails -->
+    <div id="emergency-container" style="display: none; position: fixed; bottom: 10px; right: 10px; z-index: 9999;">
+      <button onclick="window.emergencyReload()" 
+              style="background: #ef4444; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
+        Problème de chargement? Cliquer ici
+      </button>
+    </div>
+    <script>
+      // Show emergency button if app doesn't load in 5 seconds
+      setTimeout(() => {
+        const rootEl = document.getElementById('root');
+        if (!rootEl || !rootEl.children || rootEl.children.length === 0) {
+          document.getElementById('emergency-container').style.display = 'block';
+        }
+      }, 5000);
     </script>
   </body>
 </html>

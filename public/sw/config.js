@@ -1,10 +1,10 @@
 
 // Configuration values for the service worker
-export const CACHE_NAME_STATIC = 'botnb-client-portal-static-v3'; // Version incrémentée
-export const CACHE_NAME_DYNAMIC = 'botnb-client-portal-dynamic-v3'; // Version incrémentée
+const CACHE_NAME_STATIC = 'botnb-client-portal-static-v3';
+const CACHE_NAME_DYNAMIC = 'botnb-client-portal-dynamic-v3';
 
 // Minimal static assets that don't change with builds
-export const STATIC_ASSETS = [
+const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/fallback.html',
@@ -12,7 +12,7 @@ export const STATIC_ASSETS = [
 ];
 
 // Log function with prefix for easier debugging
-export const logSW = (message, data) => {
+const logSW = (message, data) => {
   const prefix = '[Service Worker]';
   if (data) {
     console.log(prefix, message, data);
@@ -20,3 +20,9 @@ export const logSW = (message, data) => {
     console.log(prefix, message);
   }
 };
+
+// Export the functions and constants to the global scope
+self.CACHE_NAME_STATIC = CACHE_NAME_STATIC;
+self.CACHE_NAME_DYNAMIC = CACHE_NAME_DYNAMIC;
+self.STATIC_ASSETS = STATIC_ASSETS;
+self.logSW = logSW;
