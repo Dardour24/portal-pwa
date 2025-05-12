@@ -3,9 +3,18 @@ import { Home, House, Bed, HelpCircle, Mail } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useCallback, memo } from "react";
+import { LucideIcon } from "lucide-react";
+
+interface NavItemProps {
+  icon: LucideIcon;
+  label: string;
+  path: string;
+  isActive: boolean;
+  onClick: () => void;
+}
 
 // Composant d'élément de navigation extrait et mémorisé
-const NavItem = memo(({ icon: Icon, label, path, isActive, onClick }) => {
+const NavItem = memo(({ icon: Icon, label, path, isActive, onClick }: NavItemProps) => {
   return (
     <button
       className={`mobile-nav-link relative min-w-[20%] py-2 ${
@@ -43,9 +52,9 @@ const MobileNavbar = () => {
     { icon: Mail, label: "Contact", path: "/contact" },
   ];
 
-  const isActive = useCallback((path) => location.pathname === path, [location.pathname]);
+  const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);
   
-  const handleNavigate = useCallback((path) => () => {
+  const handleNavigate = useCallback((path: string) => () => {
     navigate(path);
   }, [navigate]);
 

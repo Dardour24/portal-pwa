@@ -14,9 +14,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { motion } from "framer-motion";
+import { User as UserType } from "../types/auth";
+
+interface MenuButtonProps {
+  onClick: () => void;
+}
 
 // Mémoriser le bouton du menu pour éviter les re-rendus
-const MenuButton = memo(({ onClick }) => (
+const MenuButton = memo(({ onClick }: MenuButtonProps) => (
   <Button 
     variant="ghost" 
     size="icon" 
@@ -48,8 +53,14 @@ const Logo = memo(() => (
 
 Logo.displayName = "Logo";
 
+interface UserMenuProps {
+  user: UserType | null;
+  onProfileClick: () => void;
+  onLogout: () => void;
+}
+
 // Mémoriser le menu utilisateur pour éviter les re-rendus
-const UserMenu = memo(({ user, onProfileClick, onLogout }) => {
+const UserMenu = memo(({ user, onProfileClick, onLogout }: UserMenuProps) => {
   if (!user) return null;
   
   return (
@@ -126,7 +137,7 @@ const Navbar = ({ isMobile }: NavbarProps) => {
       <div className="flex items-center">
         {!isMobile && (
           <SidebarTrigger>
-            <MenuButton />
+            <MenuButton onClick={() => {}} />
           </SidebarTrigger>
         )}
         
