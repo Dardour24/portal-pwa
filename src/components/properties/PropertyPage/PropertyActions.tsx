@@ -22,29 +22,23 @@ export function usePropertyActions(): PropertyActionsProps {
   
   // Handle editing a property
   const onEdit = (propertyId: string) => {
-    const property = properties.find(p => p.id === propertyId);
-    if (property) {
-      setSelectedProperty(property);
-      setIsEditDialogOpen(true);
-    }
+    // Simply return the property ID for the parent component to handle
+    console.log("Edit property requested for:", propertyId);
+    return propertyId;
   };
   
   // Handle deleting a property
   const onDelete = (propertyId: string) => {
-    const property = properties.find(p => p.id === propertyId);
-    if (property) {
-      setSelectedProperty(property);
-      setIsDeleteDialogOpen(true);
-    }
+    // Simply return the property ID for the parent component to handle
+    console.log("Delete property requested for:", propertyId);
+    return propertyId;
   };
   
   // Handle managing knowledge base
   const onManageKnowledgeBase = (propertyId: string) => {
-    const property = properties.find(p => p.id === propertyId);
-    if (property) {
-      setSelectedProperty(property);
-      setIsKnowledgeBaseDialogOpen(true);
-    }
+    // Simply return the property ID for the parent component to handle
+    console.log("Manage knowledge base requested for:", propertyId);
+    return propertyId;
   };
   
   return {

@@ -1,76 +1,18 @@
-import { supabase } from "@/lib/supabase";
+
+import { propertyCache } from "./properties/propertyCache";
+import { propertyRetrieval } from "./properties/propertyRetrieval";
+import { propertyMutations } from "./properties/propertyMutations";
 import { Property } from "@/types/property";
 
-// Cache for property data with expiration time
-const propertyCache = new Map<string, { data: Property[]; timestamp: number; totalCount: number }>();
-const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes in milliseconds
-
+/**
+ * Main property service that combines all property-related functionality
+ */
 export const propertyService = {
   /**
    * Récupère les propriétés de l'utilisateur connecté avec pagination
    */
   async getProperties(page = 1, pageSize = 10, forceRefresh = false): Promise<{ data: Property[]; totalCount: number }> {
-    // Generate a cache key based on pagination parameters
-    const cacheKey = `properties_${page}_${pageSize}`;
-    
-    // Check cache if we're not forcing a refresh
-    if (!forceRefresh) {
-      const cachedData = propertyCache.get(cacheKey);
-      const now = Date.now();
-      
-      if (cachedData && (now - cachedData.timestamp < CACHE_EXPIRY_TIME)) {
-        console.log("Using cached property data for page:", page);
-        return { 
-          data: cachedData.data,
-          totalCount: cachedData.totalCount
-        };
-      }
-    }
-    
-    // Calculate start and end for pagination
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize - 1;
-    
-    try {
-      // First, get the total count for pagination info
-      const { count, error: countError } = await supabase
-        .from('properties')
-        .select('*', { count: 'exact', head: true });
-      
-      if (countError) {
-        console.error('Erreur lors du comptage des propriétés:', countError);
-        throw countError;
-      }
-      
-      const totalCount = count || 0;
-      
-      // Then get the actual data with pagination
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .range(start, end);
-      
-      if (error) {
-        console.error('Erreur lors de la récupération des propriétés:', error);
-        throw error;
-      }
-      
-      // Update cache with the new data
-      propertyCache.set(cacheKey, { 
-        data: data || [],
-        timestamp: Date.now(),
-        totalCount
-      });
-      
-      return { 
-        data: data || [],
-        totalCount
-      };
-    } catch (error) {
-      console.error('Exception lors de la récupération des propriétés:', error);
-      throw error instanceof Error ? error : new Error("Une erreur inconnue s'est produite");
-    }
+    return propertyRetrieval.getProperties(page, pageSize, forceRefresh);
   },
   
   /**
@@ -84,139 +26,25 @@ export const propertyService = {
    * Crée une nouvelle propriété pour l'utilisateur connecté
    */
   async createProperty(property: Omit<Property, 'id' | 'client_id' | 'created_at' | 'updated_at'>): Promise<Property> {
-    // Log pour déboguer les données reçues
-    console.log("createProperty - données reçues:", property);
-    
-    // Récupérer l'ID de l'utilisateur connecté
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      throw new Error("Utilisateur non authentifié");
-    }
-    
-    // Vérifier que name est présent (obligatoire)
-    if (!property.name) {
-      throw new Error("Le nom du logement est obligatoire");
-    }
-    
-    // Ajouter client_id à la propriété (lié à l'UUID de l'utilisateur)
-    const propertyWithClientId = {
-      ...property,
-      client_id: user.id
-    };
-    
-    console.log("Données à insérer dans Supabase:", propertyWithClientId);
-    
-    try {
-      const { data, error } = await supabase
-        .from('properties')
-        .insert(propertyWithClientId)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Erreur lors de la création de la propriété:', error);
-        throw error;
-      }
-      
-      if (!data) {
-        throw new Error("Aucune donnée retournée après création");
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Exception lors de la création de la propriété:', error);
-      throw error instanceof Error ? error : new Error("Une erreur inconnue s'est produite");
-    }
+    const result = await propertyMutations.createProperty(property);
+    propertyCache.clear(); // Clear cache after mutation
+    return result;
   },
   
   /**
    * Met à jour une propriété existante
    */
   async updateProperty(id: string, property: Partial<Omit<Property, 'id' | 'client_id' | 'created_at' | 'updated_at'>>): Promise<Property> {
-    // Log pour déboguer les données reçues
-    console.log("updateProperty - données reçues:", property);
-    
-    try {
-      const { data, error } = await supabase
-        .from('properties')
-        .update(property)
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Erreur lors de la mise à jour de la propriété:', error);
-        throw error;
-      }
-      
-      if (!data) {
-        throw new Error("Aucune donnée retournée après mise à jour");
-      }
-      
-      return data;
-    } catch (error) {
-      console.error('Exception lors de la mise à jour de la propriété:', error);
-      throw error instanceof Error ? error : new Error("Une erreur inconnue s'est produite");
-    }
+    const result = await propertyMutations.updateProperty(id, property);
+    propertyCache.clear(); // Clear cache after mutation
+    return result;
   },
   
   /**
    * Supprime une propriété et toutes les réponses associées
    */
   async deleteProperty(id: string): Promise<void> {
-    try {
-      // Démarrer une transaction pour supprimer les réponses associées puis la propriété
-      console.log("Suppression des réponses associées au logement:", id);
-      const { error: answersError } = await supabase
-        .from('form_answers')
-        .delete()
-        .eq('property_id', id);
-      
-      if (answersError) {
-        console.error('Erreur lors de la suppression des réponses:', answersError);
-        throw answersError;
-      }
-      
-      console.log("Suppression des questions personnalisées associées au logement:", id);
-      const { error: questionsError } = await supabase
-        .from('form_questions')
-        .delete()
-        .eq('property_id', id)
-        .eq('is_custom', true);
-      
-      if (questionsError) {
-        console.error('Erreur lors de la suppression des questions personnalisées:', questionsError);
-        throw questionsError;
-      }
-      
-      console.log("Suppression du logement:", id);
-      const { error: propertyError } = await supabase
-        .from('properties')
-        .delete()
-        .eq('id', id);
-      
-      if (propertyError) {
-        console.error('Erreur lors de la suppression du logement:', propertyError);
-        throw propertyError;
-      }
-      
-      console.log("Logement et données associées supprimés avec succès");
-    } catch (error) {
-      console.error('Exception lors de la suppression du logement et des données associées:', error);
-      throw error instanceof Error ? error : new Error("Une erreur inconnue s'est produite");
-    }
+    await propertyMutations.deleteProperty(id);
+    propertyCache.clear(); // Clear cache after mutation
   }
 };
-
-// Add automatic cleanup to prevent memory leaks
-if (typeof window !== 'undefined') {
-  setInterval(() => {
-    const now = Date.now();
-    for (const [key, cacheEntry] of propertyCache.entries()) {
-      if (now - cacheEntry.timestamp > CACHE_EXPIRY_TIME) {
-        propertyCache.delete(key);
-      }
-    }
-  }, 15 * 60 * 1000); // Run cleanup every 15 minutes
-}
