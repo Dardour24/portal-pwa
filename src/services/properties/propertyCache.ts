@@ -2,7 +2,7 @@
 import { Property } from "@/types/property";
 
 // Cache for property data with expiration time
-const propertyCache = new Map<string, { data: Property[]; timestamp: number; totalCount: number }>();
+const cacheStorage = new Map<string, { data: Property[]; timestamp: number; totalCount: number }>();
 const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 /**
@@ -14,7 +14,7 @@ export const propertyCache = {
    */
   get(page: number, pageSize: number): { data: Property[]; totalCount: number } | null {
     const cacheKey = `properties_${page}_${pageSize}`;
-    const cachedData = propertyCache.get(cacheKey);
+    const cachedData = cacheStorage.get(cacheKey);
     const now = Date.now();
     
     if (cachedData && (now - cachedData.timestamp < CACHE_EXPIRY_TIME)) {
@@ -33,7 +33,7 @@ export const propertyCache = {
    */
   set(page: number, pageSize: number, data: Property[], totalCount: number): void {
     const cacheKey = `properties_${page}_${pageSize}`;
-    propertyCache.set(cacheKey, { 
+    cacheStorage.set(cacheKey, { 
       data,
       timestamp: Date.now(),
       totalCount
@@ -44,7 +44,7 @@ export const propertyCache = {
    * Clears all cached property data
    */
   clear(): void {
-    propertyCache.clear();
+    cacheStorage.clear();
   }
 };
 
@@ -52,9 +52,9 @@ export const propertyCache = {
 if (typeof window !== 'undefined') {
   setInterval(() => {
     const now = Date.now();
-    for (const [key, cacheEntry] of propertyCache.entries()) {
+    for (const [key, cacheEntry] of cacheStorage.entries()) {
       if (now - cacheEntry.timestamp > CACHE_EXPIRY_TIME) {
-        propertyCache.delete(key);
+        cacheStorage.delete(key);
       }
     }
   }, 15 * 60 * 1000); // Run cleanup every 15 minutes
