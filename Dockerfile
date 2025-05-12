@@ -82,6 +82,7 @@ EXPOSE 80
 
 # Start nginx with emergency shell script
 RUN echo '#!/bin/sh\necho "Starting Nginx with health monitoring..."\nnginx -g "daemon off;"' > /start.sh && \
-    chmod +x /start.sh
+    chmod +x /start.sh && \
+    cat /start.sh
 
 CMD ["/start.sh"]
