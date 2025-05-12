@@ -6,21 +6,29 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { verifySupabaseSetup } from "./utils/verifySupabaseSetup";
+import { Spinner } from "./components/ui/spinner";
 
-// Pages
-import Home from "./pages/Home";
-import Profile from "./pages/Profile";
-import Properties from "./pages/Properties";
-import Beds24 from "./pages/Beds24";
-import Faq from "./pages/Faq";
-import Contact from "./pages/Contact";
-import SignIn from "./pages/SignIn";
-import SignUp from "./pages/SignUp";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import NotFound from "./pages/NotFound";
+// Pages chargées de manière différée avec React.lazy
+const Home = lazy(() => import("./pages/Home"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Properties = lazy(() => import("./pages/Properties"));
+const Beds24 = lazy(() => import("./pages/Beds24"));
+const Faq = lazy(() => import("./pages/Faq"));
+const Contact = lazy(() => import("./pages/Contact"));
+const SignIn = lazy(() => import("./pages/SignIn"));
+const SignUp = lazy(() => import("./pages/SignUp"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+
+// Composant de chargement pour Suspense
+const LoadingFallback = () => (
+  <div className="flex h-screen items-center justify-center">
+    <Spinner className="h-10 w-10" />
+  </div>
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,39 +57,41 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <BrowserRouter>
-            <Routes>
-              <Route path="/signin" element={<SignIn />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              
-              <Route path="/" element={<Layout />}>
-                <Route index element={
-                  <ProtectedRoute>
-                    <Home />
-                  </ProtectedRoute>
-                } />
-                <Route path="profile" element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                } />
-                <Route path="properties" element={
-                  <ProtectedRoute>
-                    <Properties />
-                  </ProtectedRoute>
-                } />
-                <Route path="beds24" element={
-                  <ProtectedRoute>
-                    <Beds24 />
-                  </ProtectedRoute>
-                } />
-                <Route path="faq" element={<Faq />} />
-                <Route path="contact" element={<Contact />} />
-              </Route>
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+            <Suspense fallback={<LoadingFallback />}>
+              <Routes>
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                
+                <Route path="/" element={<Layout />}>
+                  <Route index element={
+                    <ProtectedRoute>
+                      <Home />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="profile" element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="properties" element={
+                    <ProtectedRoute>
+                      <Properties />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="beds24" element={
+                    <ProtectedRoute>
+                      <Beds24 />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="faq" element={<Faq />} />
+                  <Route path="contact" element={<Contact />} />
+                </Route>
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
