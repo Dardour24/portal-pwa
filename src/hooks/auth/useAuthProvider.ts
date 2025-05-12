@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { useAuthState } from './useAuthState';
-import { signInWithEmail, signUpWithEmail, signOut, refreshAuthToken } from './authService';
+import { signInWithEmail, signUpWithEmail, signOut, refreshAuthToken, checkNetworkConnection } from './authService';
 import { AuthContextType, LoginResult } from '../../types/auth';
 import { toast } from '@/hooks/use-toast';
 

@@ -7,6 +7,7 @@ import { resetPassword, updatePassword } from './passwordService';
 import { clearClientDataCache } from './clientCache';
 
 // Fonction d'utilitaire pour vérifier l'état de la connexion réseau
+// Note: This function is now only defined once and exported only once
 export const checkNetworkConnection = (): boolean => {
   return navigator.onLine;
 };
@@ -22,6 +23,6 @@ export {
   mapUserData,
   resetPassword, 
   updatePassword,
-  clearClientDataCache,
-  checkNetworkConnection
+  clearClientDataCache
+  // checkNetworkConnection is already exported above, so we remove it here
 };
