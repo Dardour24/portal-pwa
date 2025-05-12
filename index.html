@@ -48,7 +48,7 @@
           // Unregister any existing service workers
           navigator.serviceWorker.getRegistrations().then(registrations => {
             for (const registration of registrations) {
-              console.log('Unregistering service worker');
+              console.log('Unregistering service worker due to disable_sw parameter');
               registration.unregister();
             }
             // Reload the page without the parameter
@@ -79,6 +79,37 @@
                     });
                   }
                 });
+
+                // Health check for service worker
+                setInterval(() => {
+                  if (navigator.serviceWorker.controller) {
+                    const start = Date.now();
+                    const timeoutPromise = new Promise((_, reject) => 
+                      setTimeout(() => reject(new Error('Service Worker timeout')), 3000)
+                    );
+                    
+                    const messageChannel = new MessageChannel();
+                    messageChannel.port1.onmessage = (event) => {
+                      if (event.data && event.data.action === 'pong') {
+                        const duration = Date.now() - start;
+                        console.log(`Service Worker responded in ${duration}ms`);
+                      }
+                    };
+                    
+                    Promise.race([
+                      navigator.serviceWorker.ready.then(registration => {
+                        registration.active.postMessage(
+                          { action: 'ping' },
+                          [messageChannel.port2]
+                        );
+                      }),
+                      timeoutPromise
+                    ]).catch(error => {
+                      console.warn('Service worker health check failed:', error);
+                      console.log('Consider using ?disable_sw=true if you have persistent issues');
+                    });
+                  }
+                }, 60000); // Check every minute
               })
               .catch(err => {
                 console.error('Service worker registration failed:', err);
