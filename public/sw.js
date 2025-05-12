@@ -1,6 +1,6 @@
 
 // Service worker for PWA functionality
-const CACHE_NAME = 'botnb-client-portal-v5'; // Version incrémentée pour forcer un refresh du cache
+const CACHE_NAME = 'botnb-client-portal-v6'; // Version incrémentée pour forcer un refresh du cache
 
 // Only cache static assets that don't change with builds
 const STATIC_ASSETS = [
@@ -195,38 +195,52 @@ self.addEventListener('unhandledrejection', (event) => {
   console.error('[Service Worker] Unhandled Promise Rejection:', event.reason);
 });
 
-// Add message handler to allow manual cache clearing
+// AMÉLIORATION: Optimisation du système de messages avec réponses immédiates et timeouts
+// Add message handler with improved acknowledgment system
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.action === 'clearCache') {
-    logSW('Clearing cache by request');
-    event.waitUntil(
-      caches.keys().then(cacheNames => {
-        return Promise.all(
-          cacheNames.map(cacheName => caches.delete(cacheName))
-        ).then(() => {
-          logSW('All caches cleared successfully');
-          // Optionally inform the client that the cache was cleared
-          if (event.source) {
-            event.source.postMessage({
-              action: 'cacheCleared',
-              success: true
-            });
-          }
-        });
-      })
-    );
+  // Immediately acknowledge receipt of the message to prevent timeouts
+  if (event.source) {
+    event.source.postMessage({
+      action: 'message-received',
+      originalAction: event.data?.action,
+      timestamp: Date.now()
+    });
   }
-});
-
-// Add a specific health check for the service worker
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.action === 'ping') {
-    logSW('Health check ping received');
-    if (event.source) {
-      event.source.postMessage({
-        action: 'pong',
-        timestamp: Date.now()
-      });
+  
+  // Handle specific message actions
+  if (event.data) {
+    // Clear cache action
+    if (event.data.action === 'clearCache') {
+      logSW('Clearing cache by request');
+      event.waitUntil(
+        caches.keys().then(cacheNames => {
+          return Promise.all(
+            cacheNames.map(cacheName => caches.delete(cacheName))
+          ).then(() => {
+            logSW('All caches cleared successfully');
+            // Notify the client that the cache was cleared
+            if (event.source) {
+              event.source.postMessage({
+                action: 'cacheCleared',
+                success: true,
+                timestamp: Date.now()
+              });
+            }
+          });
+        })
+      );
+    }
+    
+    // Health check ping
+    else if (event.data.action === 'ping') {
+      logSW('Health check ping received');
+      // Already sent immediate acknowledgment, now send specific pong response
+      if (event.source) {
+        event.source.postMessage({
+          action: 'pong',
+          timestamp: Date.now()
+        });
+      }
     }
   }
 });

@@ -76,18 +76,22 @@ export const useAuthState = (): AuthState => {
           const user: User = mapUserData(session.user, clientData);
           setState({ user, isLoading: false });
           
-          // Update localStorage cache
+          // Update localStorage cache with a timeout to prevent blocking the UI
           try {
-            localStorage.setItem('botnb-auth-user', JSON.stringify(user));
-            localStorage.setItem('botnb-auth-last-login', Date.now().toString());
+            setTimeout(() => {
+              localStorage.setItem('botnb-auth-user', JSON.stringify(user));
+              localStorage.setItem('botnb-auth-last-login', Date.now().toString());
+            }, 0);
           } catch (storageError) {
             console.warn("Could not update auth data in localStorage:", storageError);
           }
         } else {
           setState({ user: null, isLoading: false });
           // Clear localStorage cache if no session
-          localStorage.removeItem('botnb-auth-user');
-          localStorage.removeItem('botnb-auth-last-login');
+          setTimeout(() => {
+            localStorage.removeItem('botnb-auth-user');
+            localStorage.removeItem('botnb-auth-last-login');
+          }, 0);
         }
       } catch (error) {
         console.error("Error checking session:", error);
@@ -95,7 +99,8 @@ export const useAuthState = (): AuthState => {
       }
     };
 
-    checkUserSession();
+    // Executer la vérification de session après un court délai pour permettre au navigateur de traiter d'autres tâches
+    const sessionTimeout = setTimeout(checkUserSession, 10);
     
     // Set up auth state change listener with reduced debounce to avoid blocking authentication
     let debounceTimeout: number | undefined;
@@ -126,18 +131,22 @@ export const useAuthState = (): AuthState => {
               console.log("Updating user state with complete data:", user);
               setState({ user, isLoading: false });
               
-              // Update localStorage cache
+              // Update localStorage cache with timeout to prevent UI blocking
               try {
-                localStorage.setItem('botnb-auth-user', JSON.stringify(user));
-                localStorage.setItem('botnb-auth-last-login', Date.now().toString());
+                setTimeout(() => {
+                  localStorage.setItem('botnb-auth-user', JSON.stringify(user));
+                  localStorage.setItem('botnb-auth-last-login', Date.now().toString());
+                }, 0);
               } catch (storageError) {
                 console.warn("Could not update auth data in localStorage:", storageError);
               }
             } else {
               setState({ user: null, isLoading: false });
-              // Clear localStorage cache
-              localStorage.removeItem('botnb-auth-user');
-              localStorage.removeItem('botnb-auth-last-login');
+              // Clear localStorage cache with timeout to prevent UI blocking
+              setTimeout(() => {
+                localStorage.removeItem('botnb-auth-user');
+                localStorage.removeItem('botnb-auth-last-login');
+              }, 0);
             }
           } catch (error) {
             console.error("Error during auth state change:", error);
@@ -149,6 +158,7 @@ export const useAuthState = (): AuthState => {
 
     return () => {
       if (debounceTimeout) clearTimeout(debounceTimeout);
+      clearTimeout(sessionTimeout);
       subscription.unsubscribe();
     };
   }, [state.user?.id]);
