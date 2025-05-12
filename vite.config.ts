@@ -18,6 +18,22 @@ export default defineConfig(({ mode }) => {
       react(),
       mode === 'development' &&
       componentTagger(),
+      // Ajout de la configuration de préchargement
+      {
+        name: 'vite:preload-modules',
+        enforce: 'post',
+        apply: 'build',
+        transformIndexHtml(html) {
+          // Précharge les chunks JS critiques
+          return html.replace(
+            /<head>/,
+            `<head>
+              <link rel="modulepreload" href="/assets/index.js" />
+              <link rel="preload" href="/assets/main.css" as="style" />
+            `
+          );
+        }
+      }
     ].filter(Boolean),
     resolve: {
       alias: {
@@ -35,7 +51,28 @@ export default defineConfig(({ mode }) => {
       sourcemap: mode !== 'production',
       // Better error reporting
       reportCompressedSize: true,
+      // Configuration de la limite d'avertissement pour la taille des chunks
+      chunkSizeWarningLimit: 1000, // en kB
       rollupOptions: {
+        output: {
+          // Stratégie de fractionnement (code splitting)
+          manualChunks: {
+            react: ['react', 'react-dom'],
+            shadcn: [
+              '@radix-ui/react-accordion',
+              '@radix-ui/react-alert-dialog',
+              '@radix-ui/react-avatar',
+              // ... autres packages shadcn/ui
+            ],
+            tanstack: ['@tanstack/react-query'],
+            charts: ['recharts'],
+            utilities: ['date-fns', 'clsx', 'tailwind-merge'],
+          },
+          // Assurer que les chunks ont des noms cohérents
+          entryFileNames: 'assets/[name]-[hash].js',
+          chunkFileNames: 'assets/[name]-[hash].js',
+          assetFileNames: 'assets/[name]-[hash].[ext]',
+        },
         onwarn(warning, warn) {
           // Ignore certain warnings
           if (warning.code === 'MODULE_LEVEL_DIRECTIVE') return;
