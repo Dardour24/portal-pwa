@@ -6,7 +6,8 @@ importScripts(
   './sw/activate-handler.js',
   './sw/fetch-handler.js',
   './sw/message-handler.js',
-  './sw/error-handlers.js'
+  './sw/error-handlers.js',
+  './sw/offline-handler.js'
 );
 
 // Register event handlers
@@ -16,3 +17,6 @@ self.addEventListener('fetch', handleFetch);
 self.addEventListener('message', handleMessage);
 self.addEventListener('error', handleError);
 self.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+// Set this global flag to true to enable more aggressive caching
+self.ENABLE_OFFLINE_MODE = true;

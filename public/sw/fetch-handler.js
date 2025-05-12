@@ -1,5 +1,6 @@
 
 import { CACHE_NAME_STATIC, CACHE_NAME_DYNAMIC, STATIC_ASSETS, logSW } from './config.js';
+import { createOfflineResponse, isPageRequest } from './offline-handler.js';
 
 // Simplified helper functions for cleaner code
 const serveFromNetworkAndCache = async (request, cacheName) => {
@@ -20,6 +21,12 @@ const serveFromNetworkAndCache = async (request, cacheName) => {
     if (cachedResponse) {
       logSW(`Serving from cache: ${request.url}`);
       return cachedResponse;
+    }
+    
+    // Return offline page for HTML requests
+    if (isPageRequest(request)) {
+      logSW(`Serving offline page for: ${request.url}`);
+      return createOfflineResponse();
     }
     
     // Return error response if nothing in cache
@@ -44,6 +51,12 @@ const serveFromCacheThenNetwork = async (request) => {
     return response;
   } catch (error) {
     logSW(`Network failed for ${request.url}, no cache available`);
+    
+    // Return offline page for HTML requests
+    if (isPageRequest(request)) {
+      return createOfflineResponse();
+    }
+    
     return createErrorResponse();
   }
 };
@@ -88,10 +101,36 @@ export const handleFetch = (event) => {
       // Cache-first for known static assets
       event.respondWith(serveFromCacheThenNetwork(event.request));
     } 
-    else {
-      // Simple network-first for all other resources
+    else if (isImportantUserData(url)) {
+      // Network-only with offline awareness for important data
       event.respondWith(
-        fetch(event.request).catch(() => caches.match(event.request))
+        fetch(event.request)
+          .catch(() => {
+            if (isPageRequest(event.request)) {
+              return createOfflineResponse();
+            }
+            return caches.match(event.request);
+          })
+      );
+    }
+    else {
+      // Network-first with offline fallback for everything else
+      event.respondWith(
+        fetch(event.request)
+          .catch(() => {
+            return caches.match(event.request)
+              .then(cachedResponse => {
+                if (cachedResponse) {
+                  return cachedResponse;
+                }
+                
+                if (isPageRequest(event.request)) {
+                  return createOfflineResponse();
+                }
+                
+                return createErrorResponse();
+              });
+          })
       );
     }
   } catch (err) {
@@ -110,5 +149,12 @@ const isIndexFile = (url) => {
 };
 
 const isStaticAsset = (url) => {
-  return STATIC_ASSETS.includes(url.pathname);
+  return STATIC_ASSETS.includes(url.pathname) || url.pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot)$/);
+};
+
+const isImportantUserData = (url) => {
+  // API calls or user-specific data endpoints
+  return url.pathname.includes('/api/') || 
+         url.pathname.includes('/auth/') ||
+         url.pathname.includes('/supabase/');
 };
