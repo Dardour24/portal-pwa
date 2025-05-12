@@ -2,7 +2,7 @@
 import { Sidebar as SidebarComponent, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarFooter } from "@/components/ui/sidebar";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Navigation, House, Bed, HelpCircle, Mail, LogOut } from "lucide-react";
+import { Navigation, House, Bed, HelpCircle, Mail, LogOut, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
@@ -15,6 +15,7 @@ const Sidebar = () => {
     { title: "Accueil", path: "/", icon: Navigation },
     { title: "Mes Logements", path: "/properties", icon: House },
     { title: "Mon Beds24", path: "/beds24", icon: Bed },
+    { title: "BotnB Link", path: "/botnblink", icon: MessageCircle },
     { title: "FAQ", path: "/faq", icon: HelpCircle },
     { title: "Nous Contacter", path: "/contact", icon: Mail },
   ];

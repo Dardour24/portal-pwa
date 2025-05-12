@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       clients: {
         Row: {
+          chatbot_link: string | null
           created_at: string | null
           email: string
           first_name: string | null
@@ -20,6 +21,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          chatbot_link?: string | null
           created_at?: string | null
           email: string
           first_name?: string | null
@@ -29,6 +31,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          chatbot_link?: string | null
           created_at?: string | null
           email?: string
           first_name?: string | null

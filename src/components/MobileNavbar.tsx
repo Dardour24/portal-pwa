@@ -1,5 +1,5 @@
 
-import { Home, House, Bed, HelpCircle, Mail } from "lucide-react";
+import { Home, House, Bed, HelpCircle, Mail, MessageCircle } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useCallback, memo } from "react";
@@ -50,8 +50,8 @@ const MobileNavbar = () => {
     { icon: Home, label: "Accueil", path: "/" },
     { icon: House, label: "Logements", path: "/properties" },
     { icon: Bed, label: "Beds24", path: "/beds24" },
+    { icon: MessageCircle, label: "BotnB Link", path: "/botnblink" },
     { icon: HelpCircle, label: "FAQ", path: "/faq" },
-    { icon: Mail, label: "Contact", path: "/contact" },
   ];
 
   const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);

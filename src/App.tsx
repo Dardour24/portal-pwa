@@ -17,6 +17,7 @@ const Properties = lazy(() => import("./pages/Properties"));
 const Beds24 = lazy(() => import("./pages/Beds24"));
 const Faq = lazy(() => import("./pages/Faq"));
 const Contact = lazy(() => import("./pages/Contact"));
+const BotnbLink = lazy(() => import("./pages/BotnbLink")); // Nouvelle page BotnbLink
 const SignIn = lazy(() => import("./pages/SignIn"));
 const SignUp = lazy(() => import("./pages/SignUp"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
@@ -83,6 +84,11 @@ const App = () => {
                   <Route path="beds24" element={
                     <ProtectedRoute>
                       <Beds24 />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="botnblink" element={
+                    <ProtectedRoute>
+                      <BotnbLink />
                     </ProtectedRoute>
                   } />
                   <Route path="faq" element={<Faq />} />

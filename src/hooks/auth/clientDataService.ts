@@ -1,3 +1,4 @@
+
 import { supabase } from '../../lib/supabase';
 import { UserData } from './types';
 import { User } from '../../types/auth';
@@ -19,7 +20,7 @@ export const fetchClientData = async (userId: string): Promise<UserData | null> 
     console.log("Fetching client data for user:", userId);
     const { data, error } = await supabase
       .from('clients')
-      .select('first_name, last_name, phone')
+      .select('first_name, last_name, phone, chatbot_link')
       .eq('id', userId)
       .maybeSingle();
 
@@ -61,5 +62,6 @@ export const mapUserData = (supabaseUser: any, clientData: UserData | null, exis
     first_name: clientData?.first_name || '',
     last_name: clientData?.last_name || '',
     phone: clientData?.phone || '',
+    chatbot_link: clientData?.chatbot_link || '',
   };
 };
