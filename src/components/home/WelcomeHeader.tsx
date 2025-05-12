@@ -8,22 +8,10 @@ const WelcomeHeader: React.FC = () => {
 
   // Extraire le nom à afficher
   useEffect(() => {
-    if (user) {
-      if (user.first_name) {
-        setDisplayName(user.first_name);
-      } else if (user.email) {
-        // Si pas de prénom, extraire du mail
-        try {
-          const emailName = user.email.split("@")[0];
-          const nameParts = emailName.split(".");
-          if (nameParts.length > 0) {
-            setDisplayName(nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1));
-          }
-        } catch (error) {
-          console.error("Error processing user email:", error);
-          setDisplayName(""); // Fallback en cas d'erreur
-        }
-      }
+    if (user && user.first_name) {
+      setDisplayName(user.first_name);
+    } else if (user && user.email) {
+      setDisplayName("");
     }
   }, [user]);
 
