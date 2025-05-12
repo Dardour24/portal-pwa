@@ -1,6 +1,6 @@
 
-import { useState, useRef, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/components/ui/use-toast";
 import { Property } from "@/types/property";
 import { propertyService } from "@/services/propertyService";
@@ -14,6 +14,12 @@ export function useProperties(isAuthenticated: boolean) {
   const [isAddingProperty, setIsAddingProperty] = useState(false);
   const [isEditingProperty, setIsEditingProperty] = useState(false);
   const [isDeletingProperty, setIsDeletingProperty] = useState(false);
+  
+  // État pour la pagination
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   
   // Références pour les timeouts
   const addTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -29,13 +35,22 @@ export function useProperties(isAuthenticated: boolean) {
     };
   }, []);
 
-  // Fetch all properties
-  const { data: properties = [], isLoading, refetch: refetchProperties } = useQuery({
-    queryKey: ['properties'],
-    queryFn: propertyService.getProperties,
+  // Fetch properties with pagination
+  const fetchPropertiesWithPagination = useCallback(async () => {
+    if (!isAuthenticated) return { data: [], totalCount: 0 };
+    return propertyService.getProperties(page, pageSize);
+  }, [isAuthenticated, page, pageSize]);
+  
+  // Fetch all properties with pagination
+  const { 
+    data: propertiesData = { data: [], totalCount: 0 }, 
+    isLoading, 
+    refetch: refetchProperties 
+  } = useQuery({
+    queryKey: ['properties', page, pageSize],
+    queryFn: fetchPropertiesWithPagination,
     enabled: isAuthenticated,
     retry: 1,
-    // Utiliser la structure correcte pour la gestion d'erreurs dans la dernière version de React Query
     meta: {
       onError: (error: Error) => {
         console.error("Erreur lors du chargement des propriétés:", error);
@@ -47,6 +62,40 @@ export function useProperties(isAuthenticated: boolean) {
       }
     }
   });
+
+  // Update total pages whenever total count or page size changes
+  useEffect(() => {
+    setTotalCount(propertiesData.totalCount);
+    setTotalPages(Math.max(1, Math.ceil(propertiesData.totalCount / pageSize)));
+  }, [propertiesData.totalCount, pageSize]);
+
+  // Méthodes pour la navigation des pages
+  const goToNextPage = useCallback(() => {
+    if (page < totalPages) {
+      setPage(prevPage => prevPage + 1);
+    }
+  }, [page, totalPages]);
+
+  const goToPreviousPage = useCallback(() => {
+    if (page > 1) {
+      setPage(prevPage => prevPage - 1);
+    }
+  }, [page]);
+
+  const goToPage = useCallback((pageNumber: number) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setPage(pageNumber);
+    }
+  }, [totalPages]);
+
+  const changePageSize = useCallback((newPageSize: number) => {
+    setPageSize(newPageSize);
+    setPage(1); // Reset to first page when changing page size
+  }, []);
+
+  const clearCache = useCallback(() => {
+    propertyService.clearCache();
+  }, []);
 
   // Add a new property
   const addProperty = async (propertyData: Omit<Property, 'id' | 'client_id' | 'created_at' | 'updated_at'>) => {
@@ -73,7 +122,10 @@ export function useProperties(isAuthenticated: boolean) {
         addTimeoutRef.current = null;
       }
       
+      // Invalidate cache and queries to refresh data
+      propertyService.clearCache();
       await queryClient.invalidateQueries({ queryKey: ['properties'] });
+
       toast({
         title: "Succès",
         description: "Le logement a été ajouté avec succès",
@@ -123,6 +175,19 @@ export function useProperties(isAuthenticated: boolean) {
     
     try {
       console.log("Données à mettre à jour (ID:", id, "):", propertyData);
+      
+      // Optimistic update
+      const previousProperties = queryClient.getQueryData<{ data: Property[]; totalCount: number }>(['properties', page, pageSize]);
+      
+      if (previousProperties) {
+        queryClient.setQueryData(['properties', page, pageSize], {
+          ...previousProperties,
+          data: previousProperties.data.map(property => 
+            property.id === id ? { ...property, ...propertyData } : property
+          )
+        });
+      }
+      
       const result = await propertyService.updateProperty(id, propertyData);
       
       // Annuler le timeout si l'opération a réussi
@@ -131,7 +196,10 @@ export function useProperties(isAuthenticated: boolean) {
         editTimeoutRef.current = null;
       }
       
+      // Clear cache and refresh data
+      propertyService.clearCache();
       await queryClient.invalidateQueries({ queryKey: ['properties'] });
+      
       toast({
         title: "Succès",
         description: "Le logement a été mis à jour avec succès",
@@ -178,6 +246,18 @@ export function useProperties(isAuthenticated: boolean) {
     
     try {
       console.log("Suppression du logement (ID:", id, ")");
+      
+      // Optimistic update
+      const previousProperties = queryClient.getQueryData<{ data: Property[]; totalCount: number }>(['properties', page, pageSize]);
+      
+      if (previousProperties) {
+        queryClient.setQueryData(['properties', page, pageSize], {
+          ...previousProperties,
+          data: previousProperties.data.filter(property => property.id !== id),
+          totalCount: previousProperties.totalCount - 1
+        });
+      }
+      
       await propertyService.deleteProperty(id);
       
       // Annuler le timeout si l'opération a réussi
@@ -186,7 +266,15 @@ export function useProperties(isAuthenticated: boolean) {
         deleteTimeoutRef.current = null;
       }
       
+      // Clear cache and refresh data
+      propertyService.clearCache();
       await queryClient.invalidateQueries({ queryKey: ['properties'] });
+      
+      // Adjust current page if we deleted the last item on the page
+      if (previousProperties && previousProperties.data.length === 1 && page > 1) {
+        setPage(prevPage => prevPage - 1);
+      }
+      
       return true;
     } catch (error) {
       // Annuler le timeout en cas d'erreur
@@ -213,14 +301,23 @@ export function useProperties(isAuthenticated: boolean) {
   };
 
   return {
-    properties,
+    properties: propertiesData.data,
+    totalCount,
+    page,
+    pageSize,
+    totalPages,
     isLoading,
     isAddingProperty,
     isEditingProperty,
     isDeletingProperty,
+    goToNextPage,
+    goToPreviousPage,
+    goToPage,
+    changePageSize,
     addProperty,
     updateProperty,
     deleteProperty,
-    refetchProperties
+    refetchProperties,
+    clearCache
   };
 }

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
@@ -27,7 +28,14 @@ const Properties = () => {
     addProperty,
     updateProperty,
     deleteProperty,
-    refetchProperties
+    refetchProperties,
+    // Pagination props
+    page,
+    pageSize,
+    totalPages,
+    totalCount,
+    goToPage,
+    changePageSize
   } = useProperties(isAuthenticated);
 
   // Gérer la soumission du formulaire d'ajout
@@ -111,12 +119,26 @@ const Properties = () => {
     });
     refetchProperties();
   };
+
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    goToPage(newPage);
+  };
+
+  // Handle page size change
+  const handlePageSizeChange = (newPageSize: number) => {
+    changePageSize(newPageSize);
+  };
   
   return (
     <div className="container mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Mes Logements</h1>
-        {/* Bouton "Ajouter un logement" en haut - nous gardons uniquement celui-ci */}
+        {totalCount > 0 && (
+          <p className="text-sm text-muted-foreground">
+            {totalCount} logement{totalCount > 1 ? 's' : ''} au total
+          </p>
+        )}
       </div>
       
       <AddPropertyDialog
@@ -169,6 +191,10 @@ const Properties = () => {
         onDelete={handleDelete}
         onEdit={handleEdit}
         onManageKnowledgeBase={handleManageKnowledgeBase}
+        page={page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
       />
     </div>
   );
