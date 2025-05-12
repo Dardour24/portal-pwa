@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuthState } from './useAuthState';
 import { signInWithEmail, signUpWithEmail, signOut, refreshAuthToken, checkNetworkConnection } from './authService';
@@ -110,6 +111,33 @@ const useAuthProvider = (): AuthContextType => {
       console.log("useAuthProvider: Attempting login");
       const result = await signInWithEmail(email, password);
       console.log("useAuthProvider: Login result", result);
+      
+      // Attendre pour s'assurer que l'état d'authentification est propagé
+      if (result.user) {
+        // Attendre que l'état soit correctement mis à jour avant de retourner le résultat
+        await new Promise<void>((resolve) => {
+          // Fonction pour vérifier si l'authentification est complète
+          const checkAuthState = () => {
+            if (!isLoading && user && user.id === result.user?.id) {
+              resolve();
+            } else {
+              setTimeout(checkAuthState, 100);
+            }
+          };
+          
+          // Vérifier l'état initial ou configurer un délai maximum
+          const maxTimeout = setTimeout(() => {
+            console.log("Auth state propagation timeout reached, continuing anyway");
+            resolve();
+          }, 1500);
+          
+          checkAuthState();
+          
+          // Nettoyer le timeout maximum si la résolution se fait plus tôt
+          return () => clearTimeout(maxTimeout);
+        });
+      }
+      
       return result;
     } catch (error) {
       console.error("useAuthProvider: Error during login:", error);

@@ -41,6 +41,9 @@ export const SignInForm = () => {
       const result = await login(values.email, values.password);
       
       if (result.user) {
+        // Attendre un court délai pour s'assurer que l'état d'authentification est complètement propagé
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
         toast({
           title: "Connecté avec succès",
           description: "Bienvenue sur votre portail client Botnb."
