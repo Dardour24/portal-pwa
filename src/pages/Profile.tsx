@@ -3,16 +3,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
 const Profile = () => {
   const { user } = useAuth();
   const [email, setEmail] = useState(user?.email || "");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [firstName, setFirstName] = useState(user?.first_name || "");
+  const [lastName, setLastName] = useState(user?.last_name || "");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Mettre à jour les champs si l'utilisateur change
+  useEffect(() => {
+    if (user) {
+      setEmail(user.email || "");
+      setFirstName(user.first_name || "");
+      setLastName(user.last_name || "");
+    }
+  }, [user]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -28,8 +28,19 @@ export const useAuthState = (): AuthState => {
         // Only use fallback if it's not too old
         if (now - loginTime < FALLBACK_SESSION_MAX_AGE) {
           console.log("Using cached user data for initial render");
+          const parsedUser = JSON.parse(cachedUser);
+          
+          // S'assurer que les valeurs ne sont jamais undefined mais plutôt des chaînes vides
+          const sanitizedUser: User = {
+            ...parsedUser,
+            email: parsedUser.email || '',
+            first_name: parsedUser.first_name || '',
+            last_name: parsedUser.last_name || '',
+            phone: parsedUser.phone || ''
+          };
+          
           setState({ 
-            user: JSON.parse(cachedUser),
+            user: sanitizedUser,
             isLoading: true // Keep loading true until we verify with Supabase
           });
         }
@@ -96,12 +107,14 @@ export const useAuthState = (): AuthState => {
         // Clear any pending debounce
         if (debounceTimeout) clearTimeout(debounceTimeout);
         
-        // CORRECTION: Réduit le debounce à 10ms pour éviter les délais d'authentification
+        // Réduit le debounce à 10ms pour éviter les délais d'authentification
         debounceTimeout = window.setTimeout(async () => {
           try {
             if (session?.user) {
-              // CORRECTION: Modification de la condition pour s'assurer que les données sont complètes
-              if (state.user?.id === session.user.id && state.user?.first_name) {
+              // Vérifier si on a déjà les données complètes de l'utilisateur
+              if (state.user?.id === session.user.id && 
+                  state.user?.email === session.user.email &&
+                  typeof state.user?.first_name === 'string') { // Vérifie explicitement que first_name est défini comme string
                 console.log("User complètement chargé, pas besoin de recharger");
                 setState(prev => ({ ...prev, isLoading: false }));
                 return;
@@ -130,7 +143,7 @@ export const useAuthState = (): AuthState => {
             console.error("Error during auth state change:", error);
             setState({ user: null, isLoading: false });
           }
-        }, 10); // CORRECTION: Réduit de 100ms à 10ms pour plus de réactivité
+        }, 10); // Maintenu à 10ms pour plus de réactivité
       }
     );
 

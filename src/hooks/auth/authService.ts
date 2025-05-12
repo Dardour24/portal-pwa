@@ -1,3 +1,4 @@
+
 import { supabase } from '../../lib/supabase';
 import { UserData } from './types';
 import { LoginResult, User, Session } from '../../types/auth';
@@ -25,17 +26,17 @@ export const fetchClientData = async (userId: string): Promise<UserData | null> 
       .from('clients')
       .select('first_name, last_name, phone')
       .eq('id', userId)
-      .single();
+      .maybeSingle(); // Changé de .single() à .maybeSingle() pour ne pas générer d'erreur si aucune donnée
 
-    if (error) {
+    if (error && error.code !== 'PGRST116') { // PGRST116 est le code pour "no rows returned"
       console.error("Error fetching client data:", error);
       return null;
     }
 
     console.log("Client data fetched:", data);
     
-    // Update cache
-    clientDataCache.set(userId, { data, timestamp: now });
+    // Update cache with data (même si null)
+    clientDataCache.set(userId, { data: data || null, timestamp: now });
     
     return data;
   } catch (error) {
@@ -72,9 +73,9 @@ export const signInWithEmail = async (email: string, password: string): Promise<
       const user: User = {
         id: data.user.id,
         email: data.user.email || '',
-        first_name: clientData?.first_name,
-        last_name: clientData?.last_name,
-        phone: clientData?.phone,
+        first_name: clientData?.first_name || '',
+        last_name: clientData?.last_name || '',
+        phone: clientData?.phone || '',
       };
       
       // Convert Supabase session to our Session type
@@ -243,9 +244,9 @@ export const mapUserData = (supabaseUser: any, clientData: UserData | null): Use
   return {
     id: supabaseUser.id,
     email: supabaseUser.email || '',
-    first_name: clientData?.first_name,
-    last_name: clientData?.last_name,
-    phone: clientData?.phone,
+    first_name: clientData?.first_name || '',
+    last_name: clientData?.last_name || '',
+    phone: clientData?.phone || '',
   };
 };
 
