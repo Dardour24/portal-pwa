@@ -92,10 +92,13 @@ export const handleFetch = (event) => {
       return;
     }
     
-    // IMPORTANT: Ne jamais mettre en cache les images uploadées, les servir directement
+    // Always bypass cache for uploaded images
     if (url.pathname.includes('/lovable-uploads/')) {
       // Bypass cache completely for uploaded images
-      event.respondWith(fetch(event.request));
+      event.respondWith(fetch(event.request).catch(error => {
+        logSW(`Failed to fetch uploaded image: ${url.pathname}`, error);
+        return new Response('Image not found', { status: 404 });
+      }));
       return;
     }
     

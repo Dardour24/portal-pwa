@@ -19,11 +19,15 @@ self.addEventListener('error', handleError);
 self.addEventListener('unhandledrejection', handleUnhandledRejection);
 
 // Set this global flag to true to enable more aggressive caching
-self.ENABLE_OFFLINE_MODE = false; // Désactivé pour éviter les problèmes avec les images
+self.ENABLE_OFFLINE_MODE = false;
 
-// Force update on each page load
+// Force update on each page load - with safety mechanism
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') {
-    self.skipWaiting();
+    self.skipWaiting().then(() => {
+      console.log('[Service Worker] Skip waiting successful');
+    }).catch(err => {
+      console.error('[Service Worker] Skip waiting failed:', err);
+    });
   }
 });

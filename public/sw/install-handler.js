@@ -5,24 +5,8 @@ import { CACHE_NAME_STATIC, STATIC_ASSETS, logSW } from './config.js';
 export const handleInstall = (event) => {
   logSW('Installing...');
   
-  // Force deletion of old caches before installing new ones
-  const deleteCachesPromise = caches.keys()
-    .then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          logSW('Deleting old cache during install:', cacheName);
-          return caches.delete(cacheName);
-        })
-      );
-    })
-    .catch(error => {
-      console.error('[Service Worker] Error deleting old caches:', error);
-      return Promise.resolve();
-    });
-    
-  // Create a single promise chain for cleaner error handling
-  const cacheStaticAssets = deleteCachesPromise
-    .then(() => caches.open(CACHE_NAME_STATIC))
+  // More conservative approach to cache management during install
+  const cacheStaticAssets = caches.open(CACHE_NAME_STATIC)
     .then(cache => {
       logSW('Caching static assets');
       return cache.addAll(STATIC_ASSETS);
