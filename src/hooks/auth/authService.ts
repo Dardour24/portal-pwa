@@ -1,73 +1,32 @@
 
 import { supabase } from '../../lib/supabase';
-import { UserData } from './types';
 import { LoginResult, User, Session } from '../../types/auth';
-
-// Cache for client data with expiration time
-const clientDataCache = new Map<string, { data: UserData | null, timestamp: number }>();
-const CACHE_EXPIRY_TIME = 5 * 60 * 1000; // 5 minutes in milliseconds
+import { fetchClientData, mapUserData } from './clientDataService';
+import { clearClientDataCache } from './clientCache';
 
 /**
- * Fetches client data from the database with caching
- */
-export const fetchClientData = async (userId: string): Promise<UserData | null> => {
-  try {
-    // Check if we have cached data that's still valid
-    const cachedData = clientDataCache.get(userId);
-    const now = Date.now();
-    
-    if (cachedData && (now - cachedData.timestamp < CACHE_EXPIRY_TIME)) {
-      console.log("Using cached client data for user:", userId);
-      return cachedData.data;
-    }
-    
-    console.log("Fetching client data for user:", userId);
-    const { data, error } = await supabase
-      .from('clients')
-      .select('first_name, last_name, phone')
-      .eq('id', userId)
-      .maybeSingle(); // Changé de .single() à .maybeSingle() pour ne pas générer d'erreur si aucune donnée
-
-    if (error && error.code !== 'PGRST116') { // PGRST116 est le code pour "no rows returned"
-      console.error("Error fetching client data:", error);
-      return null;
-    }
-
-    console.log("Client data fetched:", data);
-    
-    // Update cache with data (même si null)
-    clientDataCache.set(userId, { data: data || null, timestamp: now });
-    
-    return data;
-  } catch (error) {
-    console.error("Error in fetchClientData:", error);
-    return null;
-  }
-};
-
-/**
- * Signs in a user with email and password
+ * S'authentifie avec email et mot de passe
  */
 export const signInWithEmail = async (email: string, password: string): Promise<LoginResult> => {
   try {
-    // Check network connectivity before attempting authentication
+    // Vérifier la connectivité réseau avant de tenter l'authentification
     if (!navigator.onLine) {
       throw new Error("Aucune connexion réseau disponible. Vérifiez votre connexion internet.");
     }
     
-    console.log("Attempting login with email:", email);
+    console.log("Tentative de connexion avec email:", email);
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     
     if (error) {
-      console.error("Login error:", error);
+      console.error("Erreur de connexion:", error);
       throw error;
     }
     
     if (data.user) {
-      console.log("Login successful for user:", data.user.id);
+      console.log("Connexion réussie pour l'utilisateur:", data.user.id);
       const clientData = await fetchClientData(data.user.id);
       
       const user: User = {
@@ -78,7 +37,7 @@ export const signInWithEmail = async (email: string, password: string): Promise<
         phone: clientData?.phone || '',
       };
       
-      // Convert Supabase session to our Session type
+      // Convertir la session Supabase en notre type Session
       const session: Session = {
         access_token: data.session?.access_token || '',
         refresh_token: data.session?.refresh_token || '',
@@ -87,12 +46,12 @@ export const signInWithEmail = async (email: string, password: string): Promise<
         user: user
       };
       
-      // Store authentication data in localStorage as fallback
+      // Stocker les données d'authentification dans localStorage comme fallback
       try {
         localStorage.setItem('botnb-auth-user', JSON.stringify(user));
         localStorage.setItem('botnb-auth-last-login', Date.now().toString());
       } catch (storageError) {
-        console.warn("Could not store auth data in localStorage:", storageError);
+        console.warn("Impossible de stocker les données d'authentification dans localStorage:", storageError);
       }
       
       return {
@@ -103,13 +62,13 @@ export const signInWithEmail = async (email: string, password: string): Promise<
     
     return { user: null, session: null };
   } catch (error) {
-    console.error("Error in signInWithEmail:", error);
+    console.error("Erreur dans signInWithEmail:", error);
     throw error;
   }
 };
 
 /**
- * Signs up a user with email and password
+ * Inscrit un utilisateur avec email et mot de passe
  */
 export const signUpWithEmail = async (
   email: string, 
@@ -119,7 +78,7 @@ export const signUpWithEmail = async (
   phoneNumber: string
 ): Promise<LoginResult> => {
   try {
-    // Register the user with Supabase
+    // Inscrire l'utilisateur avec Supabase
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -133,12 +92,12 @@ export const signUpWithEmail = async (
     });
     
     if (error) {
-      console.error("Signup error:", error);
+      console.error("Erreur d'inscription:", error);
       throw error;
     }
     
     if (data.user) {
-      // Create a record in the clients table
+      // Créer un enregistrement dans la table clients
       const { error: clientError } = await supabase
         .from('clients')
         .insert([{
@@ -150,7 +109,7 @@ export const signUpWithEmail = async (
         }]);
         
       if (clientError) {
-        console.error("Error creating client profile:", clientError);
+        console.error("Erreur lors de la création du profil client:", clientError);
         throw clientError;
       }
       
@@ -162,7 +121,7 @@ export const signUpWithEmail = async (
         phone: phoneNumber,
       };
       
-      // Convert Supabase session to our Session type
+      // Convertir la session Supabase en notre type Session
       const session: Session = {
         access_token: data.session?.access_token || '',
         refresh_token: data.session?.refresh_token || '',
@@ -179,32 +138,32 @@ export const signUpWithEmail = async (
     
     return { user: null, session: null };
   } catch (error) {
-    console.error("Error in signUpWithEmail:", error);
+    console.error("Erreur dans signUpWithEmail:", error);
     throw error;
   }
 };
 
 /**
- * Signs out the current user
+ * Déconnecte l'utilisateur courant
  */
 export const signOut = async (): Promise<void> => {
   const { error } = await supabase.auth.signOut();
   if (error) {
-    console.error("Logout error:", error);
+    console.error("Erreur de déconnexion:", error);
     throw error;
   }
 };
 
 /**
- * Gets the current session with fallback to localStorage
+ * Récupère la session courante avec fallback vers localStorage
  */
 export const getCurrentSession = async () => {
   try {
-    // First try to get session from Supabase
+    // D'abord essayer de récupérer la session depuis Supabase
     const { data: { session }, error } = await supabase.auth.getSession();
     
     if (error) {
-      console.error("Error getting session:", error);
+      console.error("Erreur lors de la récupération de la session:", error);
       throw error;
     }
     
@@ -212,108 +171,51 @@ export const getCurrentSession = async () => {
       return session;
     }
     
-    // If no session from Supabase, try fallback from localStorage
+    // Si pas de session depuis Supabase, essayer le fallback depuis localStorage
     const fallbackUser = localStorage.getItem('botnb-auth-user');
     const lastLogin = localStorage.getItem('botnb-auth-last-login');
     
     if (fallbackUser && lastLogin) {
       const loginTime = parseInt(lastLogin, 10);
       const now = Date.now();
-      const FALLBACK_SESSION_MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
+      const FALLBACK_SESSION_MAX_AGE = 24 * 60 * 60 * 1000; // 24 heures
       
-      // Only use fallback if it's not too old
+      // Utiliser le fallback uniquement s'il n'est pas trop ancien
       if (now - loginTime < FALLBACK_SESSION_MAX_AGE) {
-        console.warn("Using fallback authentication from localStorage");
-        // We don't have a real session, but we can provide the user data
-        // This can be used to show a limited UI while trying to reauthenticate
+        console.warn("Utilisation de l'authentification de secours depuis localStorage");
+        // Nous n'avons pas de vraie session, mais nous pouvons fournir les données utilisateur
+        // Cela peut être utilisé pour afficher une UI limitée pendant la tentative de réauthentification
         return { user: JSON.parse(fallbackUser) };
       }
     }
     
     return null;
   } catch (error) {
-    console.error("Error in getCurrentSession:", error);
+    console.error("Erreur dans getCurrentSession:", error);
     throw error;
   }
 };
 
 /**
- * Maps Supabase user data to our User type
- */
-export const mapUserData = (supabaseUser: any, clientData: UserData | null): User => {
-  return {
-    id: supabaseUser.id,
-    email: supabaseUser.email || '',
-    first_name: clientData?.first_name || '',
-    last_name: clientData?.last_name || '',
-    phone: clientData?.phone || '',
-  };
-};
-
-/**
- * Sends a password reset email to the specified email address
- */
-export const resetPassword = async (email: string): Promise<{ success: boolean, error?: string }> => {
-  try {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    
-    if (error) {
-      console.error("Password reset error:", error);
-      return { success: false, error: error.message };
-    }
-    
-    return { success: true };
-  } catch (error: any) {
-    console.error("Error in resetPassword:", error);
-    return { success: false, error: error.message };
-  }
-};
-
-/**
- * Updates the user's password
- */
-export const updatePassword = async (newPassword: string): Promise<{ success: boolean, error?: string }> => {
-  try {
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword
-    });
-    
-    if (error) {
-      console.error("Password update error:", error);
-      return { success: false, error: error.message };
-    }
-    
-    return { success: true };
-  } catch (error: any) {
-    console.error("Error in updatePassword:", error);
-    return { success: false, error: error.message };
-  }
-};
-
-/**
- * Clears the client data cache
- */
-export const clearClientDataCache = () => {
-  clientDataCache.clear();
-};
-
-/**
- * Refreshes the authentication token if needed
+ * Rafraîchit le token d'authentification si nécessaire
  */
 export const refreshAuthToken = async (): Promise<boolean> => {
   try {
     const { data, error } = await supabase.auth.refreshSession();
     
     if (error) {
-      console.error("Error refreshing token:", error);
+      console.error("Erreur lors du rafraîchissement du token:", error);
       return false;
     }
     
     return !!data.session;
   } catch (error) {
-    console.error("Error in refreshAuthToken:", error);
+    console.error("Erreur dans refreshAuthToken:", error);
     return false;
   }
 };
+
+// Ré-exporter les fonctions des autres modules pour maintenir la compatibilité
+export { fetchClientData, mapUserData } from './clientDataService';
+export { resetPassword, updatePassword } from './passwordService';
+export { clearClientDataCache } from './clientCache';
