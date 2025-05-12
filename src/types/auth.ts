@@ -1,3 +1,4 @@
+
 /**
  * Interface for authentication user
  */
@@ -7,5 +8,37 @@ export interface User {
   first_name: string;
   last_name: string;
   phone: string;
-  chatbot_link?: string; // Ajout du champ chatbot_link
+  chatbot_link?: string;
+}
+
+/**
+ * Interface for authentication context
+ */
+export interface AuthContextType {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  networkAvailable: boolean;
+  login: (email: string, password: string) => Promise<LoginResult>;
+  signup: (email: string, password: string, firstName: string, lastName: string, phoneNumber: string) => Promise<LoginResult>;
+  logout: () => Promise<void>;
+}
+
+/**
+ * Interface for session
+ */
+export interface Session {
+  access_token: string;
+  refresh_token: string;
+  expires_at?: number;
+  expires_in?: number;
+  user: User;
+}
+
+/**
+ * Interface for login result
+ */
+export interface LoginResult {
+  user: User | null;
+  session: Session | null;
 }
