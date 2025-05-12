@@ -6,7 +6,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import MobileNavbar from "./MobileNavbar";
-import { motion } from "framer-motion";
+import PageTransition from "./ui/page-transition";
 
 const Layout = () => {
   const isMobile = useIsMobile();
@@ -22,44 +22,36 @@ const Layout = () => {
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
-  // Animation simplifiée pour de meilleures performances
-  const pageTransition = {
-    initial: { opacity: 0, y: 5 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.15 }
-  };
+  // Extracted common content rendering to reduce duplication
+  const renderContent = () => (
+    <PageTransition pathname={location.pathname}>
+      <Outlet />
+    </PageTransition>
+  );
 
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col w-full">
         {isMobile ? (
+          // Mobile layout
           <>
             <Navbar isMobile={true} />
             <main className={`flex-1 ${needsReducedPadding ? 'pb-12' : 'pb-16'}`}>
               <div className="container-layout py-3 md:py-4">
-                <motion.div
-                  key={location.pathname}
-                  {...pageTransition}
-                >
-                  <Outlet />
-                </motion.div>
+                {renderContent()}
               </div>
             </main>
             <MobileNavbar />
           </>
         ) : (
+          // Desktop layout
           <div className="flex h-full min-h-screen w-full">
             <Sidebar />
             <div className="flex flex-col flex-1">
               <Navbar isMobile={false} />
               <main className="flex-1 p-5 overflow-auto">
                 <div className="container-layout">
-                  <motion.div
-                    key={location.pathname}
-                    {...pageTransition}
-                  >
-                    <Outlet />
-                  </motion.div>
+                  {renderContent()}
                 </div>
               </main>
             </div>
