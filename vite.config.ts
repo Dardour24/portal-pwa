@@ -1,11 +1,11 @@
 
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig, loadEnv, Plugin, ConfigEnv } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode }: ConfigEnv) => {
   // Charge les variables d'environnement depuis .env
   const env = loadEnv(mode, process.cwd(), '');
   
@@ -21,9 +21,9 @@ export default defineConfig(({ mode }) => {
       // Ajout de la configuration de préchargement
       {
         name: 'vite:preload-modules',
-        enforce: 'post',
+        enforce: 'post' as const, // Spécifier 'post' comme valeur littérale constante
         apply: 'build',
-        transformIndexHtml(html) {
+        transformIndexHtml(html: string) { // Ajout du type explicite pour html
           // Précharge les chunks JS critiques
           return html.replace(
             /<head>/,
@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => {
           );
         }
       }
-    ].filter(Boolean),
+    ].filter(Boolean) as Plugin[],  // Type cast du tableau filtré en Plugin[]
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
