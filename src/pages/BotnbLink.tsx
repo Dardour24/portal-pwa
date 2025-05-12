@@ -24,13 +24,20 @@ const BotnbLink = () => {
     try {
       setIsLoading(true);
       
+      console.log("Fetching client data for user ID:", user?.id);
+      
       const { data, error } = await supabase
         .from("clients")
         .select("chatbot_link, first_name, last_name, phone")
         .eq("id", user?.id)
         .maybeSingle();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Erreur lors de la récupération des données client:", error);
+        throw error;
+      }
+      
+      console.log("Client data fetched:", data);
       
       setChatbotLink(data?.chatbot_link || "");
       setClientData({
