@@ -1,6 +1,7 @@
 
 import { supabase } from '../../lib/supabase';
-import { signInWithEmail, signUpWithEmail, signOut, getCurrentSession, refreshAuthToken } from './authFunctions';
+import { signInWithEmail, signUpWithEmail, signOut } from './userAuthentication';
+import { getCurrentSession, refreshAuthToken } from './sessionManagement';
 import { fetchClientData, mapUserData } from './clientDataService';
 import { resetPassword, updatePassword } from './passwordService';
 import { clearClientDataCache } from './clientCache';
