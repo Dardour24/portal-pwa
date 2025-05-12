@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
 import { Menu, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "../context/AuthContext";
@@ -15,6 +15,73 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { motion } from "framer-motion";
 
+// Mémoriser le bouton du menu pour éviter les re-rendus
+const MenuButton = memo(({ onClick }) => (
+  <Button 
+    variant="ghost" 
+    size="icon" 
+    className="mr-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+    onClick={onClick}
+  >
+    <Menu className="h-5 w-5" />
+    <span className="sr-only">Toggle sidebar</span>
+  </Button>
+));
+
+MenuButton.displayName = "MenuButton";
+
+// Mémoriser le logo pour éviter les re-rendus
+const Logo = memo(() => (
+  <motion.div 
+    className="logo-container"
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    transition={{ duration: 0.3 }}
+  >
+    <img 
+      src="/lovable-uploads/b97f6b22-40f5-4de9-9245-072e4eeb6895.png" 
+      alt="Botnb Logo" 
+      className="h-8" 
+    />
+  </motion.div>
+));
+
+Logo.displayName = "Logo";
+
+// Mémoriser le menu utilisateur pour éviter les re-rendus
+const UserMenu = memo(({ user, onProfileClick, onLogout }) => {
+  if (!user) return null;
+  
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+          <User className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          <span className="sr-only">Mon Compte</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56 bg-white shadow-lg rounded-card border border-gray-100">
+        <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
+        <DropdownMenuSeparator className="bg-separator" />
+        <DropdownMenuItem 
+          onClick={onProfileClick}
+          className="cursor-pointer hover:bg-gray-50"
+        >
+          Profil
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={onLogout}
+          className="cursor-pointer hover:bg-red-50 hover:text-red-600"
+        >
+          Déconnexion
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+});
+
+UserMenu.displayName = "UserMenu";
+
 interface NavbarProps {
   isMobile: boolean;
 }
@@ -24,6 +91,7 @@ const Navbar = ({ isMobile }: NavbarProps) => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
 
+  // Gérer le défilement de manière optimisée avec un throttle implicite
   useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 10;
@@ -38,10 +106,15 @@ const Navbar = ({ isMobile }: NavbarProps) => {
     };
   }, [scrolled]);
 
-  const handleLogout = () => {
+  // Mémoriser les gestionnaires d'événements pour éviter les re-rendus
+  const handleLogout = useCallback(() => {
     logout();
     navigate("/signin");
-  };
+  }, [logout, navigate]);
+
+  const handleProfileClick = useCallback(() => {
+    navigate("/profile");
+  }, [navigate]);
 
   return (
     <header
@@ -53,57 +126,20 @@ const Navbar = ({ isMobile }: NavbarProps) => {
       <div className="flex items-center">
         {!isMobile && (
           <SidebarTrigger>
-            <Button variant="ghost" size="icon" className="mr-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle sidebar</span>
-            </Button>
+            <MenuButton />
           </SidebarTrigger>
         )}
         
-        {isMobile && (
-          <motion.div 
-            className="logo-container"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-          >
-            <img 
-              src="/lovable-uploads/b97f6b22-40f5-4de9-9245-072e4eeb6895.png" 
-              alt="Botnb Logo" 
-              className="h-8" 
-            />
-          </motion.div>
-        )}
+        {isMobile && <Logo />}
       </div>
 
       {/* Right side */}
       <div className="flex items-center">
-        {user && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                <User className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                <span className="sr-only">Mon Compte</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 bg-white shadow-lg rounded-card border border-gray-100">
-              <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-separator" />
-              <DropdownMenuItem 
-                onClick={() => navigate("/profile")}
-                className="cursor-pointer hover:bg-gray-50"
-              >
-                Profil
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={handleLogout}
-                className="cursor-pointer hover:bg-red-50 hover:text-red-600"
-              >
-                Déconnexion
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
+        <UserMenu 
+          user={user} 
+          onProfileClick={handleProfileClick} 
+          onLogout={handleLogout}
+        />
       </div>
     </header>
   );
