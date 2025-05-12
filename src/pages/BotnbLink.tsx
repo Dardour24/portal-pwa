@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,8 +12,6 @@ const BotnbLink = () => {
   const { user } = useAuth();
   const [chatbotLink, setChatbotLink] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
   
   useEffect(() => {
     if (user?.id) {
@@ -47,47 +44,6 @@ const BotnbLink = () => {
     }
   };
 
-  const saveChatbotLink = async () => {
-    if (!user?.id) return;
-    
-    try {
-      setIsSaving(true);
-      
-      // Valider le format de l'URL (simple vérification)
-      if (chatbotLink && !isValidUrl(chatbotLink)) {
-        toast({
-          title: "Format incorrect",
-          description: "Veuillez entrer une URL valide (commençant par http:// ou https://)",
-          variant: "destructive"
-        });
-        setIsSaving(false);
-        return;
-      }
-      
-      const { error } = await supabase
-        .from("clients")
-        .update({ chatbot_link: chatbotLink })
-        .eq("id", user.id);
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Lien enregistré",
-        description: "Votre lien BotnB Link a été mis à jour avec succès.",
-      });
-      setIsEditing(false);
-    } catch (error) {
-      console.error("Erreur lors de l'enregistrement du lien chatbot:", error);
-      toast({
-        title: "Erreur",
-        description: "Impossible d'enregistrer le lien du chatbot. Veuillez réessayer plus tard.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const copyToClipboard = () => {
     if (!chatbotLink) return;
     
@@ -105,15 +61,6 @@ const BotnbLink = () => {
           variant: "destructive"
         });
       });
-  };
-
-  const isValidUrl = (url: string) => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
   };
 
   return (
@@ -136,37 +83,6 @@ const BotnbLink = () => {
               <div className="flex justify-center py-6">
                 <Spinner className="h-8 w-8" />
               </div>
-            ) : isEditing ? (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label htmlFor="chatbotLink" className="text-sm font-medium">URL du chatbot</label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="chatbotLink"
-                      value={chatbotLink}
-                      onChange={(e) => setChatbotLink(e.target.value)}
-                      placeholder="https://votre-chatbot-url.com"
-                      className="flex-1"
-                    />
-                    <Button 
-                      onClick={saveChatbotLink} 
-                      disabled={isSaving}
-                    >
-                      {isSaving ? "Enregistrement..." : "Enregistrer"}
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => {
-                        fetchChatbotLink();
-                        setIsEditing(false);
-                      }}
-                      disabled={isSaving}
-                    >
-                      Annuler
-                    </Button>
-                  </div>
-                </div>
-              </div>
             ) : (
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -186,20 +102,10 @@ const BotnbLink = () => {
                         <Copy className="h-4 w-4 mr-2" />
                         Copier
                       </Button>
-                      <Button 
-                        size="sm" 
-                        onClick={() => setIsEditing(true)}
-                        className="flex-shrink-0"
-                      >
-                        Modifier
-                      </Button>
                     </div>
                   ) : (
                     <div className="bg-muted p-4 rounded-md text-center">
-                      <p className="text-muted-foreground mb-2">Vous n'avez pas encore configuré de lien BotnB Link</p>
-                      <Button onClick={() => setIsEditing(true)}>
-                        Ajouter un lien
-                      </Button>
+                      <p className="text-muted-foreground">Votre Link sera bientôt disponible</p>
                     </div>
                   )}
                 </div>
