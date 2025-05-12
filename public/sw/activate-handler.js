@@ -1,7 +1,7 @@
 
 import { CACHE_NAME_STATIC, CACHE_NAME_DYNAMIC, logSW } from './config.js';
 
-// Clean up old caches when a new service worker activates
+// Clean up old caches when a new service worker activates - with safer approach
 export const handleActivate = (event) => {
   logSW('Activating...');
   
@@ -11,7 +11,8 @@ export const handleActivate = (event) => {
     .then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (!currentCaches.includes(cacheName)) {
+          // Only delete caches that start with our prefix but aren't the current versions
+          if (cacheName.startsWith('botnb-client-') && !currentCaches.includes(cacheName)) {
             logSW('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
@@ -20,7 +21,7 @@ export const handleActivate = (event) => {
       );
     })
     .then(() => {
-      logSW('All old caches cleared');
+      logSW('Old caches cleared');
       return self.clients.claim();
     })
     .then(() => {
@@ -39,7 +40,8 @@ export const handleActivate = (event) => {
     })
     .catch(error => {
       console.error('[Service Worker] Cache cleanup error:', error);
-      return Promise.resolve();
+      // Continue activation even if cache cleanup fails
+      return self.clients.claim();
     });
   
   event.waitUntil(cleanupPromise);

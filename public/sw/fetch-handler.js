@@ -2,61 +2,43 @@
 import { CACHE_NAME_STATIC, CACHE_NAME_DYNAMIC, STATIC_ASSETS, logSW } from './config.js';
 import { createOfflineResponse, isPageRequest } from './offline-handler.js';
 
-// Simplified helper functions for cleaner code
-const serveFromNetworkAndCache = async (request, cacheName) => {
+// Simplified helper functions for cleaner code - with reduced caching
+const serveFromNetworkFirst = async (request) => {
   try {
-    const response = await fetch(request);
+    // Try network first
+    const response = await fetch(request, { cache: 'no-cache' });
     logSW(`Network response for ${request.url}:`, response.status);
     
+    // Only cache successful responses
     if (response && response.status === 200) {
-      const clonedResponse = response.clone();
-      const cache = await caches.open(cacheName);
-      cache.put(request, clonedResponse);
+      try {
+        const clonedResponse = response.clone();
+        const cache = await caches.open(CACHE_NAME_DYNAMIC);
+        cache.put(request, clonedResponse);
+      } catch (err) {
+        console.warn('[SW] Failed to cache successful response:', err);
+      }
     }
     return response;
   } catch (error) {
-    logSW(`Network request failed for ${request.url}, falling back to cache`, error);
-    const cachedResponse = await caches.match(request);
-    
-    if (cachedResponse) {
-      logSW(`Serving from cache: ${request.url}`);
-      return cachedResponse;
+    logSW(`Network request failed for ${request.url}, trying cache`, error);
+    try {
+      const cachedResponse = await caches.match(request);
+      
+      if (cachedResponse) {
+        logSW(`Serving from cache: ${request.url}`);
+        return cachedResponse;
+      }
+    } catch (cacheError) {
+      logSW(`Cache retrieval failed for ${request.url}`, cacheError);
     }
     
-    // Return offline page for HTML requests
-    if (isPageRequest(request)) {
-      logSW(`Serving offline page for: ${request.url}`);
-      return createOfflineResponse();
-    }
-    
-    // Return error response if nothing in cache
-    return createErrorResponse();
-  }
-};
-
-const serveFromCacheThenNetwork = async (request) => {
-  const cachedResponse = await caches.match(request);
-  if (cachedResponse) {
-    logSW(`Serving static asset from cache: ${request.url}`);
-    return cachedResponse;
-  }
-  
-  try {
-    const response = await fetch(request);
-    if (response && response.status === 200) {
-      const clonedResponse = response.clone();
-      const cache = await caches.open(CACHE_NAME_STATIC);
-      cache.put(request, clonedResponse);
-    }
-    return response;
-  } catch (error) {
-    logSW(`Network failed for ${request.url}, no cache available`);
-    
-    // Return offline page for HTML requests
+    // Return offline page for HTML requests or error response
     if (isPageRequest(request)) {
       return createOfflineResponse();
     }
     
+    // Return error response
     return createErrorResponse();
   }
 };
@@ -69,7 +51,7 @@ const createErrorResponse = () => {
         <h1>Network Error</h1>
         <p>L'application ne peut pas se charger. Vérifiez votre connexion internet.</p>
         <button onclick="window.location.reload()">Réessayer</button>
-        <button onclick="window.location.href='/?disable_sw=true'">Désactiver le service worker</button>
+        <button onclick="window.location.href='/?bypass-sw=true'">Désactiver le service worker</button>
       </body>
     </html>`,
     { 
@@ -79,92 +61,41 @@ const createErrorResponse = () => {
   );
 };
 
-// Main fetch handler
+// Main fetch handler - with safety mechanisms
 export const handleFetch = (event) => {
+  // Allow bypassing the service worker completely
+  const url = new URL(event.request.url);
+  if (url.searchParams.has('bypass-sw')) {
+    return; // Let the browser handle this request normally
+  }
+  
   // Ignore non-GET requests
   if (event.request.method !== 'GET') return;
   
   try {
-    const url = new URL(event.request.url);
-    
     // Skip cross-origin requests
     if (url.origin !== self.location.origin) {
       return;
     }
     
+    // Bypass service worker for certain critical paths
+    if (url.pathname.includes('/health') || 
+        url.pathname.includes('/status.txt') ||
+        url.pathname === '/fallback.html') {
+      return; // Let these go straight to the server
+    }
+    
     // Always bypass cache for uploaded images
     if (url.pathname.includes('/lovable-uploads/')) {
-      // Bypass cache completely for uploaded images
-      event.respondWith(fetch(event.request).catch(error => {
-        logSW(`Failed to fetch uploaded image: ${url.pathname}`, error);
-        return new Response('Image not found', { status: 404 });
-      }));
+      // Let the browser handle this with its normal cache logic
       return;
     }
     
-    // Choose caching strategy based on resource type
-    if (isJsOrCssAsset(url) || isIndexFile(url)) {
-      // Network-first for JS/CSS/index files
-      event.respondWith(serveFromNetworkAndCache(event.request, CACHE_NAME_DYNAMIC));
-    } 
-    else if (isStaticAsset(url)) {
-      // Cache-first for known static assets
-      event.respondWith(serveFromCacheThenNetwork(event.request));
-    } 
-    else if (isImportantUserData(url)) {
-      // Network-only with offline awareness for important data
-      event.respondWith(
-        fetch(event.request)
-          .catch(() => {
-            if (isPageRequest(event.request)) {
-              return createOfflineResponse();
-            }
-            return caches.match(event.request);
-          })
-      );
-    }
-    else {
-      // Network-first with offline fallback for everything else
-      event.respondWith(
-        fetch(event.request)
-          .catch(() => {
-            return caches.match(event.request)
-              .then(cachedResponse => {
-                if (cachedResponse) {
-                  return cachedResponse;
-                }
-                
-                if (isPageRequest(event.request)) {
-                  return createOfflineResponse();
-                }
-                
-                return createErrorResponse();
-              });
-          })
-      );
-    }
+    // Network-first strategy for most requests to ensure latest content
+    event.respondWith(serveFromNetworkFirst(event.request));
   } catch (err) {
     console.error('[SW] General fetch handler error:', err);
+    // Let the browser handle this request normally if our handler fails
+    return;
   }
-};
-
-// Helper functions to identify resource types
-const isJsOrCssAsset = (url) => {
-  return url.pathname.startsWith('/assets/') || 
-         url.pathname.match(/\.(js|css)$/);
-};
-
-const isIndexFile = (url) => {
-  return url.pathname.includes('index-');
-};
-
-const isStaticAsset = (url) => {
-  return STATIC_ASSETS.includes(url.pathname) || url.pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|webp|woff|woff2|ttf|eot)$/);
-};
-
-const isImportantUserData = (url) => {
-  // API calls or user-specific data endpoints
-  return url.pathname.includes('/api/') || 
-         url.pathname.includes('/auth/') ||
-         url.pathname.includes('/supabase/');
 };

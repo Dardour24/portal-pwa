@@ -13,7 +13,7 @@ export const createOfflineResponse = () => {
         <style>
           body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #edf3fb;
+            background-color: #f9fafb;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -54,10 +54,20 @@ export const createOfflineResponse = () => {
             font-weight: 500;
             cursor: pointer;
             transition: background-color 0.2s;
-            margin-top: 16px;
+            margin: 8px;
+            display: inline-block;
           }
           .button:hover {
             background-color: #0284c7;
+          }
+          .button.secondary {
+            background-color: #94a3b8;
+          }
+          .button.secondary:hover {
+            background-color: #64748b;
+          }
+          .buttons {
+            margin-top: 16px;
           }
         </style>
       </head>
@@ -66,8 +76,10 @@ export const createOfflineResponse = () => {
           <div class="icon">📶</div>
           <h1>Mode Hors-ligne</h1>
           <p>Vous êtes actuellement hors-ligne. Certaines fonctionnalités peuvent être limitées jusqu'à ce que votre connexion soit rétablie.</p>
-          <p>Les données en cache sont toujours accessibles, mais les nouvelles modifications ne seront pas synchronisées tant que vous ne serez pas reconnecté.</p>
-          <button class="button" onclick="window.location.reload()">Réessayer</button>
+          <div class="buttons">
+            <button class="button" onclick="window.location.reload()">Réessayer</button>
+            <button class="button secondary" onclick="window.location.href='/?bypass-sw=true'">Mode sans cache</button>
+          </div>
         </div>
       </body>
     </html>`,
@@ -90,6 +102,7 @@ export const isPageRequest = (request) => {
   // 1. It's a navigate request (likely to be HTML)
   // 2. There's no file extension (likely to be a route)
   // 3. It's explicitly requesting HTML
+  // 4. It's the root path
   
   const acceptHeader = request.headers.get('Accept') || '';
   const isHtmlRequest = acceptHeader.includes('text/html');
@@ -97,7 +110,9 @@ export const isPageRequest = (request) => {
   return (
     request.mode === 'navigate' || 
     (!hasExtension && url.pathname !== '/') || 
-    isHtmlRequest
+    isHtmlRequest ||
+    url.pathname === '/' ||
+    url.pathname === '/index.html'
   );
 };
 

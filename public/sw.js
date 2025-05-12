@@ -21,6 +21,16 @@ self.addEventListener('unhandledrejection', handleUnhandledRejection);
 // Set this global flag to true to enable more aggressive caching
 self.ENABLE_OFFLINE_MODE = false;
 
+// Bypass service worker if needed
+self.addEventListener('fetch', event => {
+  // Check if the request contains a parameter to bypass the service worker
+  const url = new URL(event.request.url);
+  if (url.searchParams.has('bypass-sw')) {
+    // Skip the service worker for this request
+    return;
+  }
+});
+
 // Force update on each page load - with safety mechanism
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') {
