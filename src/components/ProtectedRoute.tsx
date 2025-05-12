@@ -32,17 +32,17 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
     search: window.location.search
   });
 
-  // Ajouter un timeout pour éviter le chargement infini
+  // CORRECTION: Augmentation du délai d'attente pour l'authentification
   useEffect(() => {
     if (isLoading) {
       const timer = setTimeout(() => {
-        console.log("Authentification: délai d'attente dépassé après 15 secondes");
+        console.log("Authentification: délai d'attente dépassé après 30 secondes");
         setLoadingTimeout(true);
         toast({
           title: "Mode prévisualisation activé",
           description: "L'authentification prend trop de temps, la prévisualisation est automatiquement activée."
         });
-      }, 15000); // 15 secondes de timeout (augmenté de 5 à 15 secondes)
+      }, 30000); // CORRECTION: Augmenté à 30 secondes pour donner plus de temps à l'authentification
       
       return () => clearTimeout(timer);
     }

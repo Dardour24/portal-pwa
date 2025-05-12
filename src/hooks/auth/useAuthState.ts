@@ -86,7 +86,7 @@ export const useAuthState = (): AuthState => {
 
     checkUserSession();
     
-    // Set up auth state change listener with debouncing to avoid multiple calls
+    // Set up auth state change listener with reduced debounce to avoid blocking authentication
     let debounceTimeout: number | undefined;
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -96,19 +96,21 @@ export const useAuthState = (): AuthState => {
         // Clear any pending debounce
         if (debounceTimeout) clearTimeout(debounceTimeout);
         
-        // Debounce to avoid multiple rapid calls
+        // CORRECTION: Réduit le debounce à 10ms pour éviter les délais d'authentification
         debounceTimeout = window.setTimeout(async () => {
           try {
             if (session?.user) {
-              // Avoid unnecessary client data fetch if we already have this user
-              if (state.user?.id === session.user.id) {
-                console.log("User ID unchanged, skipping client data fetch");
+              // CORRECTION: Modification de la condition pour s'assurer que les données sont complètes
+              if (state.user?.id === session.user.id && state.user?.first_name) {
+                console.log("User complètement chargé, pas besoin de recharger");
                 setState(prev => ({ ...prev, isLoading: false }));
                 return;
               }
               
               const clientData = await fetchClientData(session.user.id);
               const user: User = mapUserData(session.user, clientData);
+              
+              console.log("Updating user state with complete data:", user);
               setState({ user, isLoading: false });
               
               // Update localStorage cache
@@ -128,7 +130,7 @@ export const useAuthState = (): AuthState => {
             console.error("Error during auth state change:", error);
             setState({ user: null, isLoading: false });
           }
-        }, 100); // Small debounce to avoid multiple rapid updates
+        }, 10); // CORRECTION: Réduit de 100ms à 10ms pour plus de réactivité
       }
     );
 
