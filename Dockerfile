@@ -37,8 +37,12 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy service worker directly to ensure it's available
+# Copy service worker files directly to ensure they're available
 COPY public/sw.js /usr/share/nginx/html/sw.js
+COPY public/sw/ /usr/share/nginx/html/sw/
+
+# Ensure lovable-uploads folder exists
+RUN mkdir -p /usr/share/nginx/html/lovable-uploads
 
 # Make sure we have a correct doctype in index.html
 RUN if [ -f /usr/share/nginx/html/index.html ]; then \

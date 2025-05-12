@@ -37,20 +37,43 @@ const MenuButton = memo(({ onClick }: MenuButtonProps) => (
 MenuButton.displayName = "MenuButton";
 
 // Mémoriser le logo pour éviter les re-rendus
-const Logo = memo(() => (
-  <motion.div 
-    className="logo-container"
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 0.3 }}
-  >
-    <img 
-      src="/lovable-uploads/b97f6b22-40f5-4de9-9245-072e4eeb6895.png" 
-      alt="Botnb Logo" 
-      className="h-8" 
-    />
-  </motion.div>
-));
+const Logo = memo(() => {
+  const [imgSrc, setImgSrc] = useState<string>("/lovable-uploads/b97f6b22-40f5-4de9-9245-072e4eeb6895.png");
+  const [imgError, setImgError] = useState<boolean>(false);
+
+  // Gestionnaire d'erreur pour l'image du logo
+  const handleImageError = () => {
+    console.log("Logo image error, trying alternative path");
+    // Essayer un chemin alternatif si l'image ne charge pas
+    if (imgSrc.startsWith("/lovable-uploads/")) {
+      setImgSrc("/b97f6b22-40f5-4de9-9245-072e4eeb6895.png"); // Essayer sans le préfixe
+    } else {
+      // Si toujours en échec, afficher un texte de remplacement
+      setImgError(true);
+    }
+  };
+
+  return (
+    <motion.div 
+      className="logo-container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      {!imgError ? (
+        <img 
+          src={imgSrc} 
+          alt="Botnb Logo" 
+          className="h-8" 
+          onError={handleImageError}
+          loading="eager"
+        />
+      ) : (
+        <span className="font-bold text-lg">Botnb</span>
+      )}
+    </motion.div>
+  );
+});
 
 Logo.displayName = "Logo";
 

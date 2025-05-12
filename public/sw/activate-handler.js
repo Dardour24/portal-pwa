@@ -25,6 +25,17 @@ export const handleActivate = (event) => {
     })
     .then(() => {
       logSW('Claimed clients');
+      // Notify clients that the service worker has been updated
+      return self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({
+            type: 'SW_ACTIVATED',
+            payload: { 
+              timestamp: new Date().toISOString()
+            }
+          });
+        });
+      });
     })
     .catch(error => {
       console.error('[Service Worker] Cache cleanup error:', error);

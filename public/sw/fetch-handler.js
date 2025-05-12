@@ -92,6 +92,13 @@ export const handleFetch = (event) => {
       return;
     }
     
+    // IMPORTANT: Ne jamais mettre en cache les images uploadées, les servir directement
+    if (url.pathname.includes('/lovable-uploads/')) {
+      // Bypass cache completely for uploaded images
+      event.respondWith(fetch(event.request));
+      return;
+    }
+    
     // Choose caching strategy based on resource type
     if (isJsOrCssAsset(url) || isIndexFile(url)) {
       // Network-first for JS/CSS/index files

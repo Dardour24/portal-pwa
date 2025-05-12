@@ -1,7 +1,7 @@
 
 // Configuration values for the service worker
-export const CACHE_NAME_STATIC = 'botnb-client-portal-static-v1';
-export const CACHE_NAME_DYNAMIC = 'botnb-client-portal-dynamic-v1';
+export const CACHE_NAME_STATIC = 'botnb-client-portal-static-v2'; // Version incrémentée
+export const CACHE_NAME_DYNAMIC = 'botnb-client-portal-dynamic-v2'; // Version incrémentée
 
 // Only cache static assets that don't change with builds
 export const STATIC_ASSETS = [

@@ -19,4 +19,11 @@ self.addEventListener('error', handleError);
 self.addEventListener('unhandledrejection', handleUnhandledRejection);
 
 // Set this global flag to true to enable more aggressive caching
-self.ENABLE_OFFLINE_MODE = true;
+self.ENABLE_OFFLINE_MODE = false; // Désactivé pour éviter les problèmes avec les images
+
+// Force update on each page load
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
