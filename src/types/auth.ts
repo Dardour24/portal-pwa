@@ -1,4 +1,3 @@
-
 /**
  * Interface for authentication user
  */
@@ -19,8 +18,8 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   networkAvailable: boolean;
-  login: (email: string, password: string) => Promise<LoginResult>;
-  signup: (email: string, password: string, firstName: string, lastName: string, phoneNumber: string) => Promise<LoginResult>;
+  login: (email: string, password: string, hcaptchaToken: string) => Promise<LoginResult>;
+  signup: (email: string, password: string, firstName: string, lastName: string, phoneNumber: string, hcaptchaToken: string) => Promise<LoginResult>;
   logout: () => Promise<void>;
 }
 

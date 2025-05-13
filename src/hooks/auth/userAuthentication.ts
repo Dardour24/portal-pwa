@@ -1,4 +1,3 @@
-
 import { supabase } from '../../lib/supabase';
 import { LoginResult, User } from '../../types/auth';
 import { fetchClientData } from './clientDataService';
@@ -6,17 +5,25 @@ import { fetchClientData } from './clientDataService';
 /**
  * S'authentifie avec email et mot de passe
  */
-export const signInWithEmail = async (email: string, password: string): Promise<LoginResult> => {
+export const signInWithEmail = async (email: string, password: string, hcaptchaToken: string): Promise<LoginResult> => {
   try {
     // Vérifier la connectivité réseau avant de tenter l'authentification
     if (!navigator.onLine) {
       throw new Error("Aucune connexion réseau disponible. Vérifiez votre connexion internet.");
+    }
+
+    // Vérifier le token HCaptcha
+    if (!hcaptchaToken) {
+      throw new Error("Veuillez compléter la vérification HCaptcha.");
     }
     
     console.log("Tentative de connexion avec email:", email);
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
+      options: {
+        captchaToken: hcaptchaToken
+      }
     });
     
     if (error) {
@@ -74,9 +81,15 @@ export const signUpWithEmail = async (
   password: string, 
   firstName: string, 
   lastName: string, 
-  phoneNumber: string
+  phoneNumber: string,
+  hcaptchaToken: string
 ): Promise<LoginResult> => {
   try {
+    // Vérifier le token HCaptcha
+    if (!hcaptchaToken) {
+      throw new Error("Veuillez compléter la vérification HCaptcha.");
+    }
+
     // Inscrire l'utilisateur avec Supabase
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -86,7 +99,8 @@ export const signUpWithEmail = async (
           first_name: firstName,
           last_name: lastName,
           phone: phoneNumber,
-        }
+        },
+        captchaToken: hcaptchaToken
       }
     });
     

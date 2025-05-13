@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuthState } from './useAuthState';
 import { signInWithEmail, signUpWithEmail, signOut, refreshAuthToken, checkNetworkConnection } from './authService';
@@ -95,7 +94,7 @@ const useAuthProvider = (): AuthContextType => {
     };
   }, [user]);
 
-  const login = async (email: string, password: string): Promise<LoginResult> => {
+  const login = async (email: string, password: string, hcaptchaToken: string): Promise<LoginResult> => {
     // Check for network connectivity
     if (!networkAvailable) {
       toast({
@@ -109,7 +108,7 @@ const useAuthProvider = (): AuthContextType => {
     setAuthLoading(true);
     try {
       console.log("useAuthProvider: Attempting login");
-      const result = await signInWithEmail(email, password);
+      const result = await signInWithEmail(email, password, hcaptchaToken);
       console.log("useAuthProvider: Login result", result);
       
       // Attendre pour s'assurer que l'état d'authentification est propagé
@@ -152,7 +151,8 @@ const useAuthProvider = (): AuthContextType => {
     password: string, 
     firstName: string, 
     lastName: string, 
-    phoneNumber: string
+    phoneNumber: string,
+    hcaptchaToken: string
   ): Promise<LoginResult> => {
     // Check for network connectivity
     if (!networkAvailable) {
@@ -163,10 +163,20 @@ const useAuthProvider = (): AuthContextType => {
       });
       throw new Error("Aucune connexion réseau disponible. Veuillez vérifier votre connexion et réessayer.");
     }
+
+    // Check HCaptcha token
+    if (!hcaptchaToken) {
+      toast({
+        title: "Erreur de vérification",
+        description: "Veuillez compléter la vérification HCaptcha",
+        variant: "destructive"
+      });
+      throw new Error("Veuillez compléter la vérification HCaptcha.");
+    }
     
     setAuthLoading(true);
     try {
-      const result = await signUpWithEmail(email, password, firstName, lastName, phoneNumber);
+      const result = await signUpWithEmail(email, password, firstName, lastName, phoneNumber, hcaptchaToken);
       return result;
     } catch (error) {
       console.error("Error during signup:", error);
