@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -84,6 +83,8 @@ const SignUp = () => {
           errorMessage = "Cette adresse email est déjà utilisée.";
         } else if (error.message.includes("password")) {
           errorMessage = "Le mot de passe ne répond pas aux critères de sécurité.";
+        } else if (error.message.includes("captcha")) {
+          errorMessage = "Problème de vérification automatique. Essayez un autre navigateur ou contactez l'assistance.";
         } else {
           errorMessage = error.message;
         }

@@ -11,8 +11,9 @@ export type Database = {
     Tables: {
       clients: {
         Row: {
+          chatbot_link: string | null
           created_at: string | null
-          email: string
+          email: string | null
           first_name: string | null
           id: string
           last_name: string | null
@@ -20,8 +21,9 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          chatbot_link?: string | null
           created_at?: string | null
-          email: string
+          email?: string | null
           first_name?: string | null
           id: string
           last_name?: string | null
@@ -29,8 +31,9 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          chatbot_link?: string | null
           created_at?: string | null
-          email?: string
+          email?: string | null
           first_name?: string | null
           id?: string
           last_name?: string | null
@@ -87,7 +90,7 @@ export type Database = {
           id: string
           is_custom: boolean | null
           is_required: boolean | null
-          property_id: string | null
+          property_id: string
           question_text: string
           updated_at: string | null
         }
@@ -96,7 +99,7 @@ export type Database = {
           id?: string
           is_custom?: boolean | null
           is_required?: boolean | null
-          property_id?: string | null
+          property_id: string
           question_text: string
           updated_at?: string | null
         }
@@ -105,7 +108,7 @@ export type Database = {
           id?: string
           is_custom?: boolean | null
           is_required?: boolean | null
-          property_id?: string | null
+          property_id?: string
           question_text?: string
           updated_at?: string | null
         }
@@ -147,7 +150,15 @@ export type Database = {
           name?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "properties_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

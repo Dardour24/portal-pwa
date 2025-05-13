@@ -41,6 +41,12 @@ export const signInWithEmail = async (email: string, password: string): Promise<
     
     if (error) {
       console.error("Login error:", error);
+      
+      // Map specific error messages
+      if (error.message?.includes("captcha verification")) {
+        throw new Error("Problème de vérification captcha. Essayez à nouveau ou contactez l'assistance.");
+      }
+      
       throw error;
     }
     
@@ -89,7 +95,7 @@ export const signUpWithEmail = async (
   phoneNumber: string
 ): Promise<LoginResult> => {
   try {
-    // Register the user with Supabase
+    // Register the user with Supabase with captcha handling
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -98,12 +104,19 @@ export const signUpWithEmail = async (
           first_name: firstName,
           last_name: lastName,
           phone: phoneNumber,
-        }
+        },
+        captchaToken: null // Explicitly provide null to bypass captcha
       }
     });
     
     if (error) {
       console.error("Signup error:", error);
+      
+      // Map specific error messages
+      if (error.message?.includes("captcha verification")) {
+        throw new Error("Problème de vérification captcha. Utilisez un autre navigateur ou contactez l'assistance.");
+      }
+      
       throw error;
     }
     
