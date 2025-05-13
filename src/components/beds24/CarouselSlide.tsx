@@ -24,30 +24,30 @@ const CarouselSlide: React.FC<CarouselSlideProps> = ({
 }) => {
   return (
     <Card className="border rounded-lg overflow-hidden">
-      <div className="p-4 md:p-6 flex flex-col items-center">
-        <div className="mb-4 md:mb-6 h-[250px] md:h-[400px] flex items-center justify-center w-full">
+      <div className="p-6 flex flex-col items-center">
+        <div className="mb-6 h-[400px] flex items-center justify-center w-full">
           <img 
             src={image} 
             alt={alt} 
-            className="max-h-[250px] md:max-h-[400px] w-auto max-w-full rounded-lg object-contain" 
+            className="max-h-[400px] w-auto max-w-full rounded-lg object-contain" 
           />
         </div>
-        <div className="text-center mb-4 md:mb-6">
-          <p className="whitespace-pre-line text-sm md:text-base">{text}</p>
+        <div className="text-center mb-6">
+          <p className="whitespace-pre-line">{text}</p>
         </div>
-        <div className="flex flex-col xs:flex-row gap-2 xs:gap-4 w-full justify-center">
+        <div className="flex gap-4">
           {!isFirst && (
-            <Button variant="outline" onClick={onPrev} className="w-full xs:w-auto">
+            <Button variant="outline" onClick={onPrev}>
               Étape précédente
             </Button>
           )}
           {!isLast && (
-            <Button variant="outline" onClick={onNext} className="w-full xs:w-auto">
+            <Button variant="outline" onClick={onNext}>
               Étape suivante
             </Button>
           )}
           {isLast && (
-            <Button variant="default" onClick={onNext} className="w-full xs:w-auto">
+            <Button variant="default" onClick={onNext}>
               Compléter le formulaire
             </Button>
           )}

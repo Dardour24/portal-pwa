@@ -38,59 +38,12 @@
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      // Service Worker Registration with improved error handling and emergency disable feature
       if ('serviceWorker' in navigator) {
-        // Check if service worker should be disabled (add ?disable_sw=true to URL)
-        const urlParams = new URLSearchParams(window.location.search);
-        const disableSW = urlParams.get('disable_sw') === 'true';
-        
-        if (disableSW) {
-          // Unregister any existing service workers
-          navigator.serviceWorker.getRegistrations().then(registrations => {
-            for (const registration of registrations) {
-              console.log('Unregistering service worker');
-              registration.unregister();
-            }
-            // Reload the page without the parameter
-            const newUrl = window.location.pathname + window.location.hash;
-            window.location.replace(newUrl);
-          });
-        } else {
-          // Register the service worker as normal
-          window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js')
-              .then(reg => {
-                console.log('Service worker registered:', reg);
-                
-                // Check if there's an updated service worker waiting
-                if (reg.waiting) {
-                  console.log('New service worker waiting');
-                  // You could notify the user here
-                }
-                
-                // Listen for new service workers
-                reg.addEventListener('updatefound', () => {
-                  const newWorker = reg.installing;
-                  console.log('New service worker installing');
-                  
-                  if (newWorker) {
-                    newWorker.addEventListener('statechange', () => {
-                      console.log('Service worker state:', newWorker.state);
-                    });
-                  }
-                });
-              })
-              .catch(err => {
-                console.error('Service worker registration failed:', err);
-                // Consider disabling service worker functionality on error
-              });
-              
-            // Listen for controller change events
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-              console.log('Service worker controller changed');
-            });
-          });
-        }
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Service worker registered:', reg))
+            .catch(err => console.log('Service worker registration failed:', err));
+        });
       }
     </script>
   </body>

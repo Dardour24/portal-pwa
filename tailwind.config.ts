@@ -19,14 +19,6 @@ export default {
         "2xl": "1400px",
       },
     },
-    screens: {
-      'xs': '375px',
-      'sm': '640px',
-      'md': '768px',
-      'lg': '1024px',
-      'xl': '1280px',
-      '2xl': '1536px',
-    },
     extend: {
       maxWidth: {
         'layout': '1140px',
@@ -67,9 +59,6 @@ export default {
         },
         separator: "#E3E8EF",
         pageBackground: "#edf3fb",
-      },
-      height: {
-        '18': '4.5rem', // Pour la hauteur de la navbar mobile
       },
       borderRadius: {
         lg: "var(--radius)",

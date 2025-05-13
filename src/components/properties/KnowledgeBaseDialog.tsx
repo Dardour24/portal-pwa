@@ -49,12 +49,8 @@ export const KnowledgeBaseDialog = ({
     };
   }, [resetPropertyData]);
   
-  const handleSave = () => {
+  const handleSubmit = () => {
     onSave();
-    onOpenChange(false);
-  };
-  
-  const handleCancel = () => {
     onOpenChange(false);
   };
   
@@ -67,10 +63,8 @@ export const KnowledgeBaseDialog = ({
         
         {property && isOpen && (
           <KnowledgeBaseForm
-            propertyId={property.id || ""}
-            propertyName={property.name}
-            onSave={handleSave}
-            onCancel={handleCancel}
+            property={property}
+            onSubmit={handleSubmit}
           />
         )}
       </DialogContent>
