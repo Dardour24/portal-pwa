@@ -1,3 +1,4 @@
+
 import { supabase } from '../../lib/supabase';
 import { UserData } from './types';
 import { LoginResult, User, Session } from '../../types/auth';
@@ -94,6 +95,8 @@ export const signUpWithEmail = async (
   phoneNumber: string
 ): Promise<LoginResult> => {
   try {
+    console.log("Starting user registration process");
+    
     // Register the user with Supabase with captcha bypass
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -121,6 +124,8 @@ export const signUpWithEmail = async (
     }
     
     if (data.user) {
+      console.log("User registered successfully, now creating client profile");
+      
       // Create a record in the clients table
       const { error: clientError } = await supabase
         .from('clients')
@@ -134,8 +139,19 @@ export const signUpWithEmail = async (
         
       if (clientError) {
         console.error("Error creating client profile:", clientError);
-        throw clientError;
+        console.log("Client profile creation error details:", JSON.stringify(clientError));
+        
+        // Provide detailed error info based on error codes
+        if (clientError.code === '23505') { // Unique constraint violation
+          throw new Error("Un compte avec cet email existe déjà.");
+        } else if (clientError.code === '23503') { // Foreign key violation
+          throw new Error("Erreur de référence d'utilisateur. Veuillez réessayer ou contacter l'assistance.");
+        } else {
+          throw new Error(`Erreur lors de la création du profil client: ${clientError.message}`);
+        }
       }
+      
+      console.log("Client profile created successfully");
       
       const user: User = {
         id: data.user.id,

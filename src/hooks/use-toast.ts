@@ -5,30 +5,27 @@ type ToastProps = {
   title?: string;
   description?: string;
   variant?: "default" | "destructive";
+  action?: React.ReactNode;
   duration?: number;
-  action?: {
-    label: string;
-    onClick: () => void;
-  };
 };
 
 export const toast = ({
   title,
   description,
   variant = "default",
-  duration = 5000,
   action,
+  duration = 5000,
+  ...props
 }: ToastProps) => {
-  return sonnerToast(title, {
+  const options = {
+    className: variant === "destructive" ? "destructive" : "",
     description,
+    action,
     duration,
-    action: action
-      ? {
-          label: action.label,
-          onClick: action.onClick,
-        }
-      : undefined,
-  });
+    ...props,
+  };
+
+  return sonnerToast(title ?? "", options);
 };
 
 // Export a simple stub for useToast to satisfy the interface
