@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -9,6 +8,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { useEffect, lazy, Suspense } from "react";
 import { verifySupabaseSetup } from "./utils/verifySupabaseSetup";
 import { Spinner } from "./components/ui/spinner";
+import { CustomCursor } from "./components/CustomCursor";
+import "./styles/cursor.css";
 
 // Pages chargées de manière différée avec React.lazy
 const Home = lazy(() => import("./pages/Home"));
@@ -43,13 +44,17 @@ const queryClient = new QueryClient({
 const App = () => {
   useEffect(() => {
     // Vérifier la configuration Supabase au chargement initial de l'application
-    verifySupabaseSetup()
-      .then(isConfigured => {
-        console.log("Configuration Supabase vérifiée:", isConfigured ? "OK" : "NON configurée");
-        if (!isConfigured) {
-          console.warn("IMPORTANT: La configuration Supabase n'est pas complète. Veuillez exécuter le script SQL nécessaire dans l'éditeur SQL de Supabase.");
-        }
-      });
+    verifySupabaseSetup().then((isConfigured) => {
+      console.log(
+        "Configuration Supabase vérifiée:",
+        isConfigured ? "OK" : "NON configurée"
+      );
+      if (!isConfigured) {
+        console.warn(
+          "IMPORTANT: La configuration Supabase n'est pas complète. Veuillez exécuter le script SQL nécessaire dans l'éditeur SQL de Supabase."
+        );
+      }
+    });
   }, []);
 
   return (
@@ -57,6 +62,7 @@ const App = () => {
       <AuthProvider>
         <TooltipProvider>
           <Toaster />
+          <CustomCursor />
           <BrowserRouter>
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
@@ -64,37 +70,52 @@ const App = () => {
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
-                
+
                 <Route path="/" element={<Layout />}>
-                  <Route index element={
-                    <ProtectedRoute>
-                      <Home />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="profile" element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="properties" element={
-                    <ProtectedRoute>
-                      <Properties />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="beds24" element={
-                    <ProtectedRoute>
-                      <Beds24 />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="botnblink" element={
-                    <ProtectedRoute>
-                      <BotnbLink />
-                    </ProtectedRoute>
-                  } />
+                  <Route
+                    index
+                    element={
+                      <ProtectedRoute>
+                        <Home />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="profile"
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="properties"
+                    element={
+                      <ProtectedRoute>
+                        <Properties />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="beds24"
+                    element={
+                      <ProtectedRoute>
+                        <Beds24 />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="botnblink"
+                    element={
+                      <ProtectedRoute>
+                        <BotnbLink />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route path="faq" element={<Faq />} />
                   <Route path="contact" element={<Contact />} />
                 </Route>
-                
+
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

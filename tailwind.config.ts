@@ -1,4 +1,3 @@
-
 import { type Config } from "tailwindcss";
 import { fontFamily } from "tailwindcss/defaultTheme";
 import tailwindcssAnimate from "tailwindcss-animate";
@@ -29,9 +28,15 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      padding: {
+        DEFAULT: '1rem',
+        sm: '2rem',
+        lg: '4rem',
+        xl: '5rem',
+        '2xl': '6rem',
+      },
       screens: {
-        "2xl": "1400px",
+        '2xl': '1400px',
       },
     },
     // Optimisation en limitant les valeurs de l'écran
@@ -46,6 +51,14 @@ export default {
     extend: {
       maxWidth: {
         'layout': '1140px',
+        'content': '800px',
+        'sidebar': '280px',
+      },
+      spacing: {
+        '18': '4.5rem',
+        '72': '18rem',
+        '84': '21rem',
+        '96': '24rem',
       },
       colors: {
         border: "hsl(var(--border))",
@@ -94,8 +107,19 @@ export default {
         card: "12px",
       },
       fontFamily: {
-        sans: ["var(--font-sans)", "Inter", "Nunito Sans", ...fontFamily.sans],
+        sans: ["Poppins", "var(--font-sans)", ...fontFamily.sans],
         serif: ["Times New Roman", "Times", "serif"],
+      },
+      fontSize: {
+        'xs': ['0.75rem', { lineHeight: '1.25rem' }],
+        'sm': ['0.875rem', { lineHeight: '1.375rem' }],
+        'base': ['1rem', { lineHeight: '1.5rem' }],
+        'lg': ['1.125rem', { lineHeight: '1.625rem' }],
+        'xl': ['1.25rem', { lineHeight: '1.75rem' }],
+        '2xl': ['1.5rem', { lineHeight: '2rem' }],
+        '3xl': ['1.75rem', { lineHeight: '2.25rem' }],
+        '4xl': ['2rem', { lineHeight: '2.5rem' }],
+        '5xl': ['2.5rem', { lineHeight: '1.2' }],
       },
       boxShadow: {
         'card': '0 4px 12px rgb(0 0 0 / 0.04)',
@@ -146,8 +170,8 @@ export default {
           "100%": { transform: "translateX(0)" }
         },
         "sidebar-indicator": {
-          "0%": { opacity: 0, transform: "scaleY(0)" },
-          "100%": { opacity: 1, transform: "scaleY(1)" }
+          "0%": { opacity: "0", transform: "scaleY(0)" },
+          "100%": { opacity: "1", transform: "scaleY(1)" }
         }
       },
       animation: {
@@ -164,13 +188,21 @@ export default {
   // Optimiser les variants Tailwind pour réduire la taille du CSS généré
   variants: {
     extend: {
-      // Limiter les variantes uniquement à celles qui sont utilisées
-      opacity: ['hover', 'focus'],
-      backgroundColor: ['hover', 'focus', 'active'],
-      textColor: ['hover', 'focus'],
-      borderColor: ['hover', 'focus'],
-      scale: ['hover', 'active'],
-      transform: ['hover', 'focus'],
+      opacity: ['hover', 'focus', 'active', 'group-hover'],
+      backgroundColor: ['hover', 'focus', 'active', 'group-hover'],
+      textColor: ['hover', 'focus', 'active', 'group-hover'],
+      borderColor: ['hover', 'focus', 'active', 'group-hover'],
+      scale: ['hover', 'active', 'group-hover'],
+      transform: ['hover', 'focus', 'active', 'group-hover'],
+      display: ['responsive', 'group-hover', 'group-focus'],
+      visibility: ['responsive', 'group-hover', 'group-focus'],
+      position: ['responsive'],
+      inset: ['responsive'],
+      zIndex: ['responsive'],
+      padding: ['responsive'],
+      margin: ['responsive'],
+      width: ['responsive'],
+      height: ['responsive'],
     },
   },
   plugins: [tailwindcssAnimate],
