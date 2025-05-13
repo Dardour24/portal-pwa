@@ -24,6 +24,14 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
+# Make sure we have a correct doctype in index.html (failsafe)
+RUN if [ -f /usr/share/nginx/html/index.html ]; then \
+    sed -i '1s/^/<!DOCTYPE html>\n/' /usr/share/nginx/html/index.html; \
+    fi
+
+# Create a healthcheck file
+RUN echo "healthy" > /usr/share/nginx/html/health.txt
+
 # Expose port 80
 EXPOSE 80
 

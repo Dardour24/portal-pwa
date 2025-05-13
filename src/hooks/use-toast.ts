@@ -1,34 +1,49 @@
 
-import { toast as sonnerToast } from "sonner";
+// Export Sonner's toast functionality with compatibility layer
+import { toast as sonnerToast, ToasterProps } from "sonner";
 
-type ToastProps = {
+// Create a wrapper around Sonner's toast to support the old API format
+export const toast = (props: string | { 
   title?: string;
   description?: string;
-  variant?: "default" | "destructive";
-  action?: React.ReactNode;
-  duration?: number;
+  [key: string]: any;
+}) => {
+  if (typeof props === 'string') {
+    return sonnerToast(props);
+  }
+
+  const { title, description, ...rest } = props;
+  
+  // If title and description are provided, format them in Sonner's style
+  if (title && description) {
+    return sonnerToast(title, { description, ...rest });
+  } 
+  
+  // If only title is provided
+  if (title) {
+    return sonnerToast(title, rest);
+  }
+  
+  // Fallback for any other case - convert object to string to avoid type errors
+  return sonnerToast(String(props));
 };
 
-export const toast = ({
-  title,
-  description,
-  variant = "default",
-  action,
-  duration = 5000,
-  ...props
-}: ToastProps) => {
-  const options = {
-    className: variant === "destructive" ? "destructive" : "",
-    description,
-    action,
-    duration,
-    ...props,
-  };
-
-  return sonnerToast(title ?? "", options);
-};
-
-// Export a simple stub for useToast to satisfy the interface
+// Create a mock useToast hook that maintains compatibility
 export const useToast = () => {
-  return { toast };
+  return {
+    toast,
+    // Empty toasts array to maintain compatibility with existing code
+    toasts: []
+  };
 };
+
+// Export types for compatibility
+export type { ToasterProps };
+
+// Custom Toast type for backward compatibility
+export interface Toast {
+  id: string | number;
+  title?: string;
+  description?: string;
+  [key: string]: any;
+}

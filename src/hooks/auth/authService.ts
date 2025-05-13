@@ -41,12 +41,6 @@ export const signInWithEmail = async (email: string, password: string): Promise<
     
     if (error) {
       console.error("Login error:", error);
-      
-      // Map specific error messages
-      if (error.message?.includes("captcha verification")) {
-        throw new Error("Problème de vérification captcha. Essayez à nouveau ou contactez l'assistance.");
-      }
-      
       throw error;
     }
     
@@ -95,9 +89,7 @@ export const signUpWithEmail = async (
   phoneNumber: string
 ): Promise<LoginResult> => {
   try {
-    console.log("Starting user registration process");
-    
-    // Register the user with Supabase with captcha bypass
+    // Register the user with Supabase
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -106,26 +98,16 @@ export const signUpWithEmail = async (
           first_name: firstName,
           last_name: lastName,
           phone: phoneNumber,
-        },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-        captchaToken: null // Explicitly provide null to bypass captcha requirements
+        }
       }
     });
     
     if (error) {
       console.error("Signup error:", error);
-      
-      // Map specific error messages
-      if (error.message?.includes("captcha verification")) {
-        throw new Error("Problème de vérification captcha. Utilisez un autre navigateur ou contactez l'assistance.");
-      }
-      
       throw error;
     }
     
     if (data.user) {
-      console.log("User registered successfully, now creating client profile");
-      
       // Create a record in the clients table
       const { error: clientError } = await supabase
         .from('clients')
@@ -139,19 +121,8 @@ export const signUpWithEmail = async (
         
       if (clientError) {
         console.error("Error creating client profile:", clientError);
-        console.log("Client profile creation error details:", JSON.stringify(clientError));
-        
-        // Provide detailed error info based on error codes
-        if (clientError.code === '23505') { // Unique constraint violation
-          throw new Error("Un compte avec cet email existe déjà.");
-        } else if (clientError.code === '23503') { // Foreign key violation
-          throw new Error("Erreur de référence d'utilisateur. Veuillez réessayer ou contacter l'assistance.");
-        } else {
-          throw new Error(`Erreur lors de la création du profil client: ${clientError.message}`);
-        }
+        throw clientError;
       }
-      
-      console.log("Client profile created successfully");
       
       const user: User = {
         id: data.user.id,
