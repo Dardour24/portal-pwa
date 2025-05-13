@@ -1,33 +1,42 @@
-
-import { supabase } from '../lib/supabase';
+import { supabase } from "../lib/supabase";
 
 export const verifySupabaseSetup = async () => {
   console.log("Vérification de la configuration Supabase...");
-  
+
   try {
     // Vérifier la connexion de base à Supabase
     const { data, error } = await supabase
-      .from('properties')
-      .select('count()')
+      .from("properties")
+      .select("id")
       .limit(1)
       .single();
-    
+
     if (error) {
-      if (error.code === 'PGRST109' || error.code === '42P01') {
-        console.warn("La table 'properties' n'existe pas encore. Veuillez la créer dans votre projet Supabase.");
+      if (error.code === "PGRST109" || error.code === "42P01") {
+        console.warn(
+          "La table 'properties' n'existe pas encore. Veuillez la créer dans votre projet Supabase."
+        );
         console.log("Configuration Supabase vérifiée: NON configurée");
-        console.log("IMPORTANT: La configuration Supabase n'est pas complète. Veuillez exécuter le script SQL nécessaire dans l'éditeur SQL de Supabase.");
+        console.log(
+          "IMPORTANT: La configuration Supabase n'est pas complète. Veuillez exécuter le script SQL nécessaire dans l'éditeur SQL de Supabase."
+        );
         return false;
       }
-      
-      console.error("Erreur lors de la vérification de la connexion Supabase:", error);
+
+      console.error(
+        "Erreur lors de la vérification de la connexion Supabase:",
+        error
+      );
       return false;
     }
-    
+
     console.log("Connexion Supabase vérifiée avec succès.");
     return true;
   } catch (error) {
-    console.error("Erreur lors de la vérification de la configuration Supabase:", error);
+    console.error(
+      "Erreur lors de la vérification de la configuration Supabase:",
+      error
+    );
     return false;
   }
 };
