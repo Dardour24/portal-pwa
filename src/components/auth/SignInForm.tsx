@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Mail, Lock } from "lucide-react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
+import { motion } from "framer-motion";
 
 const loginSchema = z.object({
   email: z.string().email("Veuillez entrer un email valide"),
@@ -57,7 +58,6 @@ export const SignInForm = () => {
       );
 
       if (result.user) {
-        // Attendre un court délai pour s'assurer que l'état d'authentification est complètement propagé
         await new Promise((resolve) => setTimeout(resolve, 300));
 
         toast({
@@ -75,7 +75,6 @@ export const SignInForm = () => {
     } catch (error: any) {
       console.error("Error during login:", error);
 
-      // Gestion spécifique des erreurs
       if (error.message) {
         if (error.message.includes("Invalid login credentials")) {
           setError("Email ou mot de passe incorrect. Veuillez réessayer.");
@@ -98,19 +97,26 @@ export const SignInForm = () => {
       });
     } finally {
       setIsLoading(false);
-      // Reset HCaptcha after submission
       hcaptchaRef.current?.resetCaptcha();
     }
   };
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Alert variant="destructive" className="bg-red-50 border-red-200">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="text-red-800">
+                {error}
+              </AlertDescription>
+            </Alert>
+          </motion.div>
         )}
 
         <FormField
@@ -118,9 +124,17 @@ export const SignInForm = () => {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel className="text-sm font-medium">Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="votre@email.com" {...field} />
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    type="email"
+                    placeholder="votre@email.com"
+                    className="pl-10 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-primary focus:ring-primary/20"
+                    {...field}
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -132,9 +146,19 @@ export const SignInForm = () => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Mot de passe</FormLabel>
+              <FormLabel className="text-sm font-medium">
+                Mot de passe
+              </FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    className="pl-10 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-primary focus:ring-primary/20"
+                    {...field}
+                  />
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -162,8 +186,19 @@ export const SignInForm = () => {
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Connexion en cours..." : "Se connecter"}
+        <Button
+          type="submit"
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <div className="flex items-center justify-center">
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+              Connexion en cours...
+            </div>
+          ) : (
+            "Se connecter"
+          )}
         </Button>
       </form>
     </Form>

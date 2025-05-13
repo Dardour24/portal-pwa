@@ -16,8 +16,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Mail, Lock, User, Phone } from "lucide-react";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
+import { motion } from "framer-motion";
 
 const signupSchema = z
   .object({
@@ -93,7 +94,6 @@ export const SignUpForm = () => {
 
       let errorMessage = "Échec de la création du compte. Veuillez réessayer.";
 
-      // Gestion spécifique des erreurs
       if (error.message) {
         if (error.message.includes("already been registered")) {
           errorMessage = "Cette adresse email est déjà utilisée.";
@@ -113,60 +113,44 @@ export const SignUpForm = () => {
       });
     } finally {
       setIsLoading(false);
-      // Reset HCaptcha after submission
       hcaptchaRef.current?.resetCaptcha();
     }
   };
 
   return (
-    <>
-      {error && (
-        <Alert variant="destructive" className="mb-4 animate-fade-in">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Alert variant="destructive" className="bg-red-50 border-red-200">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="text-red-800">
+                {error}
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Prénom</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Jean" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nom</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Dupont" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <FormField
             control={form.control}
-            name="phoneNumber"
+            name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Numéro de téléphone</FormLabel>
+                <FormLabel className="text-sm font-medium">Prénom</FormLabel>
                 <FormControl>
-                  <Input type="tel" placeholder="06 12 34 56 78" {...field} />
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Jean"
+                      className="pl-10 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-primary focus:ring-primary/20"
+                      {...field}
+                    />
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -175,76 +159,156 @@ export const SignUpForm = () => {
 
           <FormField
             control={form.control}
-            name="email"
+            name="lastName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel className="text-sm font-medium">Nom</FormLabel>
                 <FormControl>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Dupont"
+                      className="pl-10 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-primary focus:ring-primary/20"
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="phoneNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium">
+                Numéro de téléphone
+              </FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    type="tel"
+                    placeholder="06 12 34 56 78"
+                    className="pl-10 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-primary focus:ring-primary/20"
+                    {...field}
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium">Email</FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                   <Input
                     type="email"
                     placeholder="votre@email.com"
+                    className="pl-10 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-primary focus:ring-primary/20"
                     {...field}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Mot de passe</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Confirmer le mot de passe</FormLabel>
-                <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="hcaptchaToken"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <HCaptcha
-                    ref={hcaptchaRef}
-                    sitekey={
-                      import.meta.env.PUBLIC_HCAPTCHA_SITE_KEY ||
-                      "a1f4b8aa-17ee-4a78-b296-d88c39a66a26"
-                    }
-                    onVerify={(token) => field.onChange(token)}
-                    onExpire={() => field.onChange("")}
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium">
+                Mot de passe
+              </FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    className="pl-10 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-primary focus:ring-primary/20"
+                    {...field}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Création en cours..." : "S'inscrire"}
-          </Button>
-        </form>
-      </Form>
-    </>
+        <FormField
+          control={form.control}
+          name="confirmPassword"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-sm font-medium">
+                Confirmer le mot de passe
+              </FormLabel>
+              <FormControl>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    className="pl-10 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-primary focus:ring-primary/20"
+                    {...field}
+                  />
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="hcaptchaToken"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <HCaptcha
+                  ref={hcaptchaRef}
+                  sitekey={
+                    import.meta.env.PUBLIC_HCAPTCHA_SITE_KEY ||
+                    "a1f4b8aa-17ee-4a78-b296-d88c39a66a26"
+                  }
+                  onVerify={(token) => field.onChange(token)}
+                  onExpire={() => field.onChange("")}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button
+          type="submit"
+          className="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <div className="flex items-center justify-center">
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+              Création en cours...
+            </div>
+          ) : (
+            "S'inscrire"
+          )}
+        </Button>
+      </form>
+    </Form>
   );
 };
