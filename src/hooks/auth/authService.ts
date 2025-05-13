@@ -1,4 +1,3 @@
-
 import { supabase } from '../../lib/supabase';
 import { UserData } from './types';
 import { LoginResult, User, Session } from '../../types/auth';
@@ -95,7 +94,7 @@ export const signUpWithEmail = async (
   phoneNumber: string
 ): Promise<LoginResult> => {
   try {
-    // Register the user with Supabase with captcha handling
+    // Register the user with Supabase with captcha bypass
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -105,7 +104,8 @@ export const signUpWithEmail = async (
           last_name: lastName,
           phone: phoneNumber,
         },
-        captchaToken: null // Explicitly provide null to bypass captcha
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        captchaToken: null // Explicitly provide null to bypass captcha requirements
       }
     });
     

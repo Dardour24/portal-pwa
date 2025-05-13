@@ -1,5 +1,5 @@
 
-import { toast as sonnerToast, useToast as useSonnerToast } from "sonner";
+import { toast as sonnerToast } from "sonner";
 
 type ToastProps = {
   title?: string;
@@ -31,4 +31,7 @@ export const toast = ({
   });
 };
 
-export const useToast = useSonnerToast;
+// Export a simple stub for useToast to satisfy the interface
+export const useToast = () => {
+  return { toast };
+};
