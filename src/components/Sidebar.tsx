@@ -2,7 +2,7 @@
 import { Sidebar as SidebarComponent, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarFooter } from "@/components/ui/sidebar";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Navigation, House, Bed, HelpCircle, Mail, LogOut, MessageCircle } from "lucide-react";
+import { Navigation, House, Bed, HelpCircle, Mail, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
@@ -15,7 +15,6 @@ const Sidebar = () => {
     { title: "Accueil", path: "/", icon: Navigation },
     { title: "Mes Logements", path: "/properties", icon: House },
     { title: "Mon Beds24", path: "/beds24", icon: Bed },
-    { title: "BotnB Link", path: "/botnblink", icon: MessageCircle },
     { title: "FAQ", path: "/faq", icon: HelpCircle },
     { title: "Nous Contacter", path: "/contact", icon: Mail },
   ];
@@ -28,28 +27,26 @@ const Sidebar = () => {
   };
 
   return (
-    <SidebarComponent className="w-[230px] shadow-md" aria-label="Navigation principale">
-      <SidebarHeader className="py-4">
-        <div className="logo-container flex justify-center">
+    <SidebarComponent className="w-[230px] shadow-md">
+      <SidebarHeader className="py-6">
+        <div className="logo-container">
           <img 
             src="/lovable-uploads/b97f6b22-40f5-4de9-9245-072e4eeb6895.png" 
             alt="Botnb Logo" 
-            className="h-10" 
+            className="h-12" 
           />
         </div>
       </SidebarHeader>
-      <SidebarContent className="mt-1">
+      <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel id="navigation-group">Navigation</SidebarGroupLabel>
-          <SidebarGroupContent aria-labelledby="navigation-group">
-            <SidebarMenu role="menu">
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
               {menuItems.map((item) => (
-                <SidebarMenuItem key={item.path} role="none">
+                <SidebarMenuItem key={item.path}>
                   <SidebarMenuButton
-                    role="menuitem"
                     className={`relative ${isActive(item.path) ? "bg-sidebar-accent text-primary font-medium" : ""}`}
                     onClick={() => navigate(item.path)}
-                    aria-current={isActive(item.path) ? "page" : undefined}
                   >
                     {isActive(item.path) && (
                       <motion.span 
@@ -58,10 +55,9 @@ const Sidebar = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.2 }}
-                        aria-hidden="true"
                       />
                     )}
-                    <item.icon className="mr-2 h-5 w-5" aria-hidden="true" />
+                    <item.icon className="mr-2 h-5 w-5" />
                     <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -75,9 +71,8 @@ const Sidebar = () => {
           variant="ghost" 
           className="w-full justify-start hover:bg-red-50 hover:text-red-600 transition-colors" 
           onClick={handleLogout}
-          aria-label="Déconnexion"
         >
-          <LogOut className="mr-2 h-5 w-5" aria-hidden="true" />
+          <LogOut className="mr-2 h-5 w-5" />
           <span>Déconnexion</span>
         </Button>
       </SidebarFooter>

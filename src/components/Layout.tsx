@@ -6,7 +6,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import MobileNavbar from "./MobileNavbar";
-import PageTransition from "./ui/page-transition";
+import { AnimatePresence, motion } from "framer-motion";
 
 const Layout = () => {
   const isMobile = useIsMobile();
@@ -18,40 +18,51 @@ const Layout = () => {
 
   useEffect(() => {
     setIsRouteChanging(true);
-    const timer = setTimeout(() => setIsRouteChanging(false), 200);
+    const timer = setTimeout(() => setIsRouteChanging(false), 200); // Réduit de 300ms à 200ms
     return () => clearTimeout(timer);
   }, [location.pathname]);
-
-  // Extracted common content rendering to reduce duplication
-  const renderContent = () => (
-    <PageTransition pathname={location.pathname}>
-      <Outlet />
-    </PageTransition>
-  );
 
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col w-full">
         {isMobile ? (
-          // Mobile layout
           <>
             <Navbar isMobile={true} />
             <main className={`flex-1 ${needsReducedPadding ? 'pb-12' : 'pb-16'}`}>
-              <div className="container-layout py-3 md:py-4">
-                {renderContent()}
+              <div className="container-layout py-4 md:py-6">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={location.pathname}
+                    initial={{ opacity: 0, y: 5 }} // Réduit de 10px à 5px
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -5 }} // Réduit de 10px à 5px
+                    transition={{ duration: 0.2 }} // Réduit de 0.3s à 0.2s
+                  >
+                    <Outlet />
+                  </motion.div>
+                </AnimatePresence>
               </div>
             </main>
             <MobileNavbar />
           </>
         ) : (
-          // Desktop layout
           <div className="flex h-full min-h-screen w-full">
             <Sidebar />
             <div className="flex flex-col flex-1">
               <Navbar isMobile={false} />
-              <main className="flex-1 p-5 overflow-auto">
+              <main className="flex-1 p-6 overflow-auto">
                 <div className="container-layout">
-                  {renderContent()}
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={location.pathname}
+                      initial={{ opacity: 0, y: 5 }} // Réduit de 10px à 5px
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -5 }} // Réduit de 10px à 5px
+                      transition={{ duration: 0.2 }} // Réduit de 0.3s à 0.2s
+                    >
+                      <Outlet />
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
               </main>
             </div>

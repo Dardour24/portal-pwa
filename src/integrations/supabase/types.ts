@@ -9,92 +9,143 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      properties: {
+      clients: {
         Row: {
-          address: string
-          beds24_property_id: string | null
-          city: string
-          country: string
           created_at: string | null
+          email: string
+          first_name: string | null
           id: string
-          name: string
-          postal_code: string
-          status: string | null
+          last_name: string | null
+          phone: string | null
           updated_at: string | null
-          user_id: string
         }
         Insert: {
-          address: string
-          beds24_property_id?: string | null
-          city: string
-          country: string
           created_at?: string | null
-          id?: string
-          name: string
-          postal_code: string
-          status?: string | null
+          email: string
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          phone?: string | null
           updated_at?: string | null
-          user_id: string
         }
         Update: {
-          address?: string
-          beds24_property_id?: string | null
-          city?: string
-          country?: string
+          created_at?: string | null
+          email?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      form_answers: {
+        Row: {
+          answer_text: string | null
+          created_at: string | null
+          id: string
+          property_id: string
+          question_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          answer_text?: string | null
           created_at?: string | null
           id?: string
-          name?: string
-          postal_code?: string
-          status?: string | null
+          property_id: string
+          question_id: string
           updated_at?: string | null
-          user_id?: string
+        }
+        Update: {
+          answer_text?: string | null
+          created_at?: string | null
+          id?: string
+          property_id?: string
+          question_id?: string
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "properties_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "form_answers_property_id_fkey"
+            columns: ["property_id"]
             isOneToOne: false
-            referencedRelation: "users"
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "form_questions"
             referencedColumns: ["id"]
           },
         ]
       }
-      users: {
+      form_questions: {
         Row: {
-          avatar_url: string | null
-          created_at: string
-          email: string | null
-          full_name: string | null
+          created_at: string | null
           id: string
-          image: string | null
-          name: string | null
-          token_identifier: string
+          is_custom: boolean | null
+          is_required: boolean | null
+          property_id: string | null
+          question_text: string
           updated_at: string | null
-          user_id: string | null
         }
         Insert: {
-          avatar_url?: string | null
-          created_at?: string
-          email?: string | null
-          full_name?: string | null
-          id: string
-          image?: string | null
-          name?: string | null
-          token_identifier: string
+          created_at?: string | null
+          id?: string
+          is_custom?: boolean | null
+          is_required?: boolean | null
+          property_id?: string | null
+          question_text: string
           updated_at?: string | null
-          user_id?: string | null
         }
         Update: {
-          avatar_url?: string | null
-          created_at?: string
-          email?: string | null
-          full_name?: string | null
+          created_at?: string | null
           id?: string
-          image?: string | null
-          name?: string | null
-          token_identifier?: string
+          is_custom?: boolean | null
+          is_required?: boolean | null
+          property_id?: string | null
+          question_text?: string
           updated_at?: string | null
-          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "form_questions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      properties: {
+        Row: {
+          address: string | null
+          client_id: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          client_id: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          client_id?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }

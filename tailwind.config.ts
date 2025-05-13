@@ -11,21 +11,6 @@ export default {
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
   ],
-  // PurgeCSS configuration pour éliminer efficacement les styles inutilisés
-  purge: {
-    enabled: process.env.NODE_ENV === 'production',
-    content: ['./src/**/*.{js,jsx,ts,tsx}'],
-    options: {
-      safelist: [
-        // Classes à toujours conserver
-        'html', 'body', 'root',
-        // Modèles dynamiques
-        /^bg-/, /^text-/, /^border-/,
-        // Classes utilisées dans les Toasts/Alerts
-        /^alert-/, /^toast-/
-      ],
-    },
-  },
   theme: {
     container: {
       center: true,
@@ -34,7 +19,6 @@ export default {
         "2xl": "1400px",
       },
     },
-    // Optimisation en limitant les valeurs de l'écran
     screens: {
       'xs': '375px',
       'sm': '640px',
@@ -159,18 +143,6 @@ export default {
         "slide-in": "slide-in 0.3s ease-out",
         "sidebar-indicator": "sidebar-indicator 0.2s ease-out"
       },
-    },
-  },
-  // Optimiser les variants Tailwind pour réduire la taille du CSS généré
-  variants: {
-    extend: {
-      // Limiter les variantes uniquement à celles qui sont utilisées
-      opacity: ['hover', 'focus'],
-      backgroundColor: ['hover', 'focus', 'active'],
-      textColor: ['hover', 'focus'],
-      borderColor: ['hover', 'focus'],
-      scale: ['hover', 'active'],
-      transform: ['hover', 'focus'],
     },
   },
   plugins: [tailwindcssAnimate],

@@ -1,43 +1,41 @@
 
-import { useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useToast } from '@/components/ui/use-toast';
-import { Property } from '@/types/property';
-import { propertyService } from '@/services/propertyService';
-import { usePagination } from './properties/usePagination';
-import { usePropertyMutations } from './properties/usePropertyMutations';
-import { DEFAULT_PAGE, DEFAULT_PAGE_SIZE } from './properties/constants';
+import { useState, useRef, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/components/ui/use-toast";
+import { Property } from "@/types/property";
+import { propertyService } from "@/services/propertyService";
 
-/**
- * Main hook for managing properties with pagination and CRUD operations
- */
+// Délai maximum en ms pour les opérations avant de considérer qu'il y a un timeout
+const OPERATION_TIMEOUT = 10000;
+
 export function useProperties(isAuthenticated: boolean) {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [isAddingProperty, setIsAddingProperty] = useState(false);
+  const [isEditingProperty, setIsEditingProperty] = useState(false);
+  const [isDeletingProperty, setIsDeletingProperty] = useState(false);
   
-  // Initialize pagination
-  const pagination = usePagination({
-    initialPage: DEFAULT_PAGE,
-    initialPageSize: DEFAULT_PAGE_SIZE
-  });
-  
-  const { page, pageSize, setTotalCount } = pagination;
+  // Références pour les timeouts
+  const addTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const editTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const deleteTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch properties with pagination
-  const fetchPropertiesWithPagination = useCallback(async () => {
-    if (!isAuthenticated) return { data: [], totalCount: 0 };
-    return propertyService.getProperties(page, pageSize);
-  }, [isAuthenticated, page, pageSize]);
-  
-  // Query for properties with pagination
-  const { 
-    data: propertiesData = { data: [], totalCount: 0 }, 
-    isLoading, 
-    refetch: refetchProperties 
-  } = useQuery({
-    queryKey: ['properties', page, pageSize],
-    queryFn: fetchPropertiesWithPagination,
+  // Nettoyer les timeouts lors du démontage du composant
+  useEffect(() => {
+    return () => {
+      if (addTimeoutRef.current) clearTimeout(addTimeoutRef.current);
+      if (editTimeoutRef.current) clearTimeout(editTimeoutRef.current);
+      if (deleteTimeoutRef.current) clearTimeout(deleteTimeoutRef.current);
+    };
+  }, []);
+
+  // Fetch all properties
+  const { data: properties = [], isLoading, refetch: refetchProperties } = useQuery({
+    queryKey: ['properties'],
+    queryFn: propertyService.getProperties,
     enabled: isAuthenticated,
     retry: 1,
+    // Utiliser la structure correcte pour la gestion d'erreurs dans la dernière version de React Query
     meta: {
       onError: (error: Error) => {
         console.error("Erreur lors du chargement des propriétés:", error);
@@ -50,26 +48,172 @@ export function useProperties(isAuthenticated: boolean) {
     }
   });
 
-  // Update total count whenever data changes
-  if (propertiesData.totalCount !== pagination.totalCount) {
-    setTotalCount(propertiesData.totalCount);
-  }
+  // Add a new property
+  const addProperty = async (propertyData: Omit<Property, 'id' | 'client_id' | 'created_at' | 'updated_at'>) => {
+    setIsAddingProperty(true);
+    
+    // Configurer un timeout pour éviter le blocage infini
+    addTimeoutRef.current = setTimeout(() => {
+      console.warn("Timeout atteint lors de l'ajout du logement");
+      setIsAddingProperty(false);
+      toast({
+        title: "Erreur",
+        description: "L'opération a pris trop de temps. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    }, OPERATION_TIMEOUT);
+    
+    try {
+      console.log("Données à envoyer:", propertyData);
+      const result = await propertyService.createProperty(propertyData);
+      
+      // Annuler le timeout si l'opération a réussi
+      if (addTimeoutRef.current) {
+        clearTimeout(addTimeoutRef.current);
+        addTimeoutRef.current = null;
+      }
+      
+      await queryClient.invalidateQueries({ queryKey: ['properties'] });
+      toast({
+        title: "Succès",
+        description: "Le logement a été ajouté avec succès",
+      });
+      return true;
+    } catch (error) {
+      // Annuler le timeout en cas d'erreur
+      if (addTimeoutRef.current) {
+        clearTimeout(addTimeoutRef.current);
+        addTimeoutRef.current = null;
+      }
+      
+      console.error("Erreur lors de l'ajout du logement:", error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Impossible d'ajouter le logement";
+      
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      // S'assurer que isAddingProperty est remis à false même en cas d'erreur non gérée
+      setIsAddingProperty(false);
+    }
+  };
 
-  // Get mutation methods
-  const {
-    isAddingProperty,
-    isEditingProperty,
-    isDeletingProperty,
-    addProperty,
-    updateProperty,
-    deleteProperty,
-    clearCache
-  } = usePropertyMutations(page, pageSize);
+  // Update an existing property
+  const updateProperty = async (
+    id: string, 
+    propertyData: Partial<Omit<Property, 'id' | 'client_id' | 'created_at' | 'updated_at'>>
+  ) => {
+    setIsEditingProperty(true);
+    
+    // Configurer un timeout pour éviter le blocage infini
+    editTimeoutRef.current = setTimeout(() => {
+      console.warn("Timeout atteint lors de la mise à jour du logement");
+      setIsEditingProperty(false);
+      toast({
+        title: "Erreur",
+        description: "L'opération a pris trop de temps. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    }, OPERATION_TIMEOUT);
+    
+    try {
+      console.log("Données à mettre à jour (ID:", id, "):", propertyData);
+      const result = await propertyService.updateProperty(id, propertyData);
+      
+      // Annuler le timeout si l'opération a réussi
+      if (editTimeoutRef.current) {
+        clearTimeout(editTimeoutRef.current);
+        editTimeoutRef.current = null;
+      }
+      
+      await queryClient.invalidateQueries({ queryKey: ['properties'] });
+      toast({
+        title: "Succès",
+        description: "Le logement a été mis à jour avec succès",
+      });
+      return true;
+    } catch (error) {
+      // Annuler le timeout en cas d'erreur
+      if (editTimeoutRef.current) {
+        clearTimeout(editTimeoutRef.current);
+        editTimeoutRef.current = null;
+      }
+      
+      console.error("Erreur lors de la mise à jour du logement:", error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Impossible de mettre à jour le logement";
+      
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      // S'assurer que isEditingProperty est remis à false même en cas d'erreur non gérée
+      setIsEditingProperty(false);
+    }
+  };
 
-  // Return all necessary data and functions
+  // Delete a property and its associated answers
+  const deleteProperty = async (id: string) => {
+    setIsDeletingProperty(true);
+    
+    // Configurer un timeout pour éviter le blocage infini
+    deleteTimeoutRef.current = setTimeout(() => {
+      console.warn("Timeout atteint lors de la suppression du logement");
+      setIsDeletingProperty(false);
+      toast({
+        title: "Erreur",
+        description: "L'opération a pris trop de temps. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    }, OPERATION_TIMEOUT);
+    
+    try {
+      console.log("Suppression du logement (ID:", id, ")");
+      await propertyService.deleteProperty(id);
+      
+      // Annuler le timeout si l'opération a réussi
+      if (deleteTimeoutRef.current) {
+        clearTimeout(deleteTimeoutRef.current);
+        deleteTimeoutRef.current = null;
+      }
+      
+      await queryClient.invalidateQueries({ queryKey: ['properties'] });
+      return true;
+    } catch (error) {
+      // Annuler le timeout en cas d'erreur
+      if (deleteTimeoutRef.current) {
+        clearTimeout(deleteTimeoutRef.current);
+        deleteTimeoutRef.current = null;
+      }
+      
+      console.error("Erreur lors de la suppression du logement:", error);
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Impossible de supprimer le logement";
+      
+      toast({
+        title: "Erreur",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return false;
+    } finally {
+      // S'assurer que isDeletingProperty est remis à false même en cas d'erreur non gérée
+      setIsDeletingProperty(false);
+    }
+  };
+
   return {
-    properties: propertiesData.data,
-    totalCount: propertiesData.totalCount,
+    properties,
     isLoading,
     isAddingProperty,
     isEditingProperty,
@@ -77,9 +221,6 @@ export function useProperties(isAuthenticated: boolean) {
     addProperty,
     updateProperty,
     deleteProperty,
-    refetchProperties,
-    clearCache,
-    // Pagination properties and methods
-    ...pagination
+    refetchProperties
   };
 }
