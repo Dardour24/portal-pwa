@@ -9,146 +9,92 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      clients: {
-        Row: {
-          chatbot_link: string | null
-          created_at: string | null
-          email: string
-          first_name: string | null
-          id: string
-          last_name: string | null
-          phone: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          chatbot_link?: string | null
-          created_at?: string | null
-          email: string
-          first_name?: string | null
-          id: string
-          last_name?: string | null
-          phone?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          chatbot_link?: string | null
-          created_at?: string | null
-          email?: string
-          first_name?: string | null
-          id?: string
-          last_name?: string | null
-          phone?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      form_answers: {
-        Row: {
-          answer_text: string | null
-          created_at: string | null
-          id: string
-          property_id: string
-          question_id: string
-          updated_at: string | null
-        }
-        Insert: {
-          answer_text?: string | null
-          created_at?: string | null
-          id?: string
-          property_id: string
-          question_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          answer_text?: string | null
-          created_at?: string | null
-          id?: string
-          property_id?: string
-          question_id?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "form_answers_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "form_answers_question_id_fkey"
-            columns: ["question_id"]
-            isOneToOne: false
-            referencedRelation: "form_questions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      form_questions: {
-        Row: {
-          created_at: string | null
-          id: string
-          is_custom: boolean | null
-          is_required: boolean | null
-          property_id: string | null
-          question_text: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          is_custom?: boolean | null
-          is_required?: boolean | null
-          property_id?: string | null
-          question_text: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          is_custom?: boolean | null
-          is_required?: boolean | null
-          property_id?: string | null
-          question_text?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "form_questions_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       properties: {
         Row: {
-          address: string | null
-          client_id: string
+          address: string
+          beds24_property_id: string | null
+          city: string
+          country: string
           created_at: string | null
           id: string
-          is_active: boolean | null
           name: string
+          postal_code: string
+          status: string | null
           updated_at: string | null
+          user_id: string
         }
         Insert: {
-          address?: string | null
-          client_id: string
+          address: string
+          beds24_property_id?: string | null
+          city: string
+          country: string
           created_at?: string | null
           id?: string
-          is_active?: boolean | null
           name: string
+          postal_code: string
+          status?: string | null
           updated_at?: string | null
+          user_id: string
         }
         Update: {
-          address?: string | null
-          client_id?: string
+          address?: string
+          beds24_property_id?: string | null
+          city?: string
+          country?: string
           created_at?: string | null
           id?: string
-          is_active?: boolean | null
           name?: string
+          postal_code?: string
+          status?: string | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "properties_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      users: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          image: string | null
+          name: string | null
+          token_identifier: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          image?: string | null
+          name?: string | null
+          token_identifier: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          image?: string | null
+          name?: string | null
+          token_identifier?: string
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
