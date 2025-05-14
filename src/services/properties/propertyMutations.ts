@@ -1,4 +1,3 @@
-
 import { supabase } from "@/lib/supabase";
 import { Property } from "@/types/property";
 import { propertyCache } from "./propertyCache";
@@ -7,6 +6,23 @@ import { propertyCache } from "./propertyCache";
  * Functions related to creating, updating and deleting properties
  */
 export const propertyMutations = {
+  /**
+   * Vérifie si l'utilisateur a déjà une propriété
+   */
+  async hasExistingProperty(userId: string): Promise<boolean> {
+    const { count, error } = await supabase
+      .from('properties')
+      .select('*', { count: 'exact', head: true })
+      .eq('client_id', userId);
+
+    if (error) {
+      console.error('Erreur lors de la vérification des propriétés existantes:', error);
+      throw error;
+    }
+
+    return (count || 0) > 0;
+  },
+
   /**
    * Crée une nouvelle propriété pour l'utilisateur connecté
    */
@@ -19,6 +35,12 @@ export const propertyMutations = {
     
     if (!user) {
       throw new Error("Utilisateur non authentifié");
+    }
+
+    // Vérifier si l'utilisateur a déjà une propriété
+    const hasProperty = await this.hasExistingProperty(user.id);
+    if (hasProperty) {
+      throw new Error("Vous avez déjà créé un logement. La création de plusieurs logements n'est pas disponible en version bêta.");
     }
     
     // Vérifier que name est présent (obligatoire)

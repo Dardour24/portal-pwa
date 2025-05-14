@@ -1,12 +1,19 @@
-
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
+import { Loader2, InfoIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Schema de validation pour le formulaire de propriété
 export const propertySchema = z.object({
@@ -21,21 +28,39 @@ interface PropertyFormProps {
   isSubmitting: boolean;
   onCancel: () => void;
   initialValues?: Partial<PropertyFormValues>;
+  isEdit?: boolean;
 }
 
-export const PropertyForm = ({ onSubmit, isSubmitting, onCancel, initialValues }: PropertyFormProps) => {
+export const PropertyForm = ({
+  onSubmit,
+  isSubmitting,
+  onCancel,
+  initialValues,
+  isEdit = false,
+}: PropertyFormProps) => {
   // Configuration du formulaire avec React Hook Form
   const form = useForm<PropertyFormValues>({
     resolver: zodResolver(propertySchema),
     defaultValues: {
       name: initialValues?.name || "",
       address: initialValues?.address || "",
-    }
+    },
   });
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        {!isEdit && (
+          <Alert className="bg-yellow-50 border-yellow-200">
+            <InfoIcon className="h-4 w-4 text-yellow-600" />
+            <AlertDescription className="text-yellow-700">
+              En version bêta, vous ne pouvez créer qu'un seul logement.
+              Assurez-vous de bien remplir les informations car vous ne pourrez
+              pas en créer d'autres.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <FormField
           control={form.control}
           name="name"
@@ -49,7 +74,7 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel, initialValues }
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="address"
@@ -57,17 +82,17 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel, initialValues }
             <FormItem>
               <FormLabel>Adresse</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="123 Rue de Paris, 75001 Paris" 
-                  {...field} 
-                  value={field.value || ''}
+                <Textarea
+                  placeholder="123 Rue de Paris, 75001 Paris"
+                  {...field}
+                  value={field.value || ""}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+
         <div className="flex justify-end space-x-2">
           <Button type="button" variant="outline" onClick={onCancel}>
             Annuler
@@ -75,10 +100,13 @@ export const PropertyForm = ({ onSubmit, isSubmitting, onCancel, initialValues }
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {initialValues ? 'Modification en cours...' : 'Ajout en cours...'}
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                {isEdit ? "Modification en cours..." : "Ajout en cours..."}
               </>
+            ) : isEdit ? (
+              "Modifier"
             ) : (
-              initialValues ? 'Modifier' : 'Ajouter'
+              "Ajouter"
             )}
           </Button>
         </div>
