@@ -54,9 +54,8 @@ export const PropertyForm = ({
           <Alert className="bg-yellow-50 border-yellow-200">
             <InfoIcon className="h-4 w-4 text-yellow-600" />
             <AlertDescription className="text-yellow-700">
-              En version bêta, vous ne pouvez créer qu'un seul logement.
-              Assurez-vous de bien remplir les informations car vous ne pourrez
-              pas en créer d'autres.
+              En période d'essai, vous ne pouvez ajouter qu'un seul logement
+              pour essayer Botnb.
             </AlertDescription>
           </Alert>
         )}

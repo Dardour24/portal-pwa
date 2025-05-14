@@ -6,7 +6,6 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import MobileNavbar from "./MobileNavbar";
 import PageTransition from "./ui/page-transition";
-import { BetaBanner } from "./ui/beta-banner";
 
 const Layout = () => {
   const isMobile = useIsMobile();
@@ -32,7 +31,6 @@ const Layout = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex flex-col w-full">
-        <BetaBanner />
         {isMobile ? (
           // Mobile layout
           <>
@@ -58,7 +56,6 @@ const Layout = () => {
             </div>
           </div>
         )}
-        <BetaBanner variant="sticker" />
       </div>
     </SidebarProvider>
   );

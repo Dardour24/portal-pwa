@@ -19,6 +19,18 @@ export const CustomCursor = () => {
   const mousePosRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
+    // Check if device is touch-enabled
+    const isTouchDevice =
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0 ||
+      // @ts-ignore
+      navigator.msMaxTouchPoints > 0;
+
+    // If it's a touch device, don't initialize cursor effects
+    if (isTouchDevice) {
+      return;
+    }
+
     let animationFrameId: number;
     let currentX = 0;
     let currentY = 0;

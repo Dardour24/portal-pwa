@@ -125,8 +125,8 @@ export const PropertyList = ({
         <Alert className="bg-yellow-50 border-yellow-200">
           <InfoIcon className="h-4 w-4 text-yellow-600" />
           <AlertDescription className="text-yellow-700">
-            En version bêta, vous ne pouvez créer qu'un seul logement. Pour
-            ajouter d'autres logements, veuillez attendre la version finale.
+            En période d'essai, vous ne pouvez ajouter qu'un seul logement pour
+            essayer Botnb.
           </AlertDescription>
         </Alert>
       )}
