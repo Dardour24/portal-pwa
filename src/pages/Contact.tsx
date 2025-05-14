@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -6,128 +6,114 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Mail, MessageCircle, HelpCircle } from "lucide-react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Mail, Phone, MapPin } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
 
 const Contact = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    // Simulate form submission
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Message envoyé",
-        description:
-          "Nous avons bien reçu votre message et vous répondrons dans les plus brefs délais.",
-      });
-
-      // Reset form
-      setName("");
-      setEmail("");
-      setSubject("");
-      setMessage("");
-    }, 1000);
-  };
+  useEffect(() => {
+    // Add any initialization code here if needed
+  }, []);
 
   return (
-    <div className="container mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Nous Contacter</h1>
+    <div className="container mx-auto py-12 px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="text-center mb-12"
+      >
+        <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          Nous Contacter
+        </h1>
+        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          Notre équipe est là pour vous aider. N'hésitez pas à nous contacter
+          pour toute question ou assistance.
+        </p>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
-          <Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Card className="h-full hover:shadow-lg transition-shadow duration-300">
             <CardHeader>
-              <CardTitle>Envoyez-nous un message</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-primary" />
+                Support Email
+              </CardTitle>
               <CardDescription>
-                Nous vous répondrons dans les plus brefs délais
+                Contactez-nous par email pour toute assistance
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Nom</Label>
-                    <Input
-                      id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Votre nom"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="votre@email.com"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="subject">Sujet</Label>
-                  <Input
-                    id="subject"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    placeholder="Sujet de votre message"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="message">Message</Label>
-                  <Textarea
-                    id="message"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Votre message..."
-                    rows={5}
-                    required
-                  />
-                </div>
-
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Envoi en cours..." : "Envoyer"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div>
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Informations de contact</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start space-x-3">
-                <Mail className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <h3 className="font-medium">Email</h3>
-                  <p className="text-sm text-gray-500">contact@botnb.com</p>
-                </div>
+              <div className="space-y-4">
+                <p className="text-lg font-medium text-primary hover:text-primary/80 transition-colors duration-200">
+                  contact.botnb@gmail.com
+                </p>
               </div>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <Card className="h-full hover:shadow-lg transition-shadow duration-300">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <HelpCircle className="h-5 w-5 text-primary" />
+                FAQ
+              </CardTitle>
+              <CardDescription>
+                Consultez notre FAQ pour des réponses rapides
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <p className="text-gray-600">
+                  Retrouvez les réponses aux questions les plus fréquentes dans
+                  notre FAQ.
+                </p>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => (window.location.href = "/faq")}
+                >
+                  Voir la FAQ
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.6 }}
+        className="mt-12 text-center"
+      >
+        <Card className="max-w-2xl mx-auto bg-gradient-to-r from-primary/5 to-primary/10">
+          <CardContent className="py-8">
+            <MessageCircle className="h-12 w-12 text-primary mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2">
+              Besoin d'aide supplémentaire ?
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Notre équipe de support est disponible pour vous aider avec vos
+              questions et préoccupations.
+            </p>
+            <p className="text-sm text-gray-500">
+              Temps de réponse moyen : 12-24 heures
+            </p>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 };
