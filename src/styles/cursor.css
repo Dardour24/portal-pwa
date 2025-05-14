@@ -1,13 +1,12 @@
 .cursor-dot {
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
     background-color: transparent;
     position: fixed;
     pointer-events: none;
     z-index: 9999;
     transition: opacity 0.2s ease-in-out;
     transform: translate(-50%, -50%);
-    mix-blend-mode: difference;
 }
 
 .cursor-dot::before {
@@ -23,15 +22,14 @@
 }
 
 .cursor-outline {
-    width: 51px;
-    height: 51px;
-    border: 3px solid hsl(210, 100%, 50%);
+    width: 40px;
+    height: 40px;
+    border: 2.5px solid hsl(216, 100%, 50%);
     border-radius: 50%;
     position: fixed;
     pointer-events: none;
     z-index: 9998;
     transform: translate(-50%, -50%);
-    mix-blend-mode: difference;
     will-change: transform;
     box-shadow: 0 0 15px hsl(210, 100%, 50% / 0.3);
 }

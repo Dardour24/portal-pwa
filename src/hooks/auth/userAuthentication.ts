@@ -3,6 +3,29 @@ import { LoginResult, User } from '../../types/auth';
 import { fetchClientData } from './clientDataService';
 
 /**
+ * Vérifie si l'email est enregistré dans la table registered_email
+ */
+export const checkRegisteredEmail = async (email: string): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase
+      .from('registered_email')
+      .select('email')
+      .eq('email', email)
+      .single();
+
+    if (error) {
+      console.error("Error checking registered email:", error);
+      return false;
+    }
+
+    return !!data;
+  } catch (error) {
+    console.error("Error in checkRegisteredEmail:", error);
+    return false;
+  }
+};
+
+/**
  * S'authentifie avec email et mot de passe
  */
 export const signInWithEmail = async (email: string, password: string, hcaptchaToken: string): Promise<LoginResult> => {
@@ -90,6 +113,12 @@ export const signUpWithEmail = async (
       throw new Error("Veuillez compléter la vérification HCaptcha.");
     }
 
+    // Vérifier si l'email est enregistré
+    const isRegistered = await checkRegisteredEmail(email);
+    if (!isRegistered) {
+      throw new Error("Cette adresse email n'est pas enregistrée dans notre système.");
+    }
+
     // Inscrire l'utilisateur avec Supabase
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -108,8 +137,9 @@ export const signUpWithEmail = async (
       console.error("Erreur d'inscription:", error);
       throw error;
     }
-    else
-      {
+
+    if (data.user) {
+      // Return minimal user info without session
       const user: User = {
         id: data.user.id,
         email: data.user.email || '',
@@ -118,18 +148,9 @@ export const signUpWithEmail = async (
         phone: phoneNumber,
       };
       
-      // Convertir la session Supabase en notre type Session
-      const session = {
-        access_token: data.session?.access_token || '',
-        refresh_token: data.session?.refresh_token || '',
-        expires_at: data.session?.expires_at,
-        expires_in: data.session?.expires_in,
-        user: user
-      };
-      
       return {
         user,
-        session
+        session: null // No session on signup
       };
     }
     
