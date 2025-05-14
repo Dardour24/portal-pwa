@@ -108,24 +108,8 @@ export const signUpWithEmail = async (
       console.error("Erreur d'inscription:", error);
       throw error;
     }
-    
-    if (data.user) {
-      // Créer un enregistrement dans la table clients
-      const { error: clientError } = await supabase
-        .from('clients')
-        .insert([{
-          id: data.user.id,
-          first_name: firstName,
-          last_name: lastName,
-          phone: phoneNumber,
-          email: email
-        }]);
-        
-      if (clientError) {
-        console.error("Erreur lors de la création du profil client:", clientError);
-        throw clientError;
-      }
-      
+    else
+      {
       const user: User = {
         id: data.user.id,
         email: data.user.email || '',
