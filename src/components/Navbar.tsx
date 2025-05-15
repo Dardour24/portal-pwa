@@ -68,6 +68,8 @@ const Logo = memo(() => {
           className="h-6"
           onError={handleImageError}
           loading="eager"
+          width={175}
+          height={150}
         />
       ) : (
         <span className="font-bold text-lg">Botnb</span>
@@ -171,7 +173,7 @@ const Navbar = ({ isMobile }: NavbarProps) => {
 
   return (
     <header
-      className={`sticky top-0 z-30 flex items-center justify-between px-3 py-1.5 transition-all duration-300 bg-pageBackground dark:bg-gray-950 ${
+      className={`sticky top-0 z-30 flex items-center justify-between px-3 py-1.5 transition-all duration-300 bg-pageBackground dark:bg-gray-950 h-14 ${
         scrolled ? "shadow-md" : ""
       }`}
       role="banner"
