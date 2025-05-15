@@ -111,30 +111,21 @@ const useAuthProvider = (): AuthContextType => {
       const result = await signInWithEmail(email, password, hcaptchaToken);
       console.log("useAuthProvider: Login result", result);
       
-      // Attendre pour s'assurer que l'état d'authentification est propagé
       if (result.user) {
-        // Attendre que l'état soit correctement mis à jour avant de retourner le résultat
-        await new Promise<void>((resolve) => {
-          // Fonction pour vérifier si l'authentification est complète
-          const checkAuthState = () => {
-            if (!isLoading && user && user.id === result.user?.id) {
-              resolve();
-            } else {
-              setTimeout(checkAuthState, 100);
-            }
-          };
-          
-          // Vérifier l'état initial ou configurer un délai maximum
-          const maxTimeout = setTimeout(() => {
-            console.log("Auth state propagation timeout reached, continuing anyway");
-            resolve();
-          }, 1500);
-          
-          checkAuthState();
-          
-          // Nettoyer le timeout maximum si la résolution se fait plus tôt
-          return () => clearTimeout(maxTimeout);
-        });
+        // Set a maximum wait time of 2 seconds for state propagation
+        const maxWaitTime = 2000;
+        const startTime = Date.now();
+        
+        while (Date.now() - startTime < maxWaitTime) {
+          if (!isLoading && user && user.id === result.user.id) {
+            break;
+          }
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        if (Date.now() - startTime >= maxWaitTime) {
+          console.warn("Auth state propagation timeout reached");
+        }
       }
       
       return result;

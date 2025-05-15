@@ -29,20 +29,34 @@ export const useErrorHandler = () => {
   const RETRY_DELAY = 1000; // 1 second
   
   const handleError = async (error: Error, retryAction: () => Promise<void>) => {
-    setErrorState(prev => ({
+    const currentRetryCount = errorState.retryCount;
+    
+    if (currentRetryCount >= MAX_RETRIES) {
+      setErrorState({
+        hasError: true,
+        error,
+        retryCount: currentRetryCount
+      });
+      return;
+    }
+
+    setErrorState({
       hasError: true,
       error,
-      retryCount: prev.retryCount + 1
-    }));
+      retryCount: currentRetryCount + 1
+    });
     
-    if (errorState.retryCount < MAX_RETRIES) {
+    try {
       await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-      try {
-        await retryAction();
-        setErrorState({ hasError: false, error: null, retryCount: 0 });
-      } catch (retryError) {
-        handleError(retryError, retryAction);
-      }
+      await retryAction();
+      setErrorState({ hasError: false, error: null, retryCount: 0 });
+    } catch (retryError) {
+      // Don't recursively call handleError
+      setErrorState({
+        hasError: true,
+        error: retryError as Error,
+        retryCount: currentRetryCount + 1
+      });
     }
   };
   

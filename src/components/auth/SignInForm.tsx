@@ -61,6 +61,7 @@ export const SignInForm = () => {
   }, [isAuthenticated, isLoading]);
 
   const handleSubmit = async (values: SignInFormValues) => {
+    if (isLoading) return; // Prevent multiple submissions
     setIsLoading(true);
     resetError();
 
@@ -73,6 +74,7 @@ export const SignInForm = () => {
         );
 
         if (result.user) {
+          // Add a small delay to ensure state updates are processed
           await new Promise((resolve) => setTimeout(resolve, 300));
 
           toast({
@@ -96,8 +98,6 @@ export const SignInForm = () => {
             "Veuillez vérifier votre email pour confirmer votre compte."
           );
         }
-        setIsLoading(false);
-        hcaptchaRef.current?.resetCaptcha();
         throw error;
       }
     };
@@ -108,13 +108,18 @@ export const SignInForm = () => {
         attemptLogin
       );
     } catch (error: any) {
-      toast({
-        title: "Erreur de connexion",
-        description:
-          error.message || "Une erreur est survenue lors de la connexion.",
-        variant: "destructive",
-      });
+      // Only show error toast if we're not already showing an error state
+      if (!errorState.hasError) {
+        toast({
+          title: "Erreur de connexion",
+          description:
+            error.message || "Une erreur est survenue lors de la connexion.",
+          variant: "destructive",
+        });
+      }
     } finally {
+      setIsLoading(false);
+      hcaptchaRef.current?.resetCaptcha();
     }
   };
 
@@ -232,7 +237,7 @@ export const SignInForm = () => {
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-          disabled={isLoading || errorState.hasError}
+          disabled={isLoading}
         >
           {isLoading ? (
             <div className="flex items-center justify-center">
