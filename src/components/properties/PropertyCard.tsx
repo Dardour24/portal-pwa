@@ -55,27 +55,25 @@ export const PropertyCard = ({
           <p className="text-sm text-gray-500 mb-4">
             {property.address || "Aucune adresse"}
           </p>
-          <div className="flex flex-col space-y-2">
-            <div className="flex justify-between gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex-1 hover:bg-gray-50"
-                onClick={() => property.id && onEdit(property.id)}
-              >
-                <PenBox className="h-5 w-5 mr-1" aria-hidden="true" />
-                Modifier
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                className="hover:bg-red-600 transition-colors"
-                onClick={() => property.id && onDelete(property.id)}
-              >
-                <Trash2 className="h-5 w-5 mr-1" aria-hidden="true" />
-                Supprimer
-              </Button>
-            </div>
+          <div className="flex flex-col gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full hover:bg-gray-50"
+              onClick={() => property.id && onEdit(property.id)}
+            >
+              <PenBox className="h-5 w-5 mr-1" aria-hidden="true" />
+              Modifier
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="w-full hover:bg-red-600 transition-colors"
+              onClick={() => property.id && onDelete(property.id)}
+            >
+              <Trash2 className="h-5 w-5 mr-1" aria-hidden="true" />
+              Supprimer
+            </Button>
             <Button
               variant="default"
               size="sm"
