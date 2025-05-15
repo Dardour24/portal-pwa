@@ -123,7 +123,7 @@ export const PropertyList = ({
     <div className="space-y-6">
       {hasExistingProperty && (
         <Alert className="bg-yellow-50 border-yellow-200">
-          <InfoIcon className="h-4 w-4 text-yellow-600" />
+          <InfoIcon className="h-6 w-6 text-yellow-700" />
           <AlertDescription className="text-yellow-700">
             En période d'essai, vous ne pouvez ajouter qu'un seul logement pour
             essayer Botnb.
@@ -133,10 +133,10 @@ export const PropertyList = ({
 
       <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
         <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+          <Search className="absolute left-3 top-2.5 h-7 w-7 text-muted-foreground/80" />
           <Input
             placeholder="Rechercher un logement..."
-            className="pl-10 h-10 rounded-md border-separator focus:border-primary"
+            className="pl-12 h-10 rounded-md border-separator focus:border-primary"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -163,7 +163,7 @@ export const PropertyList = ({
           )}
           {!hasExistingProperty && (
             <Button onClick={onAddProperty} className="btn-primary-hover">
-              <CirclePlus className="h-5 w-5 mr-1" />
+              <CirclePlus className="h-7 w-7 mr-2 text-white" />
               Ajouter un logement
             </Button>
           )}
@@ -258,7 +258,7 @@ export const PropertyList = ({
           transition={{ delay: 0.2 }}
         >
           <div className="flex justify-center mb-4">
-            <CirclePlus className="h-12 w-12 text-muted-foreground" />
+            <CirclePlus className="h-20 w-20 text-muted-foreground/80" />
           </div>
           <h3 className="text-lg font-medium">Aucun logement trouvé</h3>
           <p className="text-muted-foreground mt-1 mb-4">
@@ -267,7 +267,7 @@ export const PropertyList = ({
               : "Vous n'avez pas encore ajouté de logement. Cliquez sur 'Ajouter un Logement' pour commencer."}
           </p>
           <Button onClick={onAddProperty} className="btn-primary-hover">
-            <CirclePlus className="h-5 w-5 mr-1" />
+            <CirclePlus className="h-7 w-7 mr-2 text-white" />
             Ajouter un logement
           </Button>
         </motion.div>

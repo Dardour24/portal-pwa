@@ -1,65 +1,46 @@
-
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
-import { checkSupabaseConfig } from "../lib/supabase";
 import { toast } from "@/hooks/use-toast";
+import { useNavigationState } from "@/hooks/useNavigationState";
+import { useErrorHandler } from "@/hooks/useErrorHandler";
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
+  const { saveIntendedDestination } = useNavigationState();
+  const { errorState, handleError } = useErrorHandler();
   const [loadingTimeout, setLoadingTimeout] = useState(false);
-  
-  // Vérification du mode preview
-  const { isPreviewMode } = checkSupabaseConfig();
-  const urlHasPreview = 
-    window.location.search.includes('preview=true') ||
-    window.location.search.includes('demo=true');
-  const isDevelopment = 
-    window.location.hostname === 'localhost' || 
-    process.env.NODE_ENV !== 'production';
-  
-  // Mode preview combiné
-  const isInPreviewMode = isPreviewMode || urlHasPreview || isDevelopment;
 
-  console.log("ProtectedRoute - Environment check:", { 
-    isPreviewMode, 
-    urlHasPreview, 
-    isDevelopment, 
-    combined: isInPreviewMode,
-    hostname: window.location.hostname,
-    search: window.location.search
-  });
+  useEffect(() => {
+    if (!isAuthenticated && !isLoading) {
+      // Save the current path before redirecting
+      saveIntendedDestination(location.pathname);
+    }
+  }, [isAuthenticated, isLoading, location.pathname, saveIntendedDestination]);
 
-  // CORRECTION: Augmentation du délai d'attente pour l'authentification
+  // Set a timeout for authentication check
   useEffect(() => {
     if (isLoading) {
       const timer = setTimeout(() => {
-        console.log("Authentification: délai d'attente dépassé après 30 secondes");
+        console.log(
+          "Authentification: délai d'attente dépassé après 30 secondes"
+        );
         setLoadingTimeout(true);
         toast({
-          title: "Mode prévisualisation activé",
-          description: "L'authentification prend trop de temps, la prévisualisation est automatiquement activée."
+          title: "Erreur d'authentification",
+          description:
+            "L'authentification prend trop de temps. Veuillez réessayer.",
+          variant: "destructive",
         });
-      }, 30000); // CORRECTION: Augmenté à 30 secondes pour donner plus de temps à l'authentification
-      
+      }, 30000);
+
       return () => clearTimeout(timer);
     }
   }, [isLoading]);
-
-  console.log("ProtectedRoute - Auth state:", { 
-    isAuthenticated, 
-    isLoading, 
-    isInPreviewMode, 
-    loadingTimeout 
-  });
-
-  // Si le timeout est dépassé ou en mode preview, permettre l'accès
-  if ((isLoading && loadingTimeout) || isInPreviewMode) {
-    console.log("Mode prévisualisation actif ou délai d'authentification dépassé, authentification contournée");
-    return <>{children}</>;
-  }
 
   if (isLoading && !loadingTimeout) {
     return (
@@ -75,6 +56,25 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   if (!isAuthenticated) {
     console.log("Non authentifié, redirection vers signin");
     return <Navigate to="/signin" state={{ from: location }} replace />;
+  }
+
+  if (errorState.hasError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 max-w-md w-full">
+          <h3 className="text-red-800 font-medium mb-2">
+            Erreur d'authentification
+          </h3>
+          <p className="text-red-600">{errorState.error?.message}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-100 text-red-800 rounded hover:bg-red-200 transition-colors"
+          >
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
   }
 
   console.log("Authentifié, affichage du contenu");

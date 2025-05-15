@@ -52,7 +52,7 @@ export const PropertyForm = ({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {!isEdit && (
           <Alert className="bg-yellow-50 border-yellow-200">
-            <InfoIcon className="h-4 w-4 text-yellow-600" />
+            <InfoIcon className="h-6 w-6 text-yellow-700" />
             <AlertDescription className="text-yellow-700">
               En période d'essai, vous ne pouvez ajouter qu'un seul logement
               pour essayer Botnb.
@@ -99,7 +99,7 @@ export const PropertyForm = ({
           <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{" "}
+                <Loader2 className="mr-2 h-6 w-6 animate-spin text-white" />
                 {isEdit ? "Modification en cours..." : "Ajout en cours..."}
               </>
             ) : isEdit ? (

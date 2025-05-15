@@ -1,5 +1,11 @@
-
-import { Home, House, Bed, HelpCircle, Mail, MessageCircle } from "lucide-react";
+import {
+  Home,
+  House,
+  Bed,
+  HelpCircle,
+  Mail,
+  MessageCircle,
+} from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useCallback, memo } from "react";
@@ -14,31 +20,36 @@ interface NavItemProps {
 }
 
 // Composant d'élément de navigation extrait et mémorisé
-const NavItem = memo(({ icon: Icon, label, path, isActive, onClick }: NavItemProps) => {
-  return (
-    <button
-      className={`mobile-nav-link relative min-w-[20%] py-2 ${
-        isActive ? "text-primary" : "text-gray-500 dark:text-gray-400"
-      }`}
-      onClick={onClick}
-      aria-label={label}
-      aria-current={isActive ? "page" : undefined}
-    >
-      {isActive && (
-        <motion.span
-          className="absolute bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full"
-          layoutId="mobile-nav-indicator"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
+const NavItem = memo(
+  ({ icon: Icon, label, path, isActive, onClick }: NavItemProps) => {
+    return (
+      <button
+        className={`mobile-nav-link relative min-w-[20%] py-2 ${
+          isActive ? "text-primary" : "text-gray-500 dark:text-gray-400"
+        }`}
+        onClick={onClick}
+        aria-label={label}
+        aria-current={isActive ? "page" : undefined}
+      >
+        {isActive && (
+          <motion.span
+            className="absolute bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full"
+            layoutId="mobile-nav-indicator"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2 }}
+            aria-hidden="true"
+          />
+        )}
+        <Icon
+          className="h-6 w-6 mx-auto mb-1 transition-colors"
           aria-hidden="true"
         />
-      )}
-      <Icon className="h-5 w-5 mx-auto mb-1 transition-colors" aria-hidden="true" />
-      <span className="text-xs">{label}</span>
-    </button>
-  );
-});
+        <span className="text-xs">{label}</span>
+      </button>
+    );
+  }
+);
 
 NavItem.displayName = "NavItem";
 
@@ -54,14 +65,20 @@ const MobileNavbar = () => {
     { icon: HelpCircle, label: "FAQ", path: "/faq" },
   ];
 
-  const isActive = useCallback((path: string) => location.pathname === path, [location.pathname]);
-  
-  const handleNavigate = useCallback((path: string) => () => {
-    navigate(path);
-  }, [navigate]);
+  const isActive = useCallback(
+    (path: string) => location.pathname === path,
+    [location.pathname]
+  );
+
+  const handleNavigate = useCallback(
+    (path: string) => () => {
+      navigate(path);
+    },
+    [navigate]
+  );
 
   return (
-    <nav 
+    <nav
       className="fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-gray-950 border-t border-separator shadow-lg"
       aria-label="Navigation mobile"
     >

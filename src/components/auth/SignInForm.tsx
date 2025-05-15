@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,12 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { motion } from "framer-motion";
+import { useNavigationState } from "@/hooks/useNavigationState";
+import {
+  useErrorHandler,
+  NetworkError,
+  AuthenticationError,
+} from "@/hooks/useErrorHandler";
 
 const loginSchema = z.object({
   email: z.string().email("Veuillez entrer un email valide"),
@@ -32,10 +38,11 @@ export type SignInFormValues = z.infer<typeof loginSchema>;
 
 export const SignInForm = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const { login } = useAuth();
   const navigate = useNavigate();
   const hcaptchaRef = useRef<HCaptcha>(null);
+  const { getAndClearIntendedDestination } = useNavigationState();
+  const { errorState, handleError, resetError } = useErrorHandler();
 
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(loginSchema),
@@ -48,52 +55,57 @@ export const SignInForm = () => {
 
   const handleSubmit = async (values: SignInFormValues) => {
     setIsLoading(true);
-    setError(null);
+    resetError();
 
-    try {
-      const result = await login(
-        values.email,
-        values.password,
-        values.hcaptchaToken
-      );
+    const attemptLogin = async () => {
+      try {
+        const result = await login(
+          values.email,
+          values.password,
+          values.hcaptchaToken
+        );
 
-      if (result.user) {
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        if (result.user) {
+          await new Promise((resolve) => setTimeout(resolve, 300));
 
-        toast({
-          title: "Connecté avec succès",
-          description: "Bienvenue sur votre portail client Botnb.",
-        });
-        navigate("/");
-      } else {
-        setError("Erreur de connexion : identifiants invalides.");
-        toast({
-          title: "Erreur de connexion",
-          description: "Email ou mot de passe invalide.",
-        });
-      }
-    } catch (error: any) {
-      console.error("Error during login:", error);
+          toast({
+            title: "Connecté avec succès",
+            description: "Bienvenue sur votre portail client Botnb.",
+          });
 
-      if (error.message) {
+          // Get the intended destination or default to home
+          const intendedDestination = getAndClearIntendedDestination() || "/";
+          navigate(intendedDestination, { replace: true });
+        } else {
+          throw new AuthenticationError("Email ou mot de passe invalide.");
+        }
+      } catch (error: any) {
+        if (!navigator.onLine) {
+          throw new NetworkError("Aucune connexion réseau disponible.");
+        }
+
         if (error.message.includes("Invalid login credentials")) {
-          setError("Email ou mot de passe incorrect. Veuillez réessayer.");
+          throw new AuthenticationError(
+            "Email ou mot de passe incorrect. Veuillez réessayer."
+          );
         } else if (error.message.includes("Email not confirmed")) {
-          setError(
+          throw new AuthenticationError(
             "Veuillez vérifier votre email pour confirmer votre compte."
           );
-        } else {
-          setError(
-            error.message || "Une erreur est survenue lors de la connexion."
-          );
         }
-      } else {
-        setError("Une erreur est survenue lors de la connexion.");
-      }
 
+        throw error;
+      }
+    };
+
+    try {
+      await handleError(new Error("Tentative de connexion..."), attemptLogin);
+    } catch (error: any) {
       toast({
         title: "Erreur de connexion",
-        description: error.message || "Email ou mot de passe invalide.",
+        description:
+          error.message || "Une erreur est survenue lors de la connexion.",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -104,7 +116,7 @@ export const SignInForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {error && (
+        {errorState.hasError && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -113,7 +125,8 @@ export const SignInForm = () => {
             <Alert variant="destructive" className="bg-red-50 border-red-200">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="text-red-800">
-                {error}
+                {errorState.error?.message}
+                {errorState.retryCount < 3 && " Tentative de reconnexion..."}
               </AlertDescription>
             </Alert>
           </motion.div>
@@ -189,12 +202,14 @@ export const SignInForm = () => {
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-          disabled={isLoading}
+          disabled={isLoading || errorState.hasError}
         >
           {isLoading ? (
             <div className="flex items-center justify-center">
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-              Connexion en cours...
+              {errorState.hasError
+                ? "Tentative de reconnexion..."
+                : "Connexion en cours..."}
             </div>
           ) : (
             "Se connecter"

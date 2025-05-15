@@ -9,6 +9,7 @@ import { useEffect, lazy, Suspense } from "react";
 import { verifySupabaseSetup } from "./utils/verifySupabaseSetup";
 import { Spinner } from "./components/ui/spinner";
 import { CustomCursor } from "./components/CustomCursor";
+import { useServiceWorkerManager } from "./hooks/useServiceWorkerManager";
 import "./styles/cursor.css";
 
 // Pages chargées de manière différée avec React.lazy
@@ -42,6 +43,8 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
+  const { isRegistered, isActive, lastError } = useServiceWorkerManager();
+
   useEffect(() => {
     // Vérifier la configuration Supabase au chargement initial de l'application
     verifySupabaseSetup().then((isConfigured) => {
