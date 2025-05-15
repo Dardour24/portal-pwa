@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,7 @@ export type SignInFormValues = z.infer<typeof loginSchema>;
 
 export const SignInForm = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const hcaptchaRef = useRef<HCaptcha>(null);
   const { getAndClearIntendedDestination } = useNavigationState();
@@ -52,6 +52,13 @@ export const SignInForm = () => {
       hcaptchaToken: "",
     },
   });
+
+  useEffect(() => {
+    if (isAuthenticated && isLoading === false) {
+      const intendedDestination = getAndClearIntendedDestination() || "/";
+      navigate(intendedDestination, { replace: true });
+    }
+  }, [isAuthenticated, isLoading]);
 
   const handleSubmit = async (values: SignInFormValues) => {
     setIsLoading(true);
@@ -72,10 +79,6 @@ export const SignInForm = () => {
             title: "Connecté avec succès",
             description: "Bienvenue sur votre portail client Botnb.",
           });
-
-          // Get the intended destination or default to home
-          const intendedDestination = getAndClearIntendedDestination() || "/";
-          navigate(intendedDestination, { replace: true });
         } else {
           throw new AuthenticationError("Email ou mot de passe invalide.");
         }
@@ -99,7 +102,10 @@ export const SignInForm = () => {
     };
 
     try {
-      await handleError(new Error("Tentative de connexion..."), attemptLogin);
+      await handleError(
+        new Error("Connexion en cours, merci de patienter..."),
+        attemptLogin
+      );
     } catch (error: any) {
       toast({
         title: "Erreur de connexion",
@@ -116,21 +122,38 @@ export const SignInForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-        {errorState.hasError && (
+        {isLoading && !errorState.hasError && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Alert variant="destructive" className="bg-red-50 border-red-200">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription className="text-red-800">
-                {errorState.error?.message}
-                {errorState.retryCount < 3 && " Tentative de reconnexion..."}
+            <Alert className="bg-blue-50 border-blue-200">
+              <AlertCircle className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-800">
+                Connexion en cours, merci de patienter...
               </AlertDescription>
             </Alert>
           </motion.div>
         )}
+
+        {errorState.hasError &&
+          errorState.error?.message !==
+            "Connexion en cours, merci de patienter..." && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Alert variant="destructive" className="bg-red-50 border-red-200">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-red-800">
+                  {errorState.error?.message}
+                  {errorState.retryCount < 3 && " Tentative de reconnexion..."}
+                </AlertDescription>
+              </Alert>
+            </motion.div>
+          )}
 
         <FormField
           control={form.control}
