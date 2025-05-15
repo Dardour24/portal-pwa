@@ -142,7 +142,8 @@ const useAuthProvider = (): AuthContextType => {
     password: string, 
     firstName: string, 
     lastName: string, 
-    phoneNumber: string,
+    whatsappPhone: string,
+    normalPhone: string,
     hcaptchaToken: string
   ): Promise<LoginResult> => {
     // Check for network connectivity
@@ -167,7 +168,7 @@ const useAuthProvider = (): AuthContextType => {
     
     setAuthLoading(true);
     try {
-      const result = await signUpWithEmail(email, password, firstName, lastName, phoneNumber, hcaptchaToken);
+      const result = await signUpWithEmail(email, password, firstName, lastName, whatsappPhone, normalPhone, hcaptchaToken);
       return result;
     } catch (error) {
       console.error("Error during signup:", error);

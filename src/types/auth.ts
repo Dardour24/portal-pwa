@@ -7,6 +7,7 @@ export interface User {
   first_name: string;
   last_name: string;
   phone: string;
+  whatsapp_phone: string;
   chatbot_link?: string;
 }
 
@@ -19,7 +20,15 @@ export interface AuthContextType {
   isLoading: boolean;
   networkAvailable: boolean;
   login: (email: string, password: string, hcaptchaToken: string) => Promise<LoginResult>;
-  signup: (email: string, password: string, firstName: string, lastName: string, phoneNumber: string, hcaptchaToken: string) => Promise<LoginResult>;
+  signup: (
+    email: string, 
+    password: string, 
+    firstName: string, 
+    lastName: string, 
+    whatsappPhone: string,
+    normalPhone: string,
+    hcaptchaToken: string
+  ) => Promise<LoginResult>;
   logout: () => Promise<void>;
 }
 

@@ -64,6 +64,7 @@ export const signInWithEmail = async (email: string, password: string, hcaptchaT
         first_name: clientData?.first_name || '',
         last_name: clientData?.last_name || '',
         phone: clientData?.phone || '',
+        whatsapp_phone: clientData?.whatsapp_phone || '',
       };
       
       // Convertir la session Supabase en notre type Session
@@ -104,7 +105,8 @@ export const signUpWithEmail = async (
   password: string, 
   firstName: string, 
   lastName: string, 
-  phoneNumber: string,
+  whatsappPhone: string,
+  normalPhone: string,
   hcaptchaToken: string
 ): Promise<LoginResult> => {
   try {
@@ -121,13 +123,15 @@ export const signUpWithEmail = async (
 
     // Inscrire l'utilisateur avec Supabase
     const { data, error } = await supabase.auth.signUp({
+      phone: normalPhone,
       email,
       password,
       options: {
         data: {
           first_name: firstName,
           last_name: lastName,
-          phone: phoneNumber,
+          personal_number: normalPhone,
+          phone_whatsapp: whatsappPhone,
         },
         captchaToken: hcaptchaToken
       }
@@ -139,13 +143,13 @@ export const signUpWithEmail = async (
     }
 
     if (data.user) {
-      // Return minimal user info without session
       const user: User = {
         id: data.user.id,
         email: data.user.email || '',
         first_name: firstName,
         last_name: lastName,
-        phone: phoneNumber,
+        phone: normalPhone,
+        whatsapp_phone: whatsappPhone,
       };
       
       return {

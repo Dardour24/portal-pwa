@@ -14,11 +14,27 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Mail, Lock, User, Phone } from "lucide-react";
+import {
+  AlertCircle,
+  Mail,
+  Lock,
+  User,
+  Phone,
+  MessageCircle,
+} from "lucide-react";
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { motion, AnimatePresence } from "framer-motion";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { FaWhatsapp, FaPhone } from "react-icons/fa";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+
+interface SignUpFormProps {
+  verifiedEmail: string;
+}
 
 const signupSchema = z
   .object({
@@ -26,70 +42,57 @@ const signupSchema = z
       .string()
       .min(2, "Le prénom doit contenir au moins 2 caractères"),
     lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-    phoneNumber: z
-      .string()
-      .min(10, "Le numéro de téléphone doit contenir au moins 10 chiffres")
-      .regex(/^[0-9+ ()-]{10,15}$/, "Format de téléphone invalide"),
+    whatsappPhone: z.string().min(10, "Le numéro WhatsApp doit être valide"),
+    phoneNumber: z.string().min(10, "Le numéro de téléphone doit être valide"),
     password: z
       .string()
-      .min(8, "Le mot de passe doit contenir au moins 8 caractères")
-      .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une majuscule")
-      .regex(/[a-z]/, "Le mot de passe doit contenir au moins une minuscule")
-      .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre"),
+      .min(8, "Le mot de passe doit contenir au moins 8 caractères"),
     confirmPassword: z.string(),
-    hcaptchaToken: z
-      .string()
-      .min(1, "Veuillez compléter la vérification HCaptcha"),
+    hcaptchaToken: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Les mots de passe ne correspondent pas",
     path: ["confirmPassword"],
   });
 
-export type SignUpFormValues = z.infer<typeof signupSchema>;
+type SignUpFormData = z.infer<typeof signupSchema>;
 
-interface SignUpFormProps {
-  verifiedEmail: string;
-}
-
-export const SignUpForm = ({ verifiedEmail }: SignUpFormProps) => {
+export function SignUpForm({ verifiedEmail }: SignUpFormProps) {
+  const { signup } = useAuth();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { signup } = useAuth();
   const navigate = useNavigate();
   const hcaptchaRef = useRef<HCaptcha>(null);
 
-  const form = useForm<SignUpFormValues>({
+  const form = useForm<SignUpFormData>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
+      whatsappPhone: "",
       phoneNumber: "",
       password: "",
       confirmPassword: "",
-      hcaptchaToken: "",
     },
   });
 
-  const handleSubmit = async (values: SignUpFormValues) => {
-    setIsLoading(true);
-    setError(null);
-
+  const onSubmit = async (data: SignUpFormData) => {
     try {
+      setIsLoading(true);
       await signup(
         verifiedEmail,
-        values.password,
-        values.firstName,
-        values.lastName,
-        values.phoneNumber,
-        values.hcaptchaToken
+        data.password,
+        data.firstName,
+        data.lastName,
+        data.whatsappPhone,
+        data.phoneNumber,
+        data.hcaptchaToken || ""
       );
-
       toast({
         title: "Compte créé avec succès",
-        description: "Veuillez vous connecter pour accéder à votre compte.",
+        description: "Vous pouvez maintenant vous connecter",
       });
-
       navigate("/signin");
     } catch (error: any) {
       console.error("Error during signup:", error);
@@ -112,6 +115,7 @@ export const SignUpForm = ({ verifiedEmail }: SignUpFormProps) => {
       toast({
         title: "Erreur d'inscription",
         description: errorMessage,
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -137,75 +141,74 @@ export const SignUpForm = ({ verifiedEmail }: SignUpFormProps) => {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Prénom</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        {...field}
-                        placeholder="Prénom"
-                        className="pl-9"
-                        disabled={isLoading}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+            <div className="space-y-2">
+              <Label htmlFor="firstName">Prénom</Label>
+              <Input
+                id="firstName"
+                {...form.register("firstName")}
+                placeholder="Entrez votre prénom"
+              />
+              {form.formState.errors.firstName && (
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.firstName.message}
+                </p>
               )}
-            />
-
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nom</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        {...field}
-                        placeholder="Nom"
-                        className="pl-9"
-                        disabled={isLoading}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Nom</Label>
+              <Input
+                id="lastName"
+                {...form.register("lastName")}
+                placeholder="Entrez votre nom"
+              />
+              {form.formState.errors.lastName && (
+                <p className="text-sm text-red-500">
+                  {form.formState.errors.lastName.message}
+                </p>
               )}
-            />
+            </div>
           </div>
 
-          <FormField
-            control={form.control}
-            name="phoneNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Numéro de téléphone</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      {...field}
-                      type="tel"
-                      placeholder="Numéro de téléphone"
-                      className="pl-9"
-                      disabled={isLoading}
-                    />
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          <div className="space-y-2">
+            <Label htmlFor="whatsappPhone" className="flex items-center gap-2">
+              <FaWhatsapp className="text-green-500" />
+              Numéro WhatsApp
+            </Label>
+            <PhoneInput
+              id="whatsappPhone"
+              value={form.watch("whatsappPhone")}
+              onChange={(value) => form.setValue("whatsappPhone", value)}
+              placeholder="Entrez votre numéro WhatsApp"
+            />
+            <p className="text-sm text-muted-foreground">
+              Ce numéro doit être un numéro WhatsApp valide
+            </p>
+            {form.formState.errors.whatsappPhone && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.whatsappPhone.message}
+              </p>
             )}
-          />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phoneNumber" className="flex items-center gap-2">
+              <FaPhone className="text-blue-500" />
+              Numéro de téléphone personnel
+            </Label>
+            <PhoneInput
+              id="phoneNumber"
+              value={form.watch("phoneNumber")}
+              onChange={(value) => form.setValue("phoneNumber", value)}
+              placeholder="Entrez votre numéro de téléphone"
+            />
+            {form.formState.errors.phoneNumber && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.phoneNumber.message}
+              </p>
+            )}
+          </div>
 
           <FormField
             control={form.control}
@@ -282,10 +285,10 @@ export const SignUpForm = ({ verifiedEmail }: SignUpFormProps) => {
           </AnimatePresence>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Création du compte..." : "Créer le compte"}
+            {isLoading ? "Création du compte..." : "Créer un compte"}
           </Button>
         </form>
       </Form>
     </motion.div>
   );
-};
+}
