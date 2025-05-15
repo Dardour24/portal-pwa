@@ -96,7 +96,8 @@ export const SignInForm = () => {
             "Veuillez vérifier votre email pour confirmer votre compte."
           );
         }
-
+        setIsLoading(false);
+        hcaptchaRef.current?.resetCaptcha();
         throw error;
       }
     };
@@ -114,8 +115,6 @@ export const SignInForm = () => {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
-      hcaptchaRef.current?.resetCaptcha();
     }
   };
 
@@ -169,6 +168,10 @@ export const SignInForm = () => {
                     placeholder="votre@email.com"
                     className="pl-10 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-primary focus:ring-primary/20"
                     {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      resetError();
+                    }}
                   />
                 </div>
               </FormControl>
@@ -193,6 +196,10 @@ export const SignInForm = () => {
                     placeholder="••••••••"
                     className="pl-10 bg-white/50 backdrop-blur-sm border-gray-200 focus:border-primary focus:ring-primary/20"
                     {...field}
+                    onChange={(e) => {
+                      field.onChange(e);
+                      resetError();
+                    }}
                   />
                 </div>
               </FormControl>
