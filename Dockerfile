@@ -1,24 +1,15 @@
 # Base image
-FROM node:20-alpine as build
+FROM node:20-alpine AS build
 
 # Set working directory
 WORKDIR /app
 
 # Copy package files and install dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
 # Copy project files
 COPY . .
-
-# Make sure environment variables are available at build time
-ARG VITE_SUPABASE_URL
-ARG VITE_SUPABASE_ANON_KEY
-ARG VITE_PREVIEW_MODE
-
-ENV VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
-ENV VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
-ENV VITE_PREVIEW_MODE=${VITE_PREVIEW_MODE}
 
 # Build the application
 RUN npm run build

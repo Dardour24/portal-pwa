@@ -1,7 +1,17 @@
-
 node_modules
 npm-debug.log
+Dockerfile
+.dockerignore
 .git
+.gitignore
+README.md
+.env
+.env.*
+dist
+build
+coverage
+.vscode
+.idea
 .github
 .gitignore
 README.md
@@ -9,4 +19,3 @@ README.md
 .vscode
 coverage
 .DS_Store
-dist
