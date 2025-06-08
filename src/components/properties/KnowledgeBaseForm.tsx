@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { FormQuestion, FormAnswer } from "@/types/formQA";
 import { useFormQA } from "@/hooks/use-form-qa";
@@ -162,9 +161,16 @@ export const KnowledgeBaseForm = ({
     <div className="space-y-6 py-4">
       <div className="space-y-2">
         <h2 className="text-xl font-semibold">
-          {isNewProperty ? "Nouvelle Base de Connaissances pour : " : "Modifier la Base de Connaissances pour : "}
-          {propertyName}
+          {isNewProperty ? "Étape 2/2 : Base de connaissances" : "Modifier la Base de Connaissances pour : " + propertyName}
         </h2>
+        {isNewProperty && (
+          <div className="bg-green-50 border border-green-200 rounded-md p-4 mb-4">
+            <p className="text-green-800">
+              Félicitations, votre propriété a été créée ! Prenez un moment pour renseigner ces informations. 
+              Elles permettront de répondre automatiquement et précisément aux questions futures.
+            </p>
+          </div>
+        )}
         <p className="text-muted-foreground">
           Renseignez les questions suivantes pour créer la base de connaissances de votre logement.
           Les champs marqués d'un * sont obligatoires.

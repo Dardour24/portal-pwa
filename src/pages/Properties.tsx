@@ -1,11 +1,16 @@
-
 import { useAuth } from "@/context/AuthContext";
 import { PropertyList } from "@/components/properties/PropertyList";
 import { PropertyDialogs } from "@/components/properties/PropertyPage/PropertyDialogs";
 import { usePropertyPage } from "@/components/properties/PropertyPage/usePropertyPage";
+import { useState } from "react";
+import { Property } from "@/types/property";
 
 const Properties = () => {
   const { isAuthenticated } = useAuth();
+  
+  // Nouveaux états pour le flux de création avec base de connaissances
+  const [newlyCreatedProperty, setNewlyCreatedProperty] = useState<Property | null>(null);
+  const [isKnowledgeBaseDialogOpen, setIsKnowledgeBaseDialogOpen] = useState<boolean>(false);
   
   // Use our custom hook to manage state and actions
   const {
@@ -19,8 +24,8 @@ const Properties = () => {
     setIsAddDialogOpen,
     isEditDialogOpen,
     setIsEditDialogOpen,
-    isKnowledgeBaseDialogOpen,
-    setIsKnowledgeBaseDialogOpen,
+    isKnowledgeBaseDialogOpen: isEditKnowledgeBaseDialogOpen,
+    setIsKnowledgeBaseDialogOpen: setIsEditKnowledgeBaseDialogOpen,
     isDeleteDialogOpen,
     setIsDeleteDialogOpen,
     selectedProperty,
@@ -64,8 +69,8 @@ const Properties = () => {
         setIsAddDialogOpen={setIsAddDialogOpen}
         isEditDialogOpen={isEditDialogOpen}
         setIsEditDialogOpen={setIsEditDialogOpen}
-        isKnowledgeBaseDialogOpen={isKnowledgeBaseDialogOpen}
-        setIsKnowledgeBaseDialogOpen={setIsKnowledgeBaseDialogOpen}
+        isKnowledgeBaseDialogOpen={isEditKnowledgeBaseDialogOpen}
+        setIsKnowledgeBaseDialogOpen={setIsEditKnowledgeBaseDialogOpen}
         isDeleteDialogOpen={isDeleteDialogOpen}
         setIsDeleteDialogOpen={setIsDeleteDialogOpen}
         selectedProperty={selectedProperty}
@@ -77,6 +82,11 @@ const Properties = () => {
         updateProperty={updateProperty}
         deleteProperty={deleteProperty}
         refetchProperties={refetchProperties}
+        // Nouvelles props pour le flux de création avec base de connaissances
+        newlyCreatedProperty={newlyCreatedProperty}
+        setNewlyCreatedProperty={setNewlyCreatedProperty}
+        isKnowledgeBaseDialogOpen={isKnowledgeBaseDialogOpen}
+        setIsKnowledgeBaseDialogOpen={setIsKnowledgeBaseDialogOpen}
       />
       
       {/* Property List Component */}

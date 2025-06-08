@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Property } from "@/types/property";
 import { PropertyFormValues } from "@/components/properties/PropertyForm";
@@ -26,6 +25,11 @@ interface PropertyDialogsProps {
   updateProperty: (id: string, data: Partial<Omit<Property, 'id' | 'client_id' | 'created_at' | 'updated_at'>>) => Promise<boolean>;
   deleteProperty: (id: string) => Promise<boolean>;
   refetchProperties: () => void;
+  // Nouvelles props pour le flux de création avec base de connaissances
+  newlyCreatedProperty: Property | null;
+  setNewlyCreatedProperty: (property: Property | null) => void;
+  isKnowledgeBaseDialogOpen: boolean;
+  setIsKnowledgeBaseDialogOpen: (isOpen: boolean) => void;
 }
 
 export const PropertyDialogs = ({
@@ -33,8 +37,8 @@ export const PropertyDialogs = ({
   setIsAddDialogOpen,
   isEditDialogOpen,
   setIsEditDialogOpen,
-  isKnowledgeBaseDialogOpen,
-  setIsKnowledgeBaseDialogOpen,
+  isKnowledgeBaseDialogOpen: isEditKnowledgeBaseDialogOpen,
+  setIsKnowledgeBaseDialogOpen: setIsEditKnowledgeBaseDialogOpen,
   isDeleteDialogOpen,
   setIsDeleteDialogOpen,
   selectedProperty,
@@ -45,7 +49,12 @@ export const PropertyDialogs = ({
   addProperty,
   updateProperty,
   deleteProperty,
-  refetchProperties
+  refetchProperties,
+  // Nouvelles props
+  newlyCreatedProperty,
+  setNewlyCreatedProperty,
+  isKnowledgeBaseDialogOpen,
+  setIsKnowledgeBaseDialogOpen
 }: PropertyDialogsProps) => {
   
   // Handle add property form submission
@@ -58,6 +67,21 @@ export const PropertyDialogs = ({
     const success = await addProperty(propertyData);
     if (success) {
       setIsAddDialogOpen(false);
+      // Récupérer la propriété nouvellement créée depuis la liste mise à jour
+      // Note: Nous devons attendre que la liste soit mise à jour pour récupérer la nouvelle propriété
+      refetchProperties();
+      // Pour simplifier, nous allons créer un objet temporaire avec les données soumises
+      // L'ID sera généré côté serveur mais nous n'en avons pas besoin pour le formulaire
+      const tempProperty: Property = {
+        id: 'temp-id', // ID temporaire
+        client_id: 'temp-client-id', // ID temporaire
+        name: values.name,
+        address: values.address || null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      setNewlyCreatedProperty(tempProperty);
+      setIsKnowledgeBaseDialogOpen(true);
     }
   };
 
@@ -118,11 +142,31 @@ export const PropertyDialogs = ({
         property={selectedProperty}
       />
       
+      {/* Dialogue pour l'édition d'une base de connaissances existante */}
       <KnowledgeBaseDialog
-        isOpen={isKnowledgeBaseDialogOpen}
-        onOpenChange={setIsKnowledgeBaseDialogOpen}
+        isOpen={isEditKnowledgeBaseDialogOpen}
+        onOpenChange={setIsEditKnowledgeBaseDialogOpen}
         property={selectedProperty}
         onSave={handleSaveKnowledgeBase}
+        isNewProperty={false}
+      />
+      
+      {/* Dialogue pour la création d'une nouvelle base de connaissances */}
+      <KnowledgeBaseDialog
+        isOpen={isKnowledgeBaseDialogOpen}
+        onOpenChange={(open) => {
+          setIsKnowledgeBaseDialogOpen(open);
+          if (!open) {
+            setNewlyCreatedProperty(null);
+          }
+        }}
+        property={newlyCreatedProperty}
+        onSave={() => {
+          handleSaveKnowledgeBase();
+          setIsKnowledgeBaseDialogOpen(false);
+          setNewlyCreatedProperty(null);
+        }}
+        isNewProperty={true}
       />
       
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
