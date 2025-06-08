@@ -12,8 +12,8 @@ interface PropertyDialogsProps {
   setIsAddDialogOpen: (isOpen: boolean) => void;
   isEditDialogOpen: boolean;
   setIsEditDialogOpen: (isOpen: boolean) => void;
-  isKnowledgeBaseDialogOpen: boolean;
-  setIsKnowledgeBaseDialogOpen: (isOpen: boolean) => void;
+  isEditKnowledgeBaseDialogOpen: boolean;
+  setIsEditKnowledgeBaseDialogOpen: (isOpen: boolean) => void;
   isDeleteDialogOpen: boolean;
   setIsDeleteDialogOpen: (isOpen: boolean) => void;
   selectedProperty: Property | null;
@@ -28,8 +28,8 @@ interface PropertyDialogsProps {
   // Nouvelles props pour le flux de création avec base de connaissances
   newlyCreatedProperty: Property | null;
   setNewlyCreatedProperty: (property: Property | null) => void;
-  isKnowledgeBaseDialogOpen: boolean;
-  setIsKnowledgeBaseDialogOpen: (isOpen: boolean) => void;
+  isNewPropertyKnowledgeBaseDialogOpen: boolean;
+  setIsNewPropertyKnowledgeBaseDialogOpen: (isOpen: boolean) => void;
 }
 
 export const PropertyDialogs = ({
@@ -37,8 +37,8 @@ export const PropertyDialogs = ({
   setIsAddDialogOpen,
   isEditDialogOpen,
   setIsEditDialogOpen,
-  isKnowledgeBaseDialogOpen: isEditKnowledgeBaseDialogOpen,
-  setIsKnowledgeBaseDialogOpen: setIsEditKnowledgeBaseDialogOpen,
+  isEditKnowledgeBaseDialogOpen,
+  setIsEditKnowledgeBaseDialogOpen,
   isDeleteDialogOpen,
   setIsDeleteDialogOpen,
   selectedProperty,
@@ -53,8 +53,8 @@ export const PropertyDialogs = ({
   // Nouvelles props
   newlyCreatedProperty,
   setNewlyCreatedProperty,
-  isKnowledgeBaseDialogOpen,
-  setIsKnowledgeBaseDialogOpen
+  isNewPropertyKnowledgeBaseDialogOpen,
+  setIsNewPropertyKnowledgeBaseDialogOpen
 }: PropertyDialogsProps) => {
   
   // Handle add property form submission
@@ -81,7 +81,7 @@ export const PropertyDialogs = ({
         updated_at: new Date().toISOString()
       };
       setNewlyCreatedProperty(tempProperty);
-      setIsKnowledgeBaseDialogOpen(true);
+      setIsNewPropertyKnowledgeBaseDialogOpen(true);
     }
   };
 
@@ -153,9 +153,9 @@ export const PropertyDialogs = ({
       
       {/* Dialogue pour la création d'une nouvelle base de connaissances */}
       <KnowledgeBaseDialog
-        isOpen={isKnowledgeBaseDialogOpen}
+        isOpen={isNewPropertyKnowledgeBaseDialogOpen}
         onOpenChange={(open) => {
-          setIsKnowledgeBaseDialogOpen(open);
+          setIsNewPropertyKnowledgeBaseDialogOpen(open);
           if (!open) {
             setNewlyCreatedProperty(null);
           }
@@ -163,7 +163,7 @@ export const PropertyDialogs = ({
         property={newlyCreatedProperty}
         onSave={() => {
           handleSaveKnowledgeBase();
-          setIsKnowledgeBaseDialogOpen(false);
+          setIsNewPropertyKnowledgeBaseDialogOpen(false);
           setNewlyCreatedProperty(null);
         }}
         isNewProperty={true}

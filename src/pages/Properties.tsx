@@ -10,7 +10,7 @@ const Properties = () => {
   
   // Nouveaux états pour le flux de création avec base de connaissances
   const [newlyCreatedProperty, setNewlyCreatedProperty] = useState<Property | null>(null);
-  const [isKnowledgeBaseDialogOpen, setIsKnowledgeBaseDialogOpen] = useState<boolean>(false);
+  const [isNewPropertyKnowledgeBaseDialogOpen, setIsNewPropertyKnowledgeBaseDialogOpen] = useState<boolean>(false);
   
   // Use our custom hook to manage state and actions
   const {
@@ -69,8 +69,8 @@ const Properties = () => {
         setIsAddDialogOpen={setIsAddDialogOpen}
         isEditDialogOpen={isEditDialogOpen}
         setIsEditDialogOpen={setIsEditDialogOpen}
-        isKnowledgeBaseDialogOpen={isEditKnowledgeBaseDialogOpen}
-        setIsKnowledgeBaseDialogOpen={setIsEditKnowledgeBaseDialogOpen}
+        isEditKnowledgeBaseDialogOpen={isEditKnowledgeBaseDialogOpen}
+        setIsEditKnowledgeBaseDialogOpen={setIsEditKnowledgeBaseDialogOpen}
         isDeleteDialogOpen={isDeleteDialogOpen}
         setIsDeleteDialogOpen={setIsDeleteDialogOpen}
         selectedProperty={selectedProperty}
@@ -85,8 +85,8 @@ const Properties = () => {
         // Nouvelles props pour le flux de création avec base de connaissances
         newlyCreatedProperty={newlyCreatedProperty}
         setNewlyCreatedProperty={setNewlyCreatedProperty}
-        isKnowledgeBaseDialogOpen={isKnowledgeBaseDialogOpen}
-        setIsKnowledgeBaseDialogOpen={setIsKnowledgeBaseDialogOpen}
+        isNewPropertyKnowledgeBaseDialogOpen={isNewPropertyKnowledgeBaseDialogOpen}
+        setIsNewPropertyKnowledgeBaseDialogOpen={setIsNewPropertyKnowledgeBaseDialogOpen}
       />
       
       {/* Property List Component */}
