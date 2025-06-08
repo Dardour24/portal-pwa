@@ -2,7 +2,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { KnowledgeBaseForm } from "./KnowledgeBaseForm";
 import { Property } from "@/types/property";
-import { useEffect, useRef } from "react";
 import { useFormQA } from "@/hooks/use-form-qa";
 import { useAuth } from "@/context/AuthContext";
 
@@ -23,33 +22,13 @@ export const KnowledgeBaseDialog = ({
 }: KnowledgeBaseDialogProps) => {
   const { isAuthenticated } = useAuth();
   const { resetPropertyData } = useFormQA(isAuthenticated);
-  const hasResetRef = useRef(false);
   
-  // Correction: use useRef to track if we've already reset to avoid infinite loop
-  useEffect(() => {
-    // Reset property data only when dialog closes AND hasResetRef is false
-    if (!isOpen && !hasResetRef.current) {
-      console.log("Dialog closed, resetting property data (once)");
+  const handleOpenChange = (open: boolean) => {
+    onOpenChange(open);
+    if (!open) {
       resetPropertyData();
-      hasResetRef.current = true;
     }
-    
-    // Reset our tracking flag when dialog opens again
-    if (isOpen) {
-      hasResetRef.current = false;
-    }
-  }, [isOpen, resetPropertyData]);
-  
-  // Also reset when component unmounts, but only if not already reset
-  useEffect(() => {
-    return () => {
-      if (!hasResetRef.current) {
-        console.log("Dialog unmounting, resetting property data (once)");
-        resetPropertyData();
-        hasResetRef.current = true;
-      }
-    };
-  }, [resetPropertyData]);
+  };
   
   const handleSave = () => {
     onSave();
@@ -61,7 +40,7 @@ export const KnowledgeBaseDialog = ({
   };
   
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[900px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Base de Connaissances</DialogTitle>
