@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import CardItem from "./CardItem";
 import CardDetail from "./CardDetail";
@@ -29,6 +28,7 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ onError }) => {
             try {
               const currentIndex = cardData.findIndex(card => card.id === current);
               const nextIndex = (currentIndex + 1) % cardData.length;
+              console.log("Auto-rotating from", current, "to", cardData[nextIndex].id);
               return cardData[nextIndex].id;
             } catch (error) {
               console.error("Error updating carousel:", error);
@@ -61,6 +61,7 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ onError }) => {
   // Handle card click - reset interval when user interacts
   const handleCardClick = (cardId: string) => {
     try {
+      console.log("Card clicked:", cardId);
       setSelectedCard(cardId);
       
       // Reset interval after manual selection
@@ -73,6 +74,7 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ onError }) => {
         setSelectedCard(current => {
           const currentIndex = cardData.findIndex(card => card.id === current);
           const nextIndex = (currentIndex + 1) % cardData.length;
+          console.log("Auto-rotating from", current, "to", cardData[nextIndex].id);
           return cardData[nextIndex].id;
         });
       }, INTERVAL_TIME);
@@ -84,6 +86,8 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ onError }) => {
 
   // Get the currently selected card data
   const currentCard = cardData.find(card => card.id === selectedCard) || cardData[0];
+
+  console.log("Current selected card:", selectedCard, "Current card data:", currentCard);
 
   return (
     <>
@@ -104,6 +108,7 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ onError }) => {
       {/* Selected Card Content */}
       {currentCard && (
         <CardDetail
+          key={currentCard.id} // Force re-render when card changes
           text={currentCard.text}
           image={currentCard.image}
           title={currentCard.title}

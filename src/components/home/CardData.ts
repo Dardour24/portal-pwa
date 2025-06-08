@@ -1,4 +1,3 @@
-
 import React from "react";
 import { HomeIcon, Settings, Pencil, MessageCircle, Text, Ban } from "lucide-react";
 

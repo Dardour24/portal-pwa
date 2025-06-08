@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -27,7 +26,7 @@ const CardDetail: React.FC<CardDetailProps> = ({
   const fallbackImage = "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d";
 
   const handleImageError = () => {
-    console.log("Image error in CardDetail for:", title);
+    console.log("Image error in CardDetail for:", title, "- Image path:", imgSrc);
     
     // Essayer une alternative pour les images uploadées
     if (imgSrc.includes("/lovable-uploads/") && !imgSrc.includes(fallbackImage)) {
@@ -45,6 +44,13 @@ const CardDetail: React.FC<CardDetailProps> = ({
     }
   };
 
+  // Reset image source when image prop changes
+  React.useEffect(() => {
+    console.log("CardDetail: Image changed to:", image, "for card:", title);
+    setImgSrc(image);
+    setImgError(false);
+  }, [image, title]);
+
   return (
     <div className="flex flex-col items-center mb-10">
       {/* Text before image */}
@@ -61,6 +67,7 @@ const CardDetail: React.FC<CardDetailProps> = ({
           style={{ maxHeight: '400px' }}
           onError={handleImageError}
           loading="lazy"
+          key={`${title}-${image}`} // Force re-render when image changes
         />
       ) : (
         <div className="bg-gray-100 rounded-lg w-full h-64 flex items-center justify-center mb-6">
