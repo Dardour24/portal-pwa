@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -250,6 +250,15 @@ export const SignInForm = () => {
             "Se connecter"
           )}
         </Button>
+        
+        <div className="text-center mt-4">
+          <Link 
+            to="/forgot-password" 
+            className="text-sm text-primary hover:underline transition-colors"
+          >
+            Mot de passe oublié ?
+          </Link>
+        </div>
       </form>
     </Form>
   );

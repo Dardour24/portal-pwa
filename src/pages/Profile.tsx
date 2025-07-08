@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { User, Mail, Save, Loader2 } from "lucide-react";
+import { User, Mail, Save, Loader2, Key } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const Profile = () => {
@@ -267,6 +268,15 @@ const Profile = () => {
                   <span className="text-sm text-blue-600/80">
                     {new Date().toLocaleDateString()}
                   </span>
+                </div>
+                <div className="pt-4 border-t border-blue-100/50">
+                  <Link 
+                    to="/forgot-password"
+                    className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                  >
+                    <Key className="h-4 w-4" />
+                    Changer le mot de passe
+                  </Link>
                 </div>
               </div>
             </CardContent>
